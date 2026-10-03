@@ -53,6 +53,12 @@ component-driven architecture optimized for performance, SEO, and scalability.
 - Reduced motion is enforced in CSS on `[data-motion-reveal]` so it does not depend on a hydration-sensitive hook. Motion still skips positional transforms when the OS preference is set.
 - Global element styles (headings, paragraphs, links) live in `@layer base`. An unlayered `* { margin: 0 }` would override Tailwind spacing utilities. Do not add unlayered resets that fight utilities.
 
+### Homepage (Phase 2)
+- The ten homepage sections live in `src/components/sections/home/`.
+- Fictional copy and figures live in `src/data/home.ts`. City is omitted when `showCity` is false. Age, blood group, and social links are not on this page.
+- Rider, ride, and gallery links point at later-phase routes. They stay off `LIVE_ROUTES` until those pages exist.
+- Stats count up when they enter view. Reduced motion shows the final number immediately.
+
 ---
 
 ## Folder Structure
