@@ -1,0 +1,336 @@
+/* ============================================================
+   SPIRITUAL RIDERS — GLOBAL CSS & DESIGN TOKENS
+   Tailwind CSS v4 — CSS-first configuration
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS — Colors
+   Palette: Obsidian · Charcoal · Graphite · Ivory · Gold/Bronze
+   Ratio: ~70% dark neutrals / 20% light neutrals / 10% accent
+   ============================================================ */
+
+@theme inline {
+  /* --- Base Colors --- */
+  --color-obsidian-950: oklch(6% 0.008 270);
+  --color-obsidian-900: oklch(10% 0.01 270);
+  --color-obsidian-800: oklch(14% 0.012 270);
+
+  --color-charcoal-700: oklch(20% 0.01 265);
+  --color-charcoal-600: oklch(26% 0.01 265);
+  --color-charcoal-500: oklch(32% 0.01 265);
+
+  --color-graphite-400: oklch(42% 0.008 260);
+  --color-graphite-300: oklch(52% 0.006 260);
+  --color-graphite-200: oklch(65% 0.005 260);
+
+  --color-ivory-100: oklch(96% 0.01 90);
+  --color-ivory-50: oklch(98% 0.008 90);
+  --color-white: oklch(100% 0 0);
+
+  /* --- Accent — Metallic Gold / Muted Bronze --- */
+  --color-gold-600: oklch(58% 0.12 75);
+  --color-gold-500: oklch(67% 0.14 75);
+  --color-gold-400: oklch(75% 0.13 80);
+  --color-gold-300: oklch(82% 0.1 85);
+  --color-bronze-600: oklch(52% 0.1 60);
+  --color-bronze-500: oklch(60% 0.11 62);
+
+  /* --- Semantic Aliases --- */
+  --color-background: var(--color-obsidian-950);
+  --color-surface: var(--color-obsidian-900);
+  --color-surface-raised: var(--color-obsidian-800);
+  --color-border: var(--color-charcoal-600);
+  --color-border-subtle: var(--color-charcoal-700);
+  --color-foreground: var(--color-ivory-100);
+  --color-foreground-muted: var(--color-graphite-300);
+  --color-foreground-subtle: var(--color-graphite-400);
+  --color-accent: var(--color-gold-500);
+  --color-accent-muted: var(--color-gold-300);
+  --color-accent-dim: var(--color-bronze-600);
+
+  /* --- Typography --- */
+  --font-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* --- Font Sizes (fluid) --- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+  --text-8xl: 6rem;
+  --text-9xl: 8rem;
+
+  /* --- Spacing Scale --- */
+  --spacing-section: 6rem;
+  --spacing-section-sm: 4rem;
+
+  /* --- Border Radius --- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* --- Motion / Animation --- */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 800ms;
+  --duration-cinematic: 1200ms;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* --- Shadows --- */
+  --shadow-glow-gold: 0 0 40px oklch(67% 0.14 75 / 0.15);
+  --shadow-card: 0 4px 24px oklch(6% 0.008 270 / 0.5);
+  --shadow-card-hover: 0 8px 48px oklch(6% 0.008 270 / 0.7);
+
+  /* --- Z-index layers --- */
+  --z-below: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-overlay: 20;
+  --z-modal: 30;
+  --z-nav: 40;
+  --z-toast: 50;
+}
+
+/* ============================================================
+   BASE RESET & GLOBAL STYLES
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  hanging-punctuation: first last;
+}
+
+/* Respect user motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================
+   TYPOGRAPHY DEFAULTS
+   ============================================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--color-foreground);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
+h2 { font-size: clamp(2rem, 4.5vw, 3.75rem); }
+h3 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+h4 { font-size: clamp(1.25rem, 2vw, 1.875rem); }
+h5 { font-size: var(--text-xl); }
+h6 { font-size: var(--text-lg); }
+
+p {
+  color: var(--color-foreground-muted);
+  max-width: 65ch;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+strong { color: var(--color-foreground); }
+
+/* ============================================================
+   IMAGES
+   ============================================================ */
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============================================================
+   SCROLLBAR STYLING
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-obsidian-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-charcoal-600);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-graphite-400);
+}
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+::selection {
+  background: oklch(67% 0.14 75 / 0.3);
+  color: var(--color-ivory-100);
+}
+
+/* ============================================================
+   FOCUS VISIBLE (global a11y)
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.container-site {
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 5vw, 3rem);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 900px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 5vw, 3rem);
+}
+
+.section-padding {
+  padding-block: var(--spacing-section);
+}
+
+.section-padding-sm {
+  padding-block: var(--spacing-section-sm);
+}
+
+/* Gold accent text */
+.text-accent {
+  color: var(--color-accent);
+}
+
+/* Muted text */
+.text-muted {
+  color: var(--color-foreground-muted);
+}
+
+/* Display / editorial font override */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Metallic gold gradient text */
+.text-gradient-gold {
+  background: linear-gradient(
+    135deg,
+    var(--color-gold-400) 0%,
+    var(--color-gold-500) 50%,
+    var(--color-bronze-500) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--color-border-subtle);
+  border: none;
+}
+
+/* Thin gold accent line */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold-500),
+    transparent
+  );
+  border: none;
+}
