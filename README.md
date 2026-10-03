@@ -86,8 +86,8 @@ src/
 | 0 | Foundation | Complete |
 | 1 | Visual Identity + Global Shell | Complete |
 | 2 | Homepage Experience | Complete |
-| 3 | About + Community Story | Pending |
-| 4 | Rider Directory | Pending |
+| 3 | About + Community Story | Complete |
+| 4 | Rider Directory | Complete |
 | 5 | Rider Profile | Pending |
 | 6 | Database + Real Content | Pending |
 | 7 | Rides + Events + Gallery | Pending |
