@@ -394,6 +394,21 @@ Phase X+1 — ...
 WAITING FOR INSTRUCTION
 ```
 
+### Mandatory Status File Update
+After completing every phase and generating the official phase report, you must also:
+
+1. Update (or create if missing) the file `CURRENT_STATUS.md` in the project root.
+2. Overwrite it with the latest complete status, including:
+   - List of all completed phases
+   - Summary of what was implemented in the latest phase
+   - Key files created/updated
+   - Validation results
+   - Known limitations
+   - Exact next phase
+   - Short instructions for the next AI tool
+
+This file is the permanent bridge when switching between different AI coding tools.
+
 ---
 
 ## 11. CROSS-PHASE RULES
