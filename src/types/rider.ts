@@ -157,3 +157,40 @@ export interface DirectoryRider {
   tone: "highway" | "machine" | "crew" | "dawn" | "salt" | "rain";
   is_featured: boolean;
 }
+
+/** Public profile. Hidden age, blood group, city, and social links are null. */
+export interface RiderNeighbor {
+  slug: Slug;
+  display_name: string;
+}
+
+export interface RiderProfile {
+  id: string;
+  slug: Slug;
+  display_name: string;
+  position_label: string;
+  bio: string;
+  short_bio: string;
+  joined_date: ISODateString;
+  bike_brand: string;
+  bike_model: string;
+  bike_variant: string | null;
+  bike_year: number;
+  bike_color: string | null;
+  riding_since: number | null;
+  riding_style: RidingStyle[];
+  favorite_route: string | null;
+  achievements: string[];
+  age: number | null;
+  blood_group: BloodGroup | null;
+  city: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  youtube_url: string | null;
+  website_url: string | null;
+  mark: string;
+  tone: DirectoryRider["tone"];
+  is_featured: boolean;
+  previous: RiderNeighbor | null;
+  next: RiderNeighbor | null;
+}
