@@ -433,4 +433,13 @@ video {
     animation-timeline: view();
     animation-range: entry 0% cover 45%;
   }
+
+  .hero-drift {
+    animation: hero-drift 22s var(--ease-out-expo) both;
+  }
+}
+
+@keyframes hero-drift {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
 }
