@@ -17,7 +17,7 @@ Spiritual Riders is a luxury biker brotherhood — a community of passionate mot
 | Framework | Next.js 15 (App Router, React 19, Turbopack) |
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v4 (CSS-first, `@theme inline`) |
-| Animation | Motion (Framer Motion) — Phase 1+ |
+| Animation | Motion (`motion` / `motion/react`) |
 | Database | Supabase (PostgreSQL) — Phase 6+ |
 | Auth | Supabase Auth — Phase 8+ |
 | Storage | Supabase Storage — Phase 6+ |
@@ -55,13 +55,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```
 src/
 ├── app/                  # Next.js App Router pages and layouts
-│   ├── layout.tsx        # Root layout (fonts, metadata, skip link)
-│   ├── page.tsx          # Homepage (Phase 2: full cinematic experience)
+│   ├── layout.tsx        # Root layout (fonts, metadata, shell)
+│   ├── template.tsx      # Page-enter transition
+│   ├── page.tsx          # Temporary brand shell (Phase 2 replaces it)
+│   ├── not-found.tsx     # Branded missing-route page
 │   └── globals.css       # Design tokens + global styles
 ├── components/
-│   ├── ui/               # Primitive UI components (Button, Container, etc.)
-│   ├── layout/           # Header, Footer, Navigation
-│   └── sections/         # Page section components
+│   ├── ui/               # Button, Card, Container, SectionHeading
+│   ├── layout/           # Header, mobile menu, footer, shell
+│   ├── motion/           # Reveal, AnimatedText, ImageReveal, page enter
+│   └── sections/         # Page section components (Phase 2+)
 ├── config/
 │   └── site.ts           # Site-wide constants and navigation
 ├── data/                 # Mock data (replaced by Supabase in Phase 6)
@@ -81,7 +84,7 @@ src/
 | Phase | Name | Status |
 |-------|------|--------|
 | 0 | Foundation | Complete |
-| 1 | Visual Identity + Global Shell | Pending |
+| 1 | Visual Identity + Global Shell | Complete |
 | 2 | Homepage Experience | Pending |
 | 3 | About + Community Story | Pending |
 | 4 | Rider Directory | Pending |

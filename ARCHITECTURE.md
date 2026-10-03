@@ -39,11 +39,19 @@ component-driven architecture optimized for performance, SEO, and scalability.
 - Real-time capabilities for future features.
 - TypeScript SDK with strong typing.
 
-### Why Motion (Framer Motion)? (Phase 1+)
-- Production-tested animation library.
-- Respects `prefers-reduced-motion` natively.
-- Excellent React integration.
-- Server-safe (client-only when needed).
+### Why Motion (Framer Motion)? (Phase 1)
+- Package: `motion` (v14), imported from `motion/react`.
+- Production-tested animation library with a small client boundary.
+- `MotionConfig reducedMotion="user"` lives on the shell.
+- Server Components stay the default. Client islands: header, mobile menu, reveal, text, image wipe, page enter.
+
+### Global shell (Phase 1)
+- `AppShell` composes the sticky header, mobile dialog, main, and footer. The footer is passed in from the server layout.
+- Desktop navigation starts at `1024px`. Below that, a full-screen menu traps focus, locks scroll, and closes on Escape, route change, or resize.
+- Page enter uses `src/app/template.tsx`. It is a short vertical settle with opacity held at 1 so the first paint is not blank. There is no exit animation and no splash screen.
+- Unbuilt routes stay in the nav. `LIVE_ROUTES` in `src/config/site.ts` is the prefetch allow-list. Add a path when that phase ships. Unknown URLs render the branded `not-found` page inside the shell.
+- Reduced motion is enforced in CSS on `[data-motion-reveal]` so it does not depend on a hydration-sensitive hook. Motion still skips positional transforms when the OS preference is set.
+- Global element styles (headings, paragraphs, links) live in `@layer base`. An unlayered `* { margin: 0 }` would override Tailwind spacing utilities. Do not add unlayered resets that fight utilities.
 
 ---
 

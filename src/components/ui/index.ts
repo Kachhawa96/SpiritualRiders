@@ -1,6 +1,8 @@
 /**
  * UI component barrel exports.
- * Add new components here as they are created in Phase 1+.
  */
 
+export { Button } from "./Button";
+export { Card } from "./Card";
 export { Container } from "./Container";
+export { SectionHeading } from "./SectionHeading";

@@ -75,6 +75,8 @@ Colors use the `oklch()` color space for perceptually uniform palettes.
 
 **Variable**: `--font-display` and `--font-sans`
 
+`next/font` loads the files as `--font-cormorant` and `--font-inter`. Those are aliased to the variables above so headings and utilities use the real faces.
+
 ### Scale
 
 Headings use `clamp()` for fluid responsive sizing:
@@ -148,14 +150,28 @@ Cinematic first impression is delivered by the **Hero entrance animation only**.
 | `--ease-in-out-expo` | cubic-bezier(0.87, 0, 0.13, 1) | Page transitions |
 | `--ease-spring` | cubic-bezier(0.175, 0.885, 0.32, 1.275) | Interactive hover |
 
-### Animation Patterns (Phase 1+)
+### Animation Patterns (Phase 1)
 
-- **Fade-up reveal** — y: 30px opacity: 0 → y: 0 opacity: 1
-- **Image reveal mask** — clip-path horizontal wipe
-- **Staggered text** — character or line stagger
-- **Parallax** — subtle depth on scroll (slow factor)
-- **Card hover** — subtle scale + border glow
-- **Page transition** — smooth opacity + y shift
+Implemented with Motion (`motion/react`) and the CSS tokens above.
+
+- **Fade-up reveal** (`Reveal`) — y: 28px, opacity 0 → rest, once, in view
+- **Image reveal** (`ImageReveal`) — CSS clip wipe on the view timeline. The resting state is visible if the timeline is unsupported
+- **Word settle** (`AnimatedText`, default) — opacity stays 1 so a hero can be the LCP element. `mask` mode is for below-fold lines only
+- **Page enter** — y: 12px → 0, opacity stays 1. No exit, no splash
+- **Card hover** — 4px lift, gold border, glow. Resting state is complete without hover
+- **Reduced motion** — `[data-motion-reveal]` is forced to its resting state. Hover lift is removed
+
+Do not put the primary heading inside `Reveal`. Use `AnimatedText` in `settle` mode.
+
+### Shell components
+
+| Component | Role |
+|-----------|------|
+| `Button` | `primary`, `outline`, `ghost`, `glow`. Sharp corners, wide tracking. Link when `href` is set |
+| `Card` | Obsidian surface, optional index, eyebrow, title, description |
+| `SectionHeading` | Eyebrow rule, display title, muted subtitle |
+| `Container` | `site` (1400px) or `narrow` (900px) |
+| `Header` / `Footer` | Sticky blurred bar, monogram, editorial menu, chapter footer |
 
 ---
 
