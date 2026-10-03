@@ -50,9 +50,11 @@
   --color-accent-muted: var(--color-gold-300);
   --color-accent-dim: var(--color-bronze-600);
 
-  /* --- Typography --- */
-  --font-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  --font-sans: "Inter", "DM Sans", system-ui, sans-serif;
+  /* --- Typography ---
+     next/font loads the real faces as --font-cormorant and --font-inter.
+     These aliases are what utilities and raw CSS both read. */
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
   /* --- Font Sizes (fluid) --- */
@@ -107,23 +109,34 @@
   --z-modal: 30;
   --z-nav: 40;
   --z-toast: 50;
+  --z-menu: 60;
+}
+
+/* next/font defines --font-cormorant / --font-inter on <html>.
+   Headings and body read these aliases directly. */
+:root {
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
 /* ============================================================
    BASE RESET & GLOBAL STYLES
    ============================================================ */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Keep this in the base layer so Tailwind utilities can override it.
+   An unlayered `* { margin: 0 }` would beat every spacing utility. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 }
 
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   hanging-punctuation: first last;
@@ -143,6 +156,43 @@ html {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* Motion writes inline transforms and opacity. Force the resting state,
+     including word and panel children that animate on their own. */
+  [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+
+  [data-motion-reveal] * {
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .card-interactive:hover {
+    transform: none;
+  }
+
+  .image-reveal {
+    animation: none !important;
+    clip-path: none !important;
+  }
+}
+
+/* No-JS: reveal targets must stay visible. */
+@media (scripting: none) {
+  [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  [data-motion-reveal] * {
+    transform: none !important;
+    clip-path: none !important;
+  }
 }
 
 body {
@@ -159,36 +209,43 @@ body {
 
 /* ============================================================
    TYPOGRAPHY DEFAULTS
+   In @layer base so utilities such as text-gold-500 and max-w-none win.
    ============================================================ */
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.15;
-  color: var(--color-foreground);
-  letter-spacing: -0.02em;
-}
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--color-foreground);
+    letter-spacing: -0.02em;
+  }
 
-h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
-h2 { font-size: clamp(2rem, 4.5vw, 3.75rem); }
-h3 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
-h4 { font-size: clamp(1.25rem, 2vw, 1.875rem); }
-h5 { font-size: var(--text-xl); }
-h6 { font-size: var(--text-lg); }
+  h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
+  h2 { font-size: clamp(2rem, 4.5vw, 3.75rem); }
+  h3 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+  h4 { font-size: clamp(1.25rem, 2vw, 1.875rem); }
+  h5 { font-size: var(--text-xl); }
+  h6 { font-size: var(--text-lg); }
 
-p {
-  color: var(--color-foreground-muted);
-  max-width: 65ch;
-}
+  p {
+    color: var(--color-foreground-muted);
+    max-width: 65ch;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  strong {
+    color: var(--color-foreground);
+  }
 }
 
 a:focus-visible {
@@ -196,8 +253,6 @@ a:focus-visible {
   outline-offset: 4px;
   border-radius: var(--radius-sm);
 }
-
-strong { color: var(--color-foreground); }
 
 /* ============================================================
    IMAGES
@@ -281,7 +336,13 @@ video {
 }
 
 .section-padding {
-  padding-block: var(--spacing-section);
+  padding-block: var(--spacing-section-sm);
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-block: var(--spacing-section);
+  }
 }
 
 .section-padding-sm {
@@ -333,4 +394,43 @@ video {
     transparent
   );
   border: none;
+}
+
+/* Card surface — hover is an enhancement; the resting state is complete */
+.card-surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.card-interactive {
+  transition:
+    transform var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-gold-600);
+  box-shadow: var(--shadow-glow-gold), var(--shadow-card-hover);
+}
+
+/* Wipe runs on the view timeline where supported, otherwise once on load. */
+@keyframes image-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.image-reveal {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .image-reveal {
+    animation: image-wipe var(--duration-cinematic) var(--ease-out-expo) both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 45%;
+  }
 }

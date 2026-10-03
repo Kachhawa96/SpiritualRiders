@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { AppShell } from "@/components/layout/AppShell";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 // ── Display / editorial typeface ──────────────────────────────────────────────
 const cormorant = Cormorant_Garamond({
-  variable: "--font-display",
+  variable: "--font-cormorant",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   style: ["normal", "italic"],
@@ -13,7 +15,7 @@ const cormorant = Cormorant_Garamond({
 
 // ── Body / UI typeface ────────────────────────────────────────────────────────
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
@@ -82,14 +84,18 @@ export default function RootLayout({
         {/* Skip to main content — accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded focus:bg-[var(--color-accent)] focus:text-[var(--color-obsidian-950)] focus:font-medium focus:text-sm"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[80] focus:rounded-sm focus:bg-gold-500 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-obsidian-950"
         >
           Skip to main content
         </a>
 
-        <main id="main-content" className="flex flex-col flex-1">
-          {children}
-        </main>
+        <noscript>
+          <style>
+            {`[data-motion-reveal]{opacity:1!important;transform:none!important;clip-path:none!important}[data-motion-reveal] *{transform:none!important;clip-path:none!important}`}
+          </style>
+        </noscript>
+
+        <AppShell footer={<Footer />}>{children}</AppShell>
       </body>
     </html>
   );

@@ -19,6 +19,17 @@ export const SITE_CONFIG = {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
+/**
+ * Routes that currently render a real page.
+ * Navigation prefetches only these so later-phase URLs do not 404 in the background.
+ * Add a path when its phase ships.
+ */
+export const LIVE_ROUTES = ["/"] as const;
+
+export function isLiveRoute(href: string): boolean {
+  return (LIVE_ROUTES as readonly string[]).includes(href);
+}
+
 export const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about", description: "Our story and values" },

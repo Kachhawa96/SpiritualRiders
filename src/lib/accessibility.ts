@@ -61,7 +61,7 @@ export function getFocusableElements(
 ): HTMLElement[] {
   return Array.from(
     container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)
-  );
+  ).filter((element) => element.tabIndex >= 0 && !element.hasAttribute("disabled"));
 }
 
 // ── Keyboard navigation ───────────────────────────────────────────────────────
