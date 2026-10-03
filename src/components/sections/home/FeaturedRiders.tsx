@@ -17,7 +17,7 @@ export function FeaturedRiders() {
             <SectionHeading
               eyebrow="The crew"
               title="Faces of the line."
-              subtitle="Three riders from the house. The rest of the brotherhood is still down the road."
+              subtitle="Three riders from the house. The full line is with the crew."
             />
           </Reveal>
           <Reveal delay={0.08}>

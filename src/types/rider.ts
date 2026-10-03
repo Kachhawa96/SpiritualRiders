@@ -139,3 +139,21 @@ export interface RiderCard {
   show_city: boolean;
   is_featured: boolean;
 }
+
+/** Public directory row. Private fields are already removed. */
+export interface DirectoryRider {
+  id: string;
+  slug: Slug;
+  display_name: string;
+  short_bio: string;
+  community_position: CommunityPosition;
+  position_label: string;
+  bike_brand: string;
+  bike_model: string;
+  bike_year: number;
+  riding_style: RidingStyle[];
+  city: string | null;
+  mark: string;
+  tone: "highway" | "machine" | "crew" | "dawn" | "salt" | "rain";
+  is_featured: boolean;
+}

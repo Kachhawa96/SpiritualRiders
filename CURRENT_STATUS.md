@@ -1,8 +1,8 @@
 # SPIRITUAL RIDERS — CURRENT PROJECT STATUS
 
 **Last Updated**: 2026-10-03  
-**Current Phase Completed**: Phase 2 — Homepage Experience  
-**Overall Status**: ✅ Healthy, Verified, Ready for Phase 3  
+**Current Phase Completed**: Phase 4 — Rider Directory  
+**Overall Status**: ✅ Healthy, Verified, Ready for Phase 5  
 **Project Root**: repository root (package name `spiritual-riders`)
 
 ---
@@ -12,8 +12,8 @@
 - [x] **Phase 0 — Product & Architecture Foundation** (Completed: 2026-10-03)
 - [x] **Phase 1 — Visual Identity + Global Shell** (Completed: 2026-10-03)
 - [x] **Phase 2 — Homepage Experience** (Completed: 2026-10-03)
-- [ ] Phase 3 — About + Community Story
-- [ ] Phase 4 — Rider Directory
+- [x] **Phase 3 — About + Community Story** (Completed: 2026-10-03)
+- [x] **Phase 4 — Rider Directory** (Completed: 2026-10-03)
 - [ ] Phase 5 — Rider Profile
 - [ ] Phase 6 — Database + Real Content (Supabase)
 - [ ] Phase 7 — Rides + Events + Gallery
@@ -25,23 +25,19 @@
 
 ---
 
-## 2. SUMMARY OF LATEST PHASE (PHASE 2)
+## 2. SUMMARY OF LATEST PHASE (PHASE 4)
 
 ### What Was Implemented
-The temporary Phase 1 homepage was replaced with the ten-section cinematic homepage. The Phase 1 shell (header, menu, footer, page enter, tokens, buttons) is unchanged.
+A searchable, filterable crew directory at `/riders`. Twelve fictional riders. The three homepage faces are the same people, in the same order, with the same machines.
 
-1. **Hero** — full viewport, road lines, gold eyebrow, “Ride Beyond Roads.”, supporting line, two actions. Headline stays visible. Background drifts only when motion is allowed.
-2. **Community intro** — editorial split: “A brotherhood, not a listing.”
-3. **Animated stats** — Riders 48, Machines 52, Rides 86, Years since 2020. Counts up in view. Reduced motion and first paint show the final number.
-4. **Featured riders** — Vikram Rathore, Arjun Mehta, Kabir Sen. City is shown only when allowed. Arjun’s city is withheld.
-5. **Brotherhood / values** — Respect before speed, The machine is kept, No one rides alone.
-6. **Featured bikes** — Continental GT and R nineT, alternating layout.
-7. **Timeline** — 2020 through 2026.
-8. **Ride highlight** — Salt and Silence, 12 March 2026, 640 km, 18 riders.
-9. **Gallery preview** — five frames, first one large.
-10. **Final CTA** — write to the crew, plus a contact link.
+- Search by name, machine, place in the line, or a city that is allowed to be shown.
+- Filters for riding style, machine brand, and place in the line. Chips are real buttons, not hover menus. On small screens they sit behind “Narrow the line”.
+- Empty state when nothing matches, with a clear action.
+- Loading skeleton and an error state with “Try again”.
+- Cards show name, place, machine, year, style, and city only when `show_city` is true. The whole card is a link. Nothing important is hidden until hover.
+- `/riders` is in `LIVE_ROUTES`. Profile URLs still use the branded not-found page.
 
-Visuals are original line compositions (`ChapterFrame`), not stock photography. All figures and names are fictional.
+Privacy is applied on the server. Age, blood group, and social links are never copied into the directory payload. Arjun Mehta’s Pune, and the hidden cities for Ishaan, Mohit, and Imran, are not in the page HTML.
 
 ---
 
@@ -49,75 +45,74 @@ Visuals are original line compositions (`ChapterFrame`), not stock photography. 
 
 | File | Purpose |
 |------|---------|
-| `src/app/page.tsx` | Composes the ten homepage sections |
-| `src/data/home.ts` | Fictional homepage content, with city privacy applied |
-| `src/components/visuals/ChapterFrame.tsx` | Shared road, machine, crew, dawn, salt, and rain frames |
-| `src/components/sections/home/Hero.tsx` | Full-viewport hero |
-| `src/components/sections/home/CommunityIntro.tsx` | House introduction |
-| `src/components/sections/home/Stats.tsx` | Stat grid |
-| `src/components/sections/home/StatCount.tsx` | In-view count-up |
-| `src/components/sections/home/FeaturedRiders.tsx` | Three rider features |
-| `src/components/sections/home/Values.tsx` | Brotherhood rules |
-| `src/components/sections/home/FeaturedBikes.tsx` | Two machine features |
-| `src/components/sections/home/Timeline.tsx` | Journey line |
-| `src/components/sections/home/RideHighlight.tsx` | Featured ride |
-| `src/components/sections/home/GalleryPreview.tsx` | Memory grid |
-| `src/components/sections/home/FinalCta.tsx` | Closing call to write |
-| `src/app/globals.css` | Hero drift animation |
-| `ARCHITECTURE.md` | Homepage data and privacy note |
-| `README.md` | Phase 2 marked complete |
+| `src/app/riders/page.tsx` | Directory route |
+| `src/app/riders/loading.tsx` | Loading skeleton |
+| `src/app/riders/error.tsx` | Error state with retry |
+| `src/data/mock-riders.ts` | Full fictional records, server-only import |
+| `src/lib/riders.ts` | Strips private fields before the client |
+| `src/lib/directory.ts` | Search and filter, safe to run in the browser |
+| `src/types/rider.ts` | `DirectoryRider` public row |
+| `src/components/riders/RiderDirectory.tsx` | Search, filters, grid, empty state |
+| `src/components/riders/RiderCard.tsx` | One rider, all facts visible |
+| `src/components/riders/RiderGrid.tsx` | Responsive grid |
+| `src/components/riders/RiderSearch.tsx` | Name or machine field |
+| `src/components/riders/RiderFilters.tsx` | Style, machine, place |
+| `src/components/riders/RiderDirectoryFallback.tsx` | Skeleton |
+| `src/data/home.ts` | Featured riders now come from the directory projection |
+| `src/config/site.ts` | `/riders` added to `LIVE_ROUTES` |
+| `ARCHITECTURE.md` | Live routes include the crew |
+| `README.md` | Phase 4 marked complete |
 
 ---
 
 ## 4. VALIDATION RESULTS
 
-- **ESLint**: ✅ Passed (`npm run lint`, 0 errors)
-- **TypeScript**: ✅ Passed (`tsc --noEmit` inside `next build`)
-- **Production Build**: ✅ Passed (Next.js 16.3.8, static `/` and `/_not-found`)
-- **Browser check**: Desktop hero, crew, machines, and ride highlight, plus a 390px hero and stats grid. All ten sections are in the server HTML. “Pune” is absent. Jaipur and Udaipur are present.
+- **ESLint**: ✅ Passed
+- **TypeScript**: ✅ Passed (inside `next build`, and `tsc --noEmit` before it)
+- **Production Build**: ✅ Passed (static `/`, `/about`, `/riders`, `/_not-found`)
+- **Browser check**: Desktop directory, empty search (“nomatch”), Cruiser filter (Mohit and Yash only), and a 390px layout. HTML does not contain Pune, Delhi, Lucknow, Indore, or blood groups.
 
 ---
 
 ## 5. DESIGN & ARCHITECTURAL NOTES
 
-- The hero is pulled under the sticky header (`-mt-20`, `min-h-svh`) so the first screen is a full viewport. Header content still clears the bar.
-- Frames are decorative and `aria-hidden`. Names, bikes, and copy carry the meaning.
-- Links to `/riders`, `/riders/[slug]`, `/rides/[slug]`, `/gallery`, and `/contact` are real, and those pages still use the branded not-found until their phases.
-- `LIVE_ROUTES` is still only `/`.
+- The client receives `DirectoryRider` rows only. Do not import `src/data/mock-riders.ts` from a client component.
+- “Member” is labeled “Rider” on the public site.
+- Featured order on the homepage stays Vikram, Arjun, Kabir.
 
 ---
 
 ## 6. KNOWN LIMITATIONS & PENDING ITEMS
 
-- The git commit `phase-2-homepage` has not been created.
-- Homepage imagery is drawn, not photographed. Real community photography belongs with later content phases.
-- Rider directory, profiles, rides, gallery, about, and contact pages are not built.
-- Stats and stories are fictional placeholders.
+- The git commit `phase-4-riders-directory` has not been created.
+- `/riders/[slug]` is not built. Cards link there and currently show the branded not-found page.
+- Rides, gallery, contact, and admin are still unbuilt.
+- Records are fictional. Supabase starts in Phase 6.
 - Automated tests remain Phase 11.
 
 ---
 
 ## 7. EXACT NEXT PHASE
 
-### **PHASE 3 — ABOUT + COMMUNITY STORY**
-- **Goal**: An editorial About page.
-- **Route**: `/about`
-- **Sequence**: Hero → Origin → Philosophy → Values → What We Ride → Culture → Timeline → Final CTA.
-- **Then**: add `/about` to `LIVE_ROUTES` in `src/config/site.ts`.
-- **Do not**: build the rider directory, profiles, rides, gallery, contact, or admin.
+### **PHASE 5 — RIDER PROFILE**
+- **Goal**: `/riders/[slug]` as a premium profile with dynamic SEO.
+- **Include**: hero, metadata, story, motorcycle showcase, riding identity, contributions, gallery, previous and next rider.
+- **Privacy**: enforce `show_age`, `show_blood_group`, `show_city`, and `show_social_links` in the UI, metadata, and structured data. Use the same server projection. Do not send hidden fields to the client.
+- **Unknown slug**: branded 404.
+- **Then**: profiles can stay off `LIVE_ROUTES` as a prefix, or prefetch only if you add a safe rule. Do not prefetch every slug blindly.
+- **Do not**: add Supabase, the rides pages, gallery, or admin.
 - **Validate**: `npm run lint`, `npm run typecheck`, `npm run build`.
-- **Commit target**: `phase-3-about`.
+- **Commit target**: `phase-5-rider-profile`.
 
 ---
 
 ## 8. INSTRUCTIONS FOR NEXT AI TOOL
 
 1. Work in the repository root.
-2. Implement **only Phase 3**.
-3. Read `SPIRITUAL_RIDERS_CLAUDE_CODE_MASTER_PROMPT.md`, this file, `DESIGN_SYSTEM.md`, and `src/data/home.ts` so the about story does not contradict the homepage.
-4. Reuse the shell, `SectionHeading`, `Reveal`, `Button`, `Container`, and `ChapterFrame`.
-5. Add `/about` to `LIVE_ROUTES` when the page exists.
-6. Keep privacy flags in mind even if this page has no rider records.
-7. Run lint, typecheck, and build before the phase report.
-8. Overwrite this file with the Phase 3 status.
-9. Stop and wait before Phase 4.
+2. Implement **only Phase 5**.
+3. Read `src/types/rider.ts`, `src/lib/riders.ts`, and `src/data/mock-riders.ts` before rendering a profile.
+4. Keep `getDirectoryRiders` / a new profile mapper as the only door out of the mock file.
+5. Arjun’s city, and every other hidden field, must stay out of the HTML, the title, and JSON-LD.
+6. Run lint, typecheck, and build before the phase report.
+7. Overwrite this file with the Phase 5 status.
+8. Stop and wait before Phase 6.

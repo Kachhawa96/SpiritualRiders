@@ -6,6 +6,7 @@
  */
 
 import { SITE_CONFIG } from "@/config/site";
+import { getDirectoryRiders } from "@/lib/riders";
 
 export type FrameTone = "highway" | "machine" | "crew" | "dawn" | "salt" | "rain";
 
@@ -42,60 +43,18 @@ export interface HomeFrame {
   title: string;
 }
 
-interface RiderSource {
-  slug: string;
-  displayName: string;
-  position: string;
-  shortBio: string;
-  bike: string;
-  city: string;
-  showCity: boolean;
-  tone: FrameTone;
-  mark: string;
-}
-
-const RIDER_SOURCE: RiderSource[] = [
-  {
-    slug: "vikram-rathore",
-    displayName: "Vikram Rathore",
-    position: "Founder",
-    shortBio: "Keeps the dawn starts honest and the crew pointed at the horizon.",
-    bike: "Royal Enfield Continental GT",
-    city: "Jaipur",
-    showCity: true,
-    tone: "dawn",
-    mark: "VR",
-  },
-  {
-    slug: "arjun-mehta",
-    displayName: "Arjun Mehta",
-    position: "Captain",
-    shortBio: "Rides the long way home and never leaves a machine in the dark.",
-    bike: "Triumph Street Twin",
-    city: "Pune",
-    showCity: false,
-    tone: "machine",
-    mark: "AM",
-  },
-  {
-    slug: "kabir-sen",
-    displayName: "Kabir Sen",
-    position: "Co-founder",
-    shortBio: "The quiet one at the back of the line, and the first to stop for another rider.",
-    bike: "BMW R nineT",
-    city: "Udaipur",
-    showCity: true,
-    tone: "crew",
-    mark: "KS",
-  },
-];
-
-export const FEATURED_RIDERS: HomeRider[] = RIDER_SOURCE.map(
-  ({ showCity, city, ...rider }) => ({
-    ...rider,
-    city: showCity ? city : null,
-  })
-);
+export const FEATURED_RIDERS: HomeRider[] = getDirectoryRiders()
+  .filter((rider) => rider.is_featured)
+  .map((rider) => ({
+    slug: rider.slug,
+    displayName: rider.display_name,
+    position: rider.position_label,
+    shortBio: rider.short_bio,
+    bike: `${rider.bike_brand} ${rider.bike_model}`,
+    city: rider.city,
+    tone: rider.tone,
+    mark: rider.mark,
+  }));
 
 export const FEATURED_BIKES: HomeBike[] = [
   {
