@@ -51,7 +51,7 @@ function rider(input: RiderInput): Rider {
   };
 }
 
-export const MOCK_RIDERS: Rider[] = [
+const RAW_RIDERS: Rider[] = [
   rider({
     slug: "vikram-rathore",
     full_name: "Vikram Singh Rathore",
@@ -329,3 +329,77 @@ export const MOCK_RIDERS: Rider[] = [
     joined_date: "2025-10-04",
   }),
 ];
+
+const STORIES: Record<string, { bio: string; achievements: string[] }> = {
+  "vikram-rathore": {
+    bio: "Vikram called the first departure out of Jaipur, before the city had light in the windows. He still treats a dawn start as the honest hour of the house.\n\nThe Continental GT is the machine he trusts for that hour. The crew follows the line he sets, and he waits if the line breaks.",
+    achievements: [
+      "Called the first dawn departure in 2020",
+      "Led Salt and Silence toward the Rann",
+      "Keeps the founding machine in the line",
+    ],
+  },
+  "arjun-mehta": {
+    bio: "Arjun rides at the front when the light is gone and at the back when someone falls out of the formation. The captain’s work is the whole line, not the fastest machine.\n\nHe does not talk about where he keeps his boots. The road is the only address the house needs from him.",
+    achievements: [
+      "Holds the line together on night patrol",
+      "Never leaves a stopped rider behind",
+    ],
+  },
+  "kabir-sen": {
+    bio: "Kabir was in the first twelve. He rides near the back on purpose, where a problem shows up before it becomes a story.\n\nThe R nineT has crossed the same deserts as the founder’s machine. He stops first, and he does not make a speech about it.",
+    achievements: [
+      "Rode the first morning beside the founder",
+      "Anchor of the formation on long tours",
+    ],
+  },
+  "neel-kapoor": {
+    bio: "Neel takes the track that leaves the highway. The Adventure is how he comes back with dust on the cases and the crew still in sight.",
+    achievements: ["Opened the dune road west of Jodhpur for the chapter"],
+  },
+  "reza-qureshi": {
+    bio: "Reza is the one who notices a loose bolt before the lunch stop. Long Sundays suit him. The tools ride in his pannier, not as a performance.",
+    achievements: ["Keeps the spares for the Sunday line"],
+  },
+  "ishaan-malhotra": {
+    bio: "Ishaan makes the departure time mean something. Plans stay quiet. The Versys is usually fueled before anyone else has found their gloves.",
+    achievements: ["Set the chapter’s dawn departure ritual"],
+  },
+  "farhan-iqbal": {
+    bio: "Farhan writes the rides down: who came, which road, what the weather actually did. The Himalayan is the machine he uses to go check a route before the line commits.",
+    achievements: ["Keeps the written record of the chapter rides"],
+  },
+  "mohit-bansal": {
+    bio: "Mohit rides the edge of the formation and refuses to hurry a sunset. The Iron 883 is not the newest machine in the house. It is one of the most present.",
+    achievements: ["Rode every night patrol in 2025"],
+  },
+  "sagar-joshi": {
+    bio: "Sagar likes a bend and a short burst, then he waits. The Scrambler is quick. He is quicker to fall back when the line needs a pair of eyes behind it.",
+    achievements: ["Marked the Kumbhalgarh bends for the crew"],
+  },
+  "tarun-desai": {
+    bio: "Tarun rides sweep. When the line is long and the light is leaving, he is the last headlamp the rider in front can trust.",
+    achievements: ["Sweep rider for the coastal night runs"],
+  },
+  "imran-sheikh": {
+    bio: "Imran rides a light machine and looks back more than he looks at the horizon. After rain, he is the one who knows which ghat is still honest.",
+    achievements: ["Scouted the ghats after the monsoon"],
+  },
+  "yash-oberoi": {
+    bio: "Yash is new to the line and already early. The Classic 350 is a prospect’s machine: kept clean, ridden often, and not asked to lead yet.",
+    achievements: ["First dawn start as a prospect, on time"],
+  },
+};
+
+export const MOCK_RIDERS: Rider[] = RAW_RIDERS.map((rider) => {
+  const story = STORIES[rider.slug];
+  const withStory = story
+    ? { ...rider, bio: story.bio, achievements: story.achievements }
+    : rider;
+  if (withStory.slug !== "vikram-rathore") return withStory;
+  return {
+    ...withStory,
+    show_social_links: true,
+    instagram_url: "https://example.com/vikram-rathore",
+  };
+});

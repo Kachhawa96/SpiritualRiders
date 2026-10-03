@@ -88,7 +88,7 @@ src/
 | 2 | Homepage Experience | Complete |
 | 3 | About + Community Story | Complete |
 | 4 | Rider Directory | Complete |
-| 5 | Rider Profile | Pending |
+| 5 | Rider Profile | Complete |
 | 6 | Database + Real Content | Pending |
 | 7 | Rides + Events + Gallery | Pending |
 | 8 | Admin / Content Management | Pending |
