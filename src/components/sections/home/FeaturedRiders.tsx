@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FEATURED_RIDERS } from "@/data/home";
+import { getFeaturedHomeRiders } from "@/data/home";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { Reveal } from "@/components/motion/Reveal";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
@@ -8,7 +8,8 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { isLiveRoute, ROUTES } from "@/config/site";
 
-export function FeaturedRiders() {
+export async function FeaturedRiders() {
+  const featured = await getFeaturedHomeRiders();
   return (
     <section id="crew" className="section-padding scroll-mt-24 border-t border-border-subtle">
       <Container>
@@ -28,7 +29,7 @@ export function FeaturedRiders() {
         </div>
 
         <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
-          {FEATURED_RIDERS.map((rider, index) => (
+          {featured.map((rider, index) => (
             <Reveal key={rider.slug} delay={index * 0.08} className="h-full">
               <article className="flex h-full flex-col">
                 <ImageReveal className="aspect-[3/4] w-full border border-border-subtle">

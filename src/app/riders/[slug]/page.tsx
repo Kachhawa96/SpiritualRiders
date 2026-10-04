@@ -9,13 +9,14 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams(): { slug: string }[] {
-  return getDirectoryRiders().map((rider) => ({ slug: rider.slug }));
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  const riders = await getDirectoryRiders();
+  return riders.map((rider) => ({ slug: rider.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const profile = getRiderProfile(slug);
+  const profile = await getRiderProfile(slug);
   if (!profile) notFound();
 
   const description = publicDescription(profile);
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function RiderProfilePage({ params }: PageProps) {
   const { slug } = await params;
-  const profile = getRiderProfile(slug);
+  const profile = await getRiderProfile(slug);
   if (!profile) notFound();
 
   return (

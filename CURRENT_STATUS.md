@@ -1,8 +1,8 @@
 # SPIRITUAL RIDERS — CURRENT PROJECT STATUS
 
-**Last Updated**: 2026-10-03  
-**Current Phase Completed**: Phase 5 — Rider Profile  
-**Overall Status**: ✅ Healthy, Verified, Ready for Phase 6  
+**Last Updated**: 2026-10-04  
+**Current Phase Completed**: Phase 6 — Database + Real Content  
+**Overall Status**: ✅ Live Supabase connection active. Privacy view verified.  
 **Project Root**: repository root (package name `spiritual-riders`)
 
 ---
@@ -15,7 +15,7 @@
 - [x] **Phase 3 — About + Community Story** (Completed: 2026-10-03)
 - [x] **Phase 4 — Rider Directory** (Completed: 2026-10-03)
 - [x] **Phase 5 — Rider Profile** (Completed: 2026-10-03)
-- [ ] Phase 6 — Database + Real Content (Supabase)
+- [x] **Phase 6 — Database + Real Content** (Completed: 2026-10-04)
 - [ ] Phase 7 — Rides + Events + Gallery
 - [ ] Phase 8 — Admin / Content Management
 - [ ] Phase 9 — Polish / Cinematic Motion
@@ -25,21 +25,20 @@
 
 ---
 
-## 2. SUMMARY OF LATEST PHASE (PHASE 5)
+## 2. SUMMARY OF LATEST PHASE (PHASE 6)
 
 ### What Was Implemented
-Each active rider now has a page at `/riders/[slug]`. Unknown names get a rider-specific not-found inside the shell.
+The site now reads riders through one server data layer. Pages no longer assemble private records themselves.
 
-The page has a hero, story, motorcycle, riding identity, contributions, a three-frame gallery, and previous/next links in directory order.
+- Postgres schema for `public.riders`
+- View `public.rider_public` that nulls age, blood group, city, and social links when the flag is off
+- Row Level Security on the base table, with no select grant for the anon key
+- Storage bucket `rider-media`: public read, no public upload
+- Seed of the same twelve fictional riders, including Arjun’s hidden city on the base row only
+- Zod validation of every public row
+- `@supabase/supabase-js` anon client. The service-role key is not read by the app
 
-`generateMetadata` and JSON-LD are built only from the public profile. A hidden city, age, blood group, or social link is null before those strings are written.
-
-Checked in the HTML:
-
-- Arjun Mehta: no Pune, no age, no blood group, no social link
-- Vikram Rathore: Jaipur and his public link are present
-- Imran Sheikh: blood group is on the page, Indore is not
-- Neel Kapoor: age and Jodhpur are present because those flags are on
+`.env.local` is set. The app reads `public.rider_public` from the connected Supabase project. Row ids are database UUIDs, so this is not the local seed. The anon key is denied on `public.riders` (`42501 permission denied`).
 
 ---
 
@@ -47,15 +46,19 @@ Checked in the HTML:
 
 | File | Purpose |
 |------|---------|
-| `src/app/riders/[slug]/page.tsx` | Profile route, metadata, JSON-LD |
-| `src/app/riders/[slug]/not-found.tsx` | Unknown rider |
-| `src/app/riders/[slug]/loading.tsx` | Loading state |
-| `src/components/riders/RiderProfileView.tsx` | Profile layout |
-| `src/lib/riders.ts` | `getRiderProfile` strips private fields |
-| `src/types/rider.ts` | `RiderProfile` |
-| `src/data/mock-riders.ts` | Longer stories, contributions, Vikram’s public link |
-| `ARCHITECTURE.md` | Notes the profile routes |
-| `README.md` | Phase 5 marked complete |
+| `supabase/migrations/20261004120000_riders.sql` | Table, privacy view, storage bucket |
+| `supabase/seed.sql` | Fictional crew, safe to re-run |
+| `.env.example` | Public URL and anon key. Service role is documented as unused |
+| `src/lib/db/client.ts` | Anon server client |
+| `src/lib/db/public-rider.ts` | Zod schema for a public row |
+| `src/lib/db/riders.ts` | Supabase read, or local seed when env is unset |
+| `src/lib/riders.ts` | Directory and profile APIs over public rows only |
+| `src/data/home.ts` | Featured riders are loaded asynchronously from that API |
+| `src/app/riders/page.tsx` | Awaits the directory |
+| `src/app/riders/[slug]/page.tsx` | Awaits the profile |
+| `src/components/sections/home/FeaturedRiders.tsx` | Awaits the featured three |
+| `ARCHITECTURE.md` | Data-layer notes |
+| `README.md` | Phase 6 marked complete |
 
 ---
 
@@ -63,50 +66,49 @@ Checked in the HTML:
 
 - **ESLint**: ✅ Passed
 - **TypeScript**: ✅ Passed
-- **Production Build**: ✅ Passed. Twelve static profile pages plus `/`, `/about`, `/riders`, and `/_not-found`
-- **Browser check**: Vikram on desktop (hero, story, gallery, next rider) and Arjun on a 390px screen (captain, no city)
+- **Production Build**: ✅ Passed. Same routes as Phase 5, including twelve static profiles
+- **Privacy check on the built HTML**: Pune, Delhi, Lucknow, and Indore do not appear. Imran’s blood group still appears because that flag is on
+- **Live Supabase** (2026-10-04): ✅ `rider_public` returned 12 riders. Arjun’s city, age, blood group, and social link are null. Vikram’s city is Jaipur and his public link is present. Imran’s city is null and his blood group is present. Neel’s age and Jodhpur are present. The directory, Arjun’s profile, and the homepage render from that data and do not contain Pune.
 
 ---
 
 ## 5. DESIGN & ARCHITECTURAL NOTES
 
-- The profile is a server page. The browser never receives the raw mock record.
-- Profile links are not added to `LIVE_ROUTES`, so the directory does not prefetch every slug.
-- Gallery frames are drawn marks, same language as the rest of the site.
-- Previous/next follows the directory order: featured riders first, then the rest by name.
+- The browser key can select `rider_public` only. It cannot select `public.riders`.
+- The Next server uses that same anon key. It does not use the service role.
+- Zod runs after the privacy projection, so a bad row fails closed.
+- Photographs are still not uploaded. The bucket is ready for later phases.
 
 ---
 
 ## 6. KNOWN LIMITATIONS & PENDING ITEMS
 
-- The git commit `phase-5-rider-profile` has not been created.
-- There are still no photographs. The gallery is three drawn frames.
-- Rides, the community gallery, contact, and admin are not built.
-- Supabase replaces these fictional records in Phase 6.
+- The git commit `phase-6-real-data` has not been created.
+- Live Supabase is active through `.env.local`. The local seed is not used while those env vars are set.
+- Rides, gallery, contact, and admin are not built.
 - Automated tests remain Phase 11.
 
 ---
 
 ## 7. EXACT NEXT PHASE
 
-### **PHASE 6 — DATABASE + REAL CONTENT**
-- **Goal**: Live Supabase backend.
-- **Include**: schema, migrations, fictional but realistic seed data, Storage and RLS, a typed data-access layer, Zod validation, and replacement of the mock records.
-- **Privacy**: the same flags must be enforced in the server data layer before UI, metadata, or structured data.
-- **Do not**: build the rides index, gallery page, or admin yet. Those are Phases 7 and 8.
+### **PHASE 7 — RIDES + EVENTS + GALLERY**
+- **Goal**: `/rides`, `/rides/[slug]`, and `/gallery`.
+- **Include**: cards, detail pages, filtering, a lightbox, and relationships to riders.
+- **Data**: add tables and a public projection in the same style as riders if the content should be real. Do not expose private rider columns through those pages.
+- **Do not**: build admin auth or CRUD. That is Phase 8.
 - **Validate**: `npm run lint`, `npm run typecheck`, `npm run build`.
-- **Commit target**: `phase-6-real-data`.
+- **Commit target**: `phase-7-community-content`.
 
 ---
 
 ## 8. INSTRUCTIONS FOR NEXT AI TOOL
 
 1. Work in the repository root.
-2. Implement **only Phase 6**.
-3. Read `src/types/rider.ts`, `src/lib/riders.ts`, and `src/data/mock-riders.ts` before replacing the data source.
-4. Keep a single server function that nulls hidden age, blood group, city, and social links. Do not let components read the raw row.
-5. Arjun’s city must stay hidden after the move to Supabase, including in seeds if the flag is false.
-6. No service-role key in the browser. Document env vars in `.env.example` only.
-7. Run lint, typecheck, and build before the phase report.
-8. Overwrite this file with the Phase 6 status.
-9. Stop and wait before Phase 7.
+2. Implement **only Phase 7**.
+3. Read `supabase/migrations/20261004120000_riders.sql` and `src/lib/db/riders.ts` before adding queries.
+4. New tables need RLS and a public view or an equivalent mask. The anon key must not read hidden rider fields.
+5. Do not import `src/data/mock-riders.ts` from a client component.
+6. Run lint, typecheck, and build before the phase report.
+7. Overwrite this file with the Phase 7 status.
+8. Stop and wait before Phase 8.

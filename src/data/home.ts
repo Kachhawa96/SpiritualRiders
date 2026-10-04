@@ -43,18 +43,21 @@ export interface HomeFrame {
   title: string;
 }
 
-export const FEATURED_RIDERS: HomeRider[] = getDirectoryRiders()
-  .filter((rider) => rider.is_featured)
-  .map((rider) => ({
-    slug: rider.slug,
-    displayName: rider.display_name,
-    position: rider.position_label,
-    shortBio: rider.short_bio,
-    bike: `${rider.bike_brand} ${rider.bike_model}`,
-    city: rider.city,
-    tone: rider.tone,
-    mark: rider.mark,
-  }));
+export async function getFeaturedHomeRiders(): Promise<HomeRider[]> {
+  const riders = await getDirectoryRiders();
+  return riders
+    .filter((rider) => rider.is_featured)
+    .map((rider) => ({
+      slug: rider.slug,
+      displayName: rider.display_name,
+      position: rider.position_label,
+      shortBio: rider.short_bio,
+      bike: `${rider.bike_brand} ${rider.bike_model}`,
+      city: rider.city,
+      tone: rider.tone,
+      mark: rider.mark,
+    }));
+}
 
 export const FEATURED_BIKES: HomeBike[] = [
   {

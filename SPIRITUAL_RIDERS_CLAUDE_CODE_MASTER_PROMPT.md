@@ -291,8 +291,59 @@ Schema, migrations, seed data (fictional but realistic), Storage + RLS, typed da
 
 `/rides`, `/rides/[slug]`, `/gallery` with cards, detail pages, filtering, lightbox, relationships.
 
-**Commit**: `phase-7-community-content`  
-**STOP.**
+Read these files first:
+- CURRENT_STATUS.md
+- SPIRITUAL_RIDERS_CLAUDE_CODE_MASTER_PROMPT.md
+- src/lib/riders.ts and the existing data layer patterns
+
+Context:
+- Phases 0 to 6 are completed.
+- Live Supabase connection is now working.
+- Do not modify existing Rider-related code unless necessary.
+
+Now implement ONLY Phase 7: Rides + Events + Gallery
+
+### Requirements for Phase 7:
+
+1. **Rides**
+   - Create `/rides` page (list of all rides)
+   - Create `/rides/[slug]` page (individual ride detail)
+   - Ride Card and Ride Detail should show:
+     - Cover image
+     - Title
+     - Date & Location
+     - Distance
+     - Rider count
+     - Description
+     - Dynamic Status badge
+
+2. **Dynamic Ride Status Logic** (Important)
+   Calculate status on the server based on the ride date:
+   - Upcoming → ride date is in the future
+   - Ongoing  → ride date is today
+   - Completed → ride date is in the past
+
+   Display the status as a clear badge on both the list and detail pages.
+
+3. **Gallery**
+   - Create `/gallery` page
+   - Support basic filtering
+   - Premium lightbox when clicking images
+   - Allow images to be linked to a rider or a ride
+
+4. **Database**
+   - Create necessary tables (`rides`, `gallery`) with proper relationships
+   - Add migration + seed data
+   - Follow the same clean pattern used in Phase 6 (typed data access layer + Zod)
+
+5. **Rules**
+   - Keep the existing design system and visual language
+   - Prefer Server Components
+   - Do not break existing pages
+   - After finishing, update CURRENT_STATUS.md
+   - Then STOP and wait for my next instruction
+
+Now implement Phase 7 only.
 
 ---
 
