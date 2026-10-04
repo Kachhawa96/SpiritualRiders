@@ -89,7 +89,7 @@ src/
 | 3 | About + Community Story | Complete |
 | 4 | Rider Directory | Complete |
 | 5 | Rider Profile | Complete |
-| 6 | Database + Real Content | Pending |
+| 6 | Database + Real Content | Complete |
 | 7 | Rides + Events + Gallery | Pending |
 | 8 | Admin / Content Management | Pending |
 | 9 | Polish / Cinematic Motion | Pending |

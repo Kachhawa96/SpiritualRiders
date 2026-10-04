@@ -1,11 +1,16 @@
 /**
- * Directory projection. Call from server components only.
- * Age, blood group, and social links are never copied onto the public row.
- * City is copied only when show_city is true.
+ * Public rider reads. Rows are already privacy-filtered.
+ * Do not import mock records from UI code.
  */
 
-import { MOCK_RIDERS } from "@/data/mock-riders";
-import type { CommunityPosition, DirectoryRider, Rider, RiderNeighbor, RiderProfile } from "@/types/rider";
+import { loadPublicRiderRows } from "@/lib/db/riders";
+import type { PublicRiderRow } from "@/lib/db/public-rider";
+import type {
+  CommunityPosition,
+  DirectoryRider,
+  RiderNeighbor,
+  RiderProfile,
+} from "@/types/rider";
 
 const POSITION_LABEL: Record<CommunityPosition, string> = {
   founder: "Founder",
@@ -56,85 +61,84 @@ function toneFor(slug: string): DirectoryRider["tone"] {
   return TONES[sum % TONES.length] ?? "highway";
 }
 
-export function toDirectoryRider(rider: Rider): DirectoryRider {
-  return {
-    id: rider.id,
-    slug: rider.slug,
-    display_name: rider.display_name,
-    short_bio: rider.short_bio,
-    community_position: rider.community_position,
-    position_label: positionLabel(rider.community_position),
-    bike_brand: rider.bike_brand,
-    bike_model: rider.bike_model,
-    bike_year: rider.bike_year,
-    riding_style: rider.riding_style,
-    city: rider.show_city ? rider.city : null,
-    mark: markFromName(rider.display_name),
-    tone: toneFor(rider.slug),
-    is_featured: rider.is_featured,
-  };
-}
-
-export function getDirectoryRiders(): DirectoryRider[] {
-  return orderedActiveRiders().map(toDirectoryRider);
-}
-
-function orderedActiveRiders(): Rider[] {
-  const active = MOCK_RIDERS.filter((rider) => rider.is_active);
-  const featured = active.filter((rider) => rider.is_featured);
-  const rest = active
-    .filter((rider) => !rider.is_featured)
+function orderRows(rows: PublicRiderRow[]): PublicRiderRow[] {
+  const featured = rows.filter((row) => row.is_featured);
+  const rest = rows
+    .filter((row) => !row.is_featured)
     .sort((a, b) => a.display_name.localeCompare(b.display_name));
   return [...featured, ...rest];
 }
 
-function neighbor(rider: Rider | undefined): RiderNeighbor | null {
-  if (!rider) return null;
-  return { slug: rider.slug, display_name: rider.display_name };
+function toDirectoryRider(row: PublicRiderRow): DirectoryRider {
+  return {
+    id: row.id,
+    slug: row.slug,
+    display_name: row.display_name,
+    short_bio: row.short_bio,
+    community_position: row.community_position,
+    position_label: positionLabel(row.community_position),
+    bike_brand: row.bike_brand,
+    bike_model: row.bike_model,
+    bike_year: row.bike_year,
+    riding_style: row.riding_style,
+    city: row.city,
+    mark: markFromName(row.display_name),
+    tone: toneFor(row.slug),
+    is_featured: row.is_featured,
+  };
 }
 
-export function toRiderProfile(
-  rider: Rider,
-  previous: Rider | undefined,
-  next: Rider | undefined
+function toRiderProfile(
+  row: PublicRiderRow,
+  previous: PublicRiderRow | undefined,
+  next: PublicRiderRow | undefined
 ): RiderProfile {
-  const social = rider.show_social_links;
   return {
-    id: rider.id,
-    slug: rider.slug,
-    display_name: rider.display_name,
-    position_label: positionLabel(rider.community_position),
-    bio: rider.bio,
-    short_bio: rider.short_bio,
-    joined_date: rider.joined_date,
-    bike_brand: rider.bike_brand,
-    bike_model: rider.bike_model,
-    bike_variant: rider.bike_variant,
-    bike_year: rider.bike_year,
-    bike_color: rider.bike_color,
-    riding_since: rider.riding_since,
-    riding_style: rider.riding_style,
-    favorite_route: rider.favorite_route,
-    achievements: rider.achievements,
-    age: rider.show_age ? rider.age : null,
-    blood_group: rider.show_blood_group ? rider.blood_group : null,
-    city: rider.show_city ? rider.city : null,
-    instagram_url: social ? rider.instagram_url : null,
-    facebook_url: social ? rider.facebook_url : null,
-    youtube_url: social ? rider.youtube_url : null,
-    website_url: social ? rider.website_url : null,
-    mark: markFromName(rider.display_name),
-    tone: toneFor(rider.slug),
-    is_featured: rider.is_featured,
+    id: row.id,
+    slug: row.slug,
+    display_name: row.display_name,
+    position_label: positionLabel(row.community_position),
+    bio: row.bio,
+    short_bio: row.short_bio,
+    joined_date: row.joined_date.slice(0, 10),
+    bike_brand: row.bike_brand,
+    bike_model: row.bike_model,
+    bike_variant: row.bike_variant,
+    bike_year: row.bike_year,
+    bike_color: row.bike_color,
+    riding_since: row.riding_since,
+    riding_style: row.riding_style,
+    favorite_route: row.favorite_route,
+    achievements: row.achievements,
+    age: row.age,
+    blood_group: row.blood_group,
+    city: row.city,
+    instagram_url: row.instagram_url,
+    facebook_url: row.facebook_url,
+    youtube_url: row.youtube_url,
+    website_url: row.website_url,
+    mark: markFromName(row.display_name),
+    tone: toneFor(row.slug),
+    is_featured: row.is_featured,
     previous: neighbor(previous),
     next: neighbor(next),
   };
 }
 
-export function getRiderProfile(slug: string): RiderProfile | null {
-  const ordered = orderedActiveRiders();
-  const index = ordered.findIndex((rider) => rider.slug === slug);
-  const rider = ordered[index];
-  if (!rider) return null;
-  return toRiderProfile(rider, ordered[index - 1], ordered[index + 1]);
+function neighbor(row: PublicRiderRow | undefined): RiderNeighbor | null {
+  if (!row) return null;
+  return { slug: row.slug, display_name: row.display_name };
+}
+
+export async function getDirectoryRiders(): Promise<DirectoryRider[]> {
+  const rows = orderRows(await loadPublicRiderRows());
+  return rows.map(toDirectoryRider);
+}
+
+export async function getRiderProfile(slug: string): Promise<RiderProfile | null> {
+  const rows = orderRows(await loadPublicRiderRows());
+  const index = rows.findIndex((row) => row.slug === slug);
+  const row = rows[index];
+  if (!row) return null;
+  return toRiderProfile(row, rows[index - 1], rows[index + 1]);
 }

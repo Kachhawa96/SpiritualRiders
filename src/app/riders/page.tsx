@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   description: `The riders of ${SITE_CONFIG.name}. Search the line by name, machine, or style.`,
 };
 
-export default function RidersPage() {
-  const riders = getDirectoryRiders();
+export default async function RidersPage() {
+  const riders = await getDirectoryRiders();
 
   return (
     <section className="section-padding scroll-mt-24">

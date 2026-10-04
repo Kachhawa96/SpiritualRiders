@@ -56,7 +56,15 @@ component-driven architecture optimized for performance, SEO, and scalability.
 ### Homepage (Phase 2)
 - The ten homepage sections live in `src/components/sections/home/`.
 - Fictional copy and figures live in `src/data/home.ts`. City is omitted when `showCity` is false. Age, blood group, and social links are not on this page.
-- `/`, `/about`, and `/riders` are live. Individual rider pages are generated from the crew list. Ride and gallery links stay off `LIVE_ROUTES` until those pages exist.
+- `/`, `/about`, and `/riders` are live. Profiles are generated from the public rider rows. Ride and gallery links stay off `LIVE_ROUTES` until those pages exist.
+
+### Data (Phase 6)
+- Pages call `getDirectoryRiders` and `getRiderProfile` in `src/lib/riders.ts`.
+- Those functions read `public.rider_public` when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set.
+- The anon key cannot select `public.riders`. The view nulls age, blood group, city, and social links when the matching flag is false.
+- Zod parses every row before it becomes a directory card or a profile.
+- With no Supabase env, the same projection runs on the fictional seed so local builds still render. Set the env vars to switch to Postgres.
+- The service-role key is not read by the app.
 - Stats count up when they enter view. Reduced motion shows the final number immediately.
 
 ---

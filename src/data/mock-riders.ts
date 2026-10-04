@@ -1,7 +1,7 @@
 /**
- * Fictional rider records for the directory.
- * Import this only from server code. Hidden cities (Arjun’s Pune, and others)
- * must be stripped by getDirectoryRiders() before they reach the client.
+ * Fictional seed records.
+ * The app reads them only through src/lib/db/riders.ts when Supabase env is unset.
+ * Hidden cities must stay null in the public projection.
  */
 
 import type { Rider } from "@/types/rider";
