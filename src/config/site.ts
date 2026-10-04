@@ -24,7 +24,7 @@ export const SITE_CONFIG = {
  * Navigation prefetches only these so later-phase URLs do not 404 in the background.
  * Add a path when its phase ships.
  */
-export const LIVE_ROUTES = ["/", "/about", "/riders"] as const;
+export const LIVE_ROUTES = ["/", "/about", "/riders", "/rides", "/gallery"] as const;
 
 export function isLiveRoute(href: string): boolean {
   return (LIVE_ROUTES as readonly string[]).includes(href);

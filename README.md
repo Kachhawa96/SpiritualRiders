@@ -90,7 +90,7 @@ src/
 | 4 | Rider Directory | Complete |
 | 5 | Rider Profile | Complete |
 | 6 | Database + Real Content | Complete |
-| 7 | Rides + Events + Gallery | Pending |
+| 7 | Rides + Events + Gallery | Complete |
 | 8 | Admin / Content Management | Pending |
 | 9 | Polish / Cinematic Motion | Pending |
 | 10 | SEO / Accessibility / Performance | Pending |

@@ -134,17 +134,6 @@ export const VALUES = [
   },
 ] as const;
 
-export const FEATURED_RIDE = {
-  slug: "salt-and-silence",
-  title: "Salt and Silence",
-  date: "2026-03-12",
-  distanceKm: 640,
-  riders: 18,
-  route: "Jaipur to the Rann",
-  summary:
-    "A two-day run into the white desert. Dawn starts, a long straight, and a camp where the only sound left was the cooling of the engines.",
-} as const;
-
 export function homeStats(): { label: string; value: number }[] {
   return [
     { label: "Riders", value: 48 },
