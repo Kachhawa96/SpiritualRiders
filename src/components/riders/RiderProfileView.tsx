@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { Reveal } from "@/components/motion/Reveal";
@@ -29,6 +30,15 @@ export function RiderProfileView({ profile }: RiderProfileViewProps) {
       <section className="relative -mt-20 flex min-h-[78svh] flex-col">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute inset-0 bg-obsidian-950" />
+          {profile.cover_image_url ? (
+            <Image
+              src={profile.cover_image_url}
+              alt={profile.display_name}
+              fill
+              priority
+              className="object-cover opacity-30"
+            />
+          ) : null}
           <div className="absolute top-0 right-0 h-[24rem] w-[24rem] rounded-full bg-gold-500/10 blur-3xl" />
           <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/80 to-obsidian-950/25" />
         </div>
@@ -67,12 +77,22 @@ export function RiderProfileView({ profile }: RiderProfileViewProps) {
 
       <section className="section-padding border-t border-border-subtle">
         <Container className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <ImageReveal className="aspect-[4/5] w-full border border-border-subtle">
-            <ChapterFrame
-              tone={profile.tone}
-              label={String(profile.bike_year)}
-              title={profile.bike_model}
-            />
+          <ImageReveal className="relative aspect-[4/5] w-full overflow-hidden border border-border-subtle bg-obsidian-950">
+            {profile.bike_image_url ? (
+              <Image
+                src={profile.bike_image_url}
+                alt={`${profile.bike_brand} ${profile.bike_model}`}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 50vw, 100vw"
+              />
+            ) : (
+              <ChapterFrame
+                tone={profile.tone}
+                label={String(profile.bike_year)}
+                title={profile.bike_model}
+              />
+            )}
           </ImageReveal>
           <Reveal>
             <SectionHeading
@@ -158,8 +178,18 @@ export function RiderProfileView({ profile }: RiderProfileViewProps) {
             />
           </Reveal>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
-            <ImageReveal className="min-h-64 border border-border-subtle">
-              <ChapterFrame tone={profile.tone} label={profile.mark} title={profile.bike_model} />
+            <ImageReveal className="relative min-h-64 overflow-hidden border border-border-subtle bg-obsidian-950">
+              {profile.profile_image_url ? (
+                <Image
+                  src={profile.profile_image_url}
+                  alt={profile.display_name}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                />
+              ) : (
+                <ChapterFrame tone={profile.tone} label={profile.mark} title={profile.bike_model} />
+              )}
             </ImageReveal>
             <ImageReveal className="min-h-64 border border-border-subtle">
               <ChapterFrame tone="highway" label="The road" title={profile.favorite_route ?? "The line"} />

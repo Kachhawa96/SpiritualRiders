@@ -19,6 +19,7 @@ export interface HomeRider {
   city: string | null;
   tone: FrameTone;
   mark: string;
+  profile_image_url?: string | null;
 }
 
 export interface HomeBike {
@@ -56,6 +57,7 @@ export async function getFeaturedHomeRiders(): Promise<HomeRider[]> {
       city: rider.city,
       tone: rider.tone,
       mark: rider.mark,
+      profile_image_url: rider.profile_image_url ?? null,
     }));
 }
 

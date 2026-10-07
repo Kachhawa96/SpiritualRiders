@@ -156,6 +156,8 @@ export interface DirectoryRider {
   mark: string;
   tone: "highway" | "machine" | "crew" | "dawn" | "salt" | "rain";
   is_featured: boolean;
+  profile_image_url?: string | null;
+  cover_image_url?: string | null;
 }
 
 /** Public profile. Hidden age, blood group, city, and social links are null. */
@@ -191,6 +193,9 @@ export interface RiderProfile {
   mark: string;
   tone: DirectoryRider["tone"];
   is_featured: boolean;
+  profile_image_url?: string | null;
+  cover_image_url?: string | null;
+  bike_image_url?: string | null;
   previous: RiderNeighbor | null;
   next: RiderNeighbor | null;
 }

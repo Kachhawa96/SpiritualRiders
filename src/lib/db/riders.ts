@@ -64,5 +64,8 @@ export function toPublicRow(rider: Rider): PublicRiderRow {
     website_url: social ? rider.website_url : null,
     is_featured: rider.is_featured,
     is_active: rider.is_active,
+    profile_image_url: rider.profile_image?.src ?? null,
+    cover_image_url: rider.cover_image?.src ?? null,
+    bike_image_url: rider.bike_image?.src ?? null,
   };
 }

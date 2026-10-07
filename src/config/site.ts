@@ -62,6 +62,7 @@ export const ROUTES = {
   ride: (slug: string) => `/rides/${slug}`,
   gallery: "/gallery",
   contact: "/contact",
+  admin: "/admin",
 } as const;
 
 // ── Social ────────────────────────────────────────────────────────────────────
