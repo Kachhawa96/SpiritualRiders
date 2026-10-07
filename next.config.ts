@@ -6,8 +6,11 @@ const nextConfig: NextConfig = {
   // Cloudinary patterns can also be added here if needed.
   images: {
     remotePatterns: [
-      // Supabase Storage (Phase 6+)
-      // { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },

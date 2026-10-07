@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getFeaturedHomeRiders } from "@/data/home";
 import { ImageReveal } from "@/components/motion/ImageReveal";
@@ -32,8 +33,18 @@ export async function FeaturedRiders() {
           {featured.map((rider, index) => (
             <Reveal key={rider.slug} delay={index * 0.08} className="h-full">
               <article className="flex h-full flex-col">
-                <ImageReveal className="aspect-[3/4] w-full border border-border-subtle">
-                  <ChapterFrame tone={rider.tone} label={rider.mark} title={rider.position} />
+                <ImageReveal className="relative aspect-[3/4] w-full overflow-hidden border border-border-subtle bg-obsidian-950">
+                  {rider.profile_image_url ? (
+                    <Image
+                      src={rider.profile_image_url}
+                      alt={rider.displayName}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                    />
+                  ) : (
+                    <ChapterFrame tone={rider.tone} label={rider.mark} title={rider.position} />
+                  )}
                 </ImageReveal>
                 <p className="mt-6 text-[0.68rem] uppercase tracking-[0.32em] text-gold-500">
                   {rider.position}

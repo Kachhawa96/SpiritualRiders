@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
 import { isLiveRoute, ROUTES } from "@/config/site";
@@ -10,16 +11,30 @@ interface RiderCardProps {
 
 export function RiderCard({ rider }: RiderCardProps) {
   const styles = rider.riding_style.map((style) => STYLE_LABEL[style]).join(" · ");
+  const imageUrl = rider.profile_image_url || rider.cover_image_url;
 
   return (
-    <article className="flex h-full flex-col border border-border-subtle bg-obsidian-900">
+    <article className="group flex h-full flex-col border border-border-subtle bg-obsidian-900 transition-colors hover:border-gold-500/40">
       <Link
         href={ROUTES.rider(rider.slug)}
         prefetch={isLiveRoute(ROUTES.rider(rider.slug))}
         className="flex h-full flex-col"
       >
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <ChapterFrame tone={rider.tone} label={rider.mark} title={rider.position_label} />
+        <div className="relative aspect-[4/3] overflow-hidden bg-obsidian-950">
+          {imageUrl ? (
+            <>
+              <Image
+                src={imageUrl}
+                alt={rider.display_name}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-obsidian-900 via-transparent to-transparent opacity-60" />
+            </>
+          ) : (
+            <ChapterFrame tone={rider.tone} label={rider.mark} title={rider.position_label} />
+          )}
         </div>
         <div className="flex flex-1 flex-col p-5 md:p-6">
           <div className="flex items-center justify-between gap-3">

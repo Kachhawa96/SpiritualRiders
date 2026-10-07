@@ -352,7 +352,47 @@ Now implement Phase 7 only.
 
 `/admin` with Supabase Auth, server-side authorization, CRUD for riders/rides/gallery + community settings. Image upload validation, protected routes.
 
-**Commit**: `phase-8-admin`  
+Read these files first:
+- CURRENT_STATUS.md
+- SPIRITUAL_RIDERS_CLAUDE_CODE_MASTER_PROMPT.md
+
+Context:
+- Phases 0 to 7 are fully completed and working.
+- Live Supabase is connected.
+- Do NOT modify or rewrite earlier phases unless absolutely necessary.
+
+Now implement ONLY Phase 8: Admin / Content Management
+
+### Requirements for Phase 8:
+
+1. **Admin Route**
+   - Create `/admin` (and related sub-routes if needed)
+   - There must be **NO Admin link** visible in the public navigation or footer.
+   - Admins will access it by directly visiting `/admin`.
+
+2. **Authentication & Protection**
+   - Use Supabase Auth
+   - Protect all `/admin` routes with server-side checks
+   - Unauthenticated users → show a clean Admin Login page
+   - Authenticated but non-admin users → Access Denied
+   - Only authorized admins can access the dashboard
+
+3. **Admin Features to Implement**
+   - Dashboard overview
+   - **Rider Management**: Create, Edit, Feature/Unfeature, Archive, Upload images
+   - **Ride Management**: Create, Edit, Feature, Archive
+   - **Gallery Management**: Upload, Reorder, Delete, Link to Rider/Ride
+   - **Community Settings**: Basic site settings (name, tagline, social links, etc.)
+
+4. **Technical Rules**
+   - Keep the existing design system (but Admin UI can be more functional/clean)
+   - Use Server Components + Server Actions where possible
+   - Never expose service-role key to the browser
+   - Follow proper RLS and authorization
+   - After finishing → Update CURRENT_STATUS.md
+   - Then STOP and wait for my next instruction
+
+Now implement Phase 8 only. 
 **STOP.**
 
 ---

@@ -85,6 +85,8 @@ function toDirectoryRider(row: PublicRiderRow): DirectoryRider {
     mark: markFromName(row.display_name),
     tone: toneFor(row.slug),
     is_featured: row.is_featured,
+    profile_image_url: row.profile_image_url ?? null,
+    cover_image_url: row.cover_image_url ?? null,
   };
 }
 
@@ -120,6 +122,9 @@ function toRiderProfile(
     mark: markFromName(row.display_name),
     tone: toneFor(row.slug),
     is_featured: row.is_featured,
+    profile_image_url: row.profile_image_url ?? null,
+    cover_image_url: row.cover_image_url ?? null,
+    bike_image_url: row.bike_image_url ?? null,
     previous: neighbor(previous),
     next: neighbor(next),
   };

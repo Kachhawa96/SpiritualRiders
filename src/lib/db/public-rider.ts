@@ -56,6 +56,9 @@ export const publicRiderRowSchema = z.object({
   website_url: z.string().nullable(),
   is_featured: z.boolean(),
   is_active: z.boolean(),
+  profile_image_url: z.string().nullable().optional(),
+  cover_image_url: z.string().nullable().optional(),
+  bike_image_url: z.string().nullable().optional(),
 });
 
 export type PublicRiderRow = z.infer<typeof publicRiderRowSchema>;
