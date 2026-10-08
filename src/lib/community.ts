@@ -2,7 +2,12 @@
  * Public rides and gallery. Participant rows only carry name, slug, and position.
  */
 
-import { loadGallery, loadParticipants, loadRides } from "@/lib/db/community";
+import {
+  loadCommunityHeroImage,
+  loadGallery,
+  loadParticipants,
+  loadRides,
+} from "@/lib/db/community";
 import { RIDE_STATUS_LABEL, RIDE_TYPE_LABEL } from "@/lib/ride-labels";
 import { positionLabel } from "@/lib/riders";
 import type { PublicGalleryRow, PublicRideRow } from "@/lib/db/community-schema";
@@ -127,4 +132,8 @@ export async function getGallery(): Promise<GalleryFrame[]> {
   return rows
     .map(toFrame)
     .sort((a, b) => (b.taken_on ?? "").localeCompare(a.taken_on ?? ""));
+}
+
+export async function getHeroImageUrl(): Promise<string | null> {
+  return loadCommunityHeroImage();
 }

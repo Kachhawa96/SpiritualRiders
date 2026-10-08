@@ -18,9 +18,21 @@ export const metadata: Metadata = {
   description: SITE_CONFIG.description,
 };
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ notice?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const showClosedNotice = resolvedParams?.notice === "onboarding-closed";
+
   return (
     <>
+      {showClosedNotice && (
+        <div className="relative z-30 border-b border-gold-500/30 bg-obsidian-900/90 px-4 py-3 text-center text-xs text-graphite-300">
+          <span className="font-semibold text-gold-400">Notice:</span> Profile onboarding is currently closed. Contact leadership if you need assistance.
+        </div>
+      )}
       <Hero />
       <CommunityIntro />
       <Stats />
@@ -34,3 +46,4 @@ export default function HomePage() {
     </>
   );
 }
+

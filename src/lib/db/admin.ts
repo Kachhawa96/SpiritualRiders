@@ -563,6 +563,8 @@ export async function getCommunitySettings(): Promise<AdminCommunitySettings> {
     instagram_url: SOCIAL_LINKS.instagram ?? "",
     facebook_url: SOCIAL_LINKS.facebook ?? "",
     youtube_url: SOCIAL_LINKS.youtube ?? "",
+    hero_image_url: null,
+    onboarding_enabled: false,
   };
 
   const supabase = await getAdminDbClient();
@@ -602,6 +604,8 @@ export async function updateCommunitySettings(
       instagram_url: parsed.instagram_url || null,
       facebook_url: parsed.facebook_url || null,
       youtube_url: parsed.youtube_url || null,
+      hero_image_url: parsed.hero_image_url || null,
+      onboarding_enabled: Boolean(parsed.onboarding_enabled),
       updated_at: new Date().toISOString(),
     })
     .select("*")
@@ -613,6 +617,7 @@ export async function updateCommunitySettings(
 
   return parsed;
 }
+
 
 // ── Dashboard Metrics ─────────────────────────────────────────────────────────
 

@@ -66,3 +66,21 @@ export async function loadGallery(): Promise<PublicGalleryRow[]> {
   if (error) throw new Error(`Could not read gallery_public: ${error.message}`);
   return publicGalleryRowSchema.array().parse(data ?? []);
 }
+
+export async function loadCommunityHeroImage(): Promise<string | null> {
+  if (!hasSupabaseEnv()) return null;
+  const supabase = createAnonServerClient();
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from("community_settings")
+      .select("hero_image_url")
+      .eq("id", "default")
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return (data.hero_image_url as string) || null;
+  } catch {
+    return null;
+  }
+}
