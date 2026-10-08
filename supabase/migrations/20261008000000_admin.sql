@@ -38,6 +38,8 @@ alter table public.rides add column if not exists cover_image_url text;
 
 alter table public.gallery_items add column if not exists image_url text;
 
+alter table public.community_settings add column if not exists hero_image_url text;
+
 -- 3. Grants on base tables for authenticated administrators
 grant select, insert, update, delete on table public.riders to authenticated;
 grant select, insert, update, delete on table public.rides to authenticated;

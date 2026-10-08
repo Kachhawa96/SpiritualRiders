@@ -12,10 +12,12 @@ interface AdminNavProps {
 const NAV_LINKS = [
   { href: "/admin", label: "Overview", exact: true },
   { href: "/admin/riders", label: "Riders" },
+  { href: "/admin/onboarding", label: "Onboarding" },
   { href: "/admin/rides", label: "Rides" },
   { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/settings", label: "Settings" },
 ];
+
 
 export function AdminNav({ userEmail }: AdminNavProps) {
   const pathname = usePathname();

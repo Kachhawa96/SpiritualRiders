@@ -2,7 +2,21 @@ import { getCommunitySettings } from "@/lib/db/admin";
 import { SettingsForm } from "@/components/admin/SettingsForm";
 
 export default async function AdminSettingsPage() {
-  const settings = await getCommunitySettings();
+  let settings;
+  try {
+    settings = await getCommunitySettings();
+  } catch {
+    settings = {
+      name: "Spiritual Riders",
+      tagline: "Riders. Spirit. Brotherhood.",
+      description: "A premium motorcycle brotherhood built on passion, respect, and the open road.",
+      email: "contact@spiritualriders.in",
+      founded_year: 2020,
+      hero_image_url: null,
+      onboarding_enabled: false,
+    };
+  }
+
 
   return (
     <div className="space-y-6">

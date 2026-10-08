@@ -166,6 +166,9 @@ export const adminCommunitySettingsSchema = z.object({
   instagram_url: z.string().nullable().optional(),
   facebook_url: z.string().nullable().optional(),
   youtube_url: z.string().nullable().optional(),
+  hero_image_url: z.string().nullable().optional(),
+  onboarding_enabled: z.boolean().default(false),
 });
 
 export type AdminCommunitySettings = z.infer<typeof adminCommunitySettingsSchema>;
+

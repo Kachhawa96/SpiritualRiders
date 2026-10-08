@@ -451,6 +451,13 @@ export async function saveSettingsAction(
     const instagram_url = (formData.get("instagram_url") as string)?.trim() || "";
     const facebook_url = (formData.get("facebook_url") as string)?.trim() || "";
     const youtube_url = (formData.get("youtube_url") as string)?.trim() || "";
+    let hero_image_url = (formData.get("hero_image_url") as string)?.trim() || null;
+    const onboarding_enabled = formData.get("onboarding_enabled") === "on";
+
+    const heroImageFile = formData.get("hero_image_file") as File | null;
+    if (heroImageFile && heroImageFile.size > 0) {
+      hero_image_url = await uploadAdminImage(heroImageFile, "hero", 5);
+    }
 
     await updateCommunitySettings({
       name,
@@ -461,9 +468,13 @@ export async function saveSettingsAction(
       instagram_url,
       facebook_url,
       youtube_url,
+      hero_image_url,
+      onboarding_enabled,
     });
 
     revalidatePath("/admin/settings");
+    revalidatePath("/admin/onboarding");
+    revalidatePath("/onboard");
     revalidatePath("/");
     revalidatePath("/about");
 
@@ -475,3 +486,4 @@ export async function saveSettingsAction(
     };
   }
 }
+
