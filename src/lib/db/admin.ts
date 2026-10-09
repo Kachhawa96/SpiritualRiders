@@ -566,6 +566,7 @@ export async function getCommunitySettings(): Promise<AdminCommunitySettings> {
     facebook_url: SOCIAL_LINKS.facebook ?? "",
     youtube_url: SOCIAL_LINKS.youtube ?? "",
     hero_image_url: null,
+    logo_image_url: null,
     onboarding_enabled: false,
   };
 
@@ -607,6 +608,7 @@ export async function updateCommunitySettings(
       facebook_url: parsed.facebook_url || null,
       youtube_url: parsed.youtube_url || null,
       hero_image_url: parsed.hero_image_url || null,
+      logo_image_url: parsed.logo_image_url || null,
       onboarding_enabled: Boolean(parsed.onboarding_enabled),
       updated_at: new Date().toISOString(),
     })

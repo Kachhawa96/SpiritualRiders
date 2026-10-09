@@ -461,11 +461,17 @@ export async function saveSettingsAction(
     const facebook_url = (formData.get("facebook_url") as string)?.trim() || "";
     const youtube_url = (formData.get("youtube_url") as string)?.trim() || "";
     let hero_image_url = (formData.get("hero_image_url") as string)?.trim() || null;
+    let logo_image_url = (formData.get("logo_image_url") as string)?.trim() || null;
     const onboarding_enabled = formData.get("onboarding_enabled") === "on";
 
     const heroImageFile = formData.get("hero_image_file") as File | null;
     if (heroImageFile && heroImageFile.size > 0) {
       hero_image_url = await uploadAdminImage(heroImageFile, "hero", 5);
+    }
+
+    const logoImageFile = formData.get("logo_image_file") as File | null;
+    if (logoImageFile && logoImageFile.size > 0) {
+      logo_image_url = await uploadAdminImage(logoImageFile, "brand", 5);
     }
 
     await updateCommunitySettings({
@@ -478,6 +484,7 @@ export async function saveSettingsAction(
       facebook_url,
       youtube_url,
       hero_image_url,
+      logo_image_url,
       onboarding_enabled,
     });
 

@@ -23,7 +23,7 @@ export async function Footer({ settings: initialSettings }: FooterProps = {}) {
       <div className="divider-gold" aria-hidden="true" />
       <div className="container-site grid gap-14 py-16 md:grid-cols-12 md:py-20">
         <div className="md:col-span-5">
-          <BrandMark />
+          <BrandMark logoUrl={settings.logo_image_url} />
           <p className="mt-6 max-w-sm text-sm leading-relaxed">
             {settings.description || SITE_CONFIG.description}
           </p>

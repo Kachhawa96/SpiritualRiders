@@ -16,6 +16,39 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     initialSettings.hero_image_url ?? ""
   );
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [logoImageUrl, setLogoImageUrl] = useState<string>(
+    initialSettings.logo_image_url ?? ""
+  );
+  const [logoFilePreview, setLogoFilePreview] = useState<string | null>(null);
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setLogoFilePreview(null);
+      return;
+    }
+
+    const maxMb = 5;
+    if (file.size > maxMb * 1024 * 1024) {
+      setErrorMessage(
+        `Selected logo is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
+      );
+      e.target.value = "";
+      setLogoFilePreview(null);
+      return;
+    }
+
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/svg+xml"];
+    if (!allowed.includes(file.type)) {
+      setErrorMessage(`Invalid logo format (${file.type}). Allowed: PNG, SVG, WebP, JPG, AVIF.`);
+      e.target.value = "";
+      setLogoFilePreview(null);
+      return;
+    }
+
+    setErrorMessage(null);
+    setLogoFilePreview(URL.createObjectURL(file));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,7 +90,17 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     if (file && file.size > 5 * 1024 * 1024) {
       setErrorMessage(
-        `Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
+        `Selected hero image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
+      );
+      return;
+    }
+
+    const logoInput = form.elements.namedItem("logo_image_file") as HTMLInputElement | null;
+    const logoFile = logoInput?.files?.[0];
+
+    if (logoFile && logoFile.size > 5 * 1024 * 1024) {
+      setErrorMessage(
+        `Selected logo is ${(logoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
       );
       return;
     }
@@ -71,6 +114,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           setSuccessMessage("Community settings updated successfully.");
           if (fileInput) fileInput.value = "";
           setFilePreview(null);
+          if (logoInput) logoInput.value = "";
+          setLogoFilePreview(null);
         } else {
           setErrorMessage(res.error || "Failed to update settings.");
         }
@@ -171,6 +216,121 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               defaultValue={initialSettings.description}
               className="mt-1.5 w-full rounded-sm border border-charcoal-500 bg-obsidian-950 px-3 py-2 text-xs leading-relaxed text-ivory-100 focus:border-gold-500 focus:outline-none"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Official Brand Logo */}
+      <div className="rounded-sm border border-charcoal-600 bg-obsidian-900/40 p-6">
+        <div className="border-b border-charcoal-700 pb-3">
+          <h2 className="font-display text-lg font-bold text-ivory-100">
+            Brand Logo
+          </h2>
+          <p className="mt-1 text-xs text-graphite-300">
+            Upload the official emblem/logo image for Spiritual Riders. Displays in the header, mobile drawer, footer, and admin navigation.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          <div className="flex flex-wrap items-center gap-3 rounded-sm border border-gold-500/30 bg-gold-500/5 px-4 py-3 text-xs text-graphite-300">
+            <span className="font-semibold uppercase tracking-wider text-gold-400">
+              Recommended:
+            </span>
+            <span>Transparent PNG or SVG</span>
+            <span>·</span>
+            <span>Square or Horizontal</span>
+            <span>·</span>
+            <span>Max 5MB</span>
+          </div>
+
+          {/* Logo Preview */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex size-20 items-center justify-center rounded-sm border border-charcoal-600 bg-obsidian-950 p-2 shadow-inner">
+              {logoFilePreview || logoImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={logoFilePreview || logoImageUrl}
+                  alt="Brand Logo Preview"
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <span className="grid size-12 place-items-center border border-gold-500/70 font-display text-sm font-bold tracking-[0.14em] text-gold-400">
+                  SR
+                </span>
+              )}
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ivory-100">
+                {logoFilePreview
+                  ? "● Pending Upload (Click Save Below)"
+                  : logoImageUrl
+                    ? "✓ Active Custom Logo"
+                    : "Default Procedural 'SR' Badge"}
+              </span>
+              <p className="text-[0.7rem] text-graphite-400">
+                {logoFilePreview || logoImageUrl
+                  ? "This logo is rendered in the global navigation bar and brand marks."
+                  : 'No custom image uploaded yet. The site is currently using the stylized gold "SR" badge.'}
+              </p>
+              <div className="flex items-center gap-4 pt-1">
+                {logoFilePreview ? (
+                  <button
+                    type="button"
+                    onClick={() => setLogoFilePreview(null)}
+                    className="cursor-pointer text-xs text-graphite-400 hover:text-ivory-100"
+                  >
+                    ✕ Cancel new selection
+                  </button>
+                ) : null}
+                {logoImageUrl && !logoFilePreview ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLogoImageUrl("");
+                      setLogoFilePreview(null);
+                    }}
+                    className="cursor-pointer text-xs text-red-400 hover:text-red-300"
+                  >
+                    ✕ Remove logo (revert to &apos;SR&apos; badge)
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {/* File Upload and URL inputs */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                Upload Logo File
+              </label>
+              <input
+                type="file"
+                name="logo_image_file"
+                accept="image/png,image/svg+xml,image/webp,image/jpeg,image/avif"
+                onChange={handleLogoFileChange}
+                className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
+              />
+              <p className="mt-2 text-[0.65rem] text-graphite-400">
+                Direct upload to Supabase storage (<code className="text-gold-400">rider-media/brand</code>).
+              </p>
+            </div>
+
+            <div className="rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                Or Direct Logo URL
+              </label>
+              <input
+                name="logo_image_url"
+                value={logoImageUrl}
+                onChange={(e) => setLogoImageUrl(e.target.value)}
+                placeholder="https://..."
+                className="mt-2 w-full rounded-sm border border-charcoal-500 bg-obsidian-900 px-3 py-2 text-xs text-ivory-100 focus:border-gold-500 focus:outline-none"
+              />
+              <p className="mt-2 text-[0.65rem] text-graphite-400">
+                Paste an external image link or keep existing storage URL.
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -101,6 +101,7 @@ export default async function RootLayout({
         <AppShell
           footer={<Footer settings={settings} />}
           contactInfo={{ email: settings.email, tagline: settings.tagline }}
+          logoUrl={settings.logo_image_url}
         >
           {children}
         </AppShell>

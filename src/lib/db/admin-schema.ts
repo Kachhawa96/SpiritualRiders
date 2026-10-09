@@ -171,6 +171,7 @@ export const adminCommunitySettingsSchema = z.object({
   facebook_url: z.string().nullable().optional(),
   youtube_url: z.string().nullable().optional(),
   hero_image_url: z.string().nullable().optional(),
+  logo_image_url: z.string().nullable().optional(),
   onboarding_enabled: z.boolean().default(false),
 });
 

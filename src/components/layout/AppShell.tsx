@@ -15,9 +15,10 @@ interface AppShellProps {
     email?: string;
     tagline?: string;
   };
+  logoUrl?: string | null;
 }
 
-export function AppShell({ children, footer, contactInfo }: AppShellProps) {
+export function AppShell({ children, footer, contactInfo, logoUrl }: AppShellProps) {
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
@@ -55,6 +56,7 @@ export function AppShell({ children, footer, contactInfo }: AppShellProps) {
         menuId={menuId}
         onMenuOpen={openMenu}
         inert={open}
+        logoUrl={logoUrl}
       />
       <AnimatePresence>
         {open ? (
@@ -64,6 +66,7 @@ export function AppShell({ children, footer, contactInfo }: AppShellProps) {
             onClose={closeMenu}
             email={contactInfo?.email}
             tagline={contactInfo?.tagline}
+            logoUrl={logoUrl}
           />
         ) : null}
       </AnimatePresence>

@@ -16,9 +16,10 @@ interface MobileNavProps {
   onClose: () => void;
   email?: string;
   tagline?: string;
+  logoUrl?: string | null;
 }
 
-export function MobileNav({ id, onClose, email, tagline }: MobileNavProps) {
+export function MobileNav({ id, onClose, email, tagline, logoUrl }: MobileNavProps) {
   const titleId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -83,7 +84,7 @@ export function MobileNav({ id, onClose, email, tagline }: MobileNavProps) {
                 ×
               </span>
             </button>
-            <BrandMark compact className="order-1" />
+            <BrandMark compact logoUrl={logoUrl} className="order-1" />
           </div>
 
           <nav className="mt-12 flex-1 overflow-y-auto" aria-label="Mobile">
