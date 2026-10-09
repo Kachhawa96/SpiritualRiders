@@ -9,7 +9,7 @@ export function FinalCta() {
       <Container variant="narrow" className="text-center">
         <Reveal>
           <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">
-            The open road
+            Get in touch
           </p>
           <h2 className="mt-5 font-medium">Ride with the crew.</h2>
           <p className="mx-auto mt-5 max-w-lg text-base md:text-lg">
