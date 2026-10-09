@@ -27,6 +27,7 @@ import type {
 } from "@/lib/db/admin-schema";
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
+import { calculateAgeFromDob } from "@/lib/date-utils";
 
 export interface ActionResult {
   success: boolean;
@@ -89,8 +90,15 @@ export async function saveRiderAction(
     const bike_year = Number(formData.get("bike_year"));
     const bike_color = (formData.get("bike_color") as string)?.trim() || null;
 
+    const date_of_birth = (formData.get("date_of_birth") as string)?.trim() || null;
     const ageRaw = formData.get("age") as string;
-    const age = ageRaw ? Number(ageRaw) : null;
+    let age = ageRaw ? Number(ageRaw) : null;
+    if (date_of_birth) {
+      const calculatedAge = calculateAgeFromDob(date_of_birth);
+      if (calculatedAge !== null) {
+        age = calculatedAge;
+      }
+    }
     const blood_group = (formData.get("blood_group") as string)
       ? (formData.get("blood_group") as z.infer<typeof adminBloodSchema>)
       : null;
@@ -155,6 +163,7 @@ export async function saveRiderAction(
       bike_variant,
       bike_year,
       bike_color,
+      date_of_birth,
       age,
       blood_group,
       city,

@@ -47,6 +47,7 @@ export const onboardingSubmissionInputSchema = z.object({
   bike_color: z.string().nullable().optional(),
 
   // Personal
+  date_of_birth: z.string().min(10).nullable().optional(),
   age: z.number().int().min(16).max(100).nullable().optional(),
   blood_group: adminBloodSchema.nullable().optional(),
   city: z.string().nullable().optional(),
@@ -101,6 +102,7 @@ export interface OnboardingSubmissionRecord {
   bike_variant: string | null;
   bike_year: number;
   bike_color: string | null;
+  date_of_birth: string | null;
   age: number | null;
   blood_group: z.infer<typeof adminBloodSchema> | null;
   city: string | null;
@@ -108,6 +110,7 @@ export interface OnboardingSubmissionRecord {
   show_blood_group: boolean;
   show_city: boolean;
   show_social_links: boolean;
+
   riding_since: number | null;
   riding_style: Array<z.infer<typeof adminRidingStyleSchema>>;
   favorite_route: string | null;

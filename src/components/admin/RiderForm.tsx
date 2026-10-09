@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AdminRiderRecord } from "@/lib/db/admin-schema";
 import { saveRiderAction } from "@/app/admin/actions";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { calculateAgeFromDob } from "@/lib/date-utils";
 
 interface RiderFormProps {
   initialData?: AdminRiderRecord | null;
@@ -45,6 +47,21 @@ export function RiderForm({ initialData }: RiderFormProps) {
   const [selectedStyles, setSelectedStyles] = useState<string[]>(
     initialData?.riding_style ?? []
   );
+
+  const [dob, setDob] = useState<string>(initialData?.date_of_birth ?? "");
+  const [calculatedAge, setCalculatedAge] = useState<number | null>(
+    initialData?.date_of_birth
+      ? calculateAgeFromDob(initialData.date_of_birth)
+      : initialData?.age ?? null
+  );
+
+  const handleDobChange = (val: string) => {
+    setDob(val);
+    const calculated = calculateAgeFromDob(val);
+    if (calculated !== null) {
+      setCalculatedAge(calculated);
+    }
+  };
 
   const isEditing = Boolean(initialData?.id);
 
@@ -172,17 +189,19 @@ export function RiderForm({ initialData }: RiderFormProps) {
             <label className="block text-xs uppercase tracking-wider text-graphite-300">
               Date Joined *
             </label>
-            <input
-              name="joined_date"
-              type="date"
-              required
-              defaultValue={
-                initialData?.joined_date
-                  ? initialData.joined_date.slice(0, 10)
-                  : new Date().toISOString().slice(0, 10)
-              }
-              className="mt-1.5 w-full rounded-sm border border-charcoal-500 bg-obsidian-950 px-3 py-2 text-xs text-ivory-100 focus:border-gold-500 focus:outline-none"
-            />
+            <div className="mt-1.5">
+              <DatePicker
+                name="joined_date"
+                required
+                defaultValue={
+                  initialData?.joined_date
+                    ? initialData.joined_date.slice(0, 10)
+                    : new Date().toISOString().slice(0, 10)
+                }
+                minYear={1990}
+                maxYear={new Date().getFullYear() + 1}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -299,20 +318,33 @@ export function RiderForm({ initialData }: RiderFormProps) {
             </label>
           </div>
 
-          {/* Age */}
+          {/* Date of Birth & Age */}
           <div className="rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
-            <label className="block text-xs uppercase tracking-wider text-graphite-300">
-              Age
-            </label>
-            <input
-              name="age"
-              type="number"
-              min="18"
-              max="99"
-              defaultValue={initialData?.age ?? ""}
-              placeholder="e.g. 38"
-              className="mt-1.5 w-full rounded-sm border border-charcoal-500 bg-obsidian-900 px-3 py-2 text-xs text-ivory-100 focus:border-gold-500 focus:outline-none"
-            />
+            <div className="flex items-center justify-between">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                Date of Birth
+              </label>
+              {dob && calculatedAge !== null && (
+                <span className="text-[0.7rem] font-mono font-bold text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded-xs border border-gold-500/30">
+                  Age: {calculatedAge} yrs
+                </span>
+              )}
+            </div>
+            <div className="mt-1.5">
+              <DatePicker
+                name="date_of_birth"
+                defaultValue={initialData?.date_of_birth ?? ""}
+                onChange={handleDobChange}
+                placeholder="Select date of birth"
+                maxDate={new Date().toISOString().slice(0, 10)}
+                minYear={1930}
+                maxYear={new Date().getFullYear()}
+              />
+            </div>
+            <input type="hidden" name="age" value={calculatedAge ?? initialData?.age ?? ""} />
+            <p className="mt-2 text-[0.68rem] text-graphite-400">
+              Private field. Age is calculated automatically from birth date.
+            </p>
             <label className="mt-3 flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"

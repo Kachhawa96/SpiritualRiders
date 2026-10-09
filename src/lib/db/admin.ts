@@ -146,9 +146,11 @@ export async function createAdminRider(
       community_position: parsed.community_position,
       bio: parsed.bio,
       short_bio: parsed.short_bio,
+      date_of_birth: parsed.date_of_birth || null,
       age: parsed.age ?? null,
       blood_group: parsed.blood_group ?? null,
       city: parsed.city ?? null,
+
       show_age: parsed.show_age,
       show_blood_group: parsed.show_blood_group,
       show_city: parsed.show_city,

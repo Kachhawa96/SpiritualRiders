@@ -9,6 +9,7 @@ import {
   approveSubmissionAction,
   rejectSubmissionAction,
 } from "@/app/admin/onboarding/actions";
+import { formatDeterministicDateTime } from "@/lib/date-utils";
 
 interface SubmissionReviewProps {
   submission: OnboardingSubmissionRecord;
@@ -99,23 +100,23 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
           <h2 className="mt-2 font-display text-2xl font-bold text-ivory-100">
             {submission.display_name}
           </h2>
-          <p className="text-xs text-graphite-300">
-            Submitted on {new Date(submission.created_at).toLocaleString()}
+          <p className="text-xs text-graphite-300" suppressHydrationWarning>
+            Submitted on {formatDeterministicDateTime(submission.created_at)}
             {submission.contact_email ? ` · Contact: ${submission.contact_email}` : ""}
             {submission.submitter_ip ? ` · IP: ${submission.submitter_ip}` : ""}
           </p>
 
           {submission.status === "approved" && submission.reviewed_at && (
-            <p className="mt-2 text-xs text-green-400">
+            <p className="mt-2 text-xs text-green-400" suppressHydrationWarning>
               ✓ Approved by <span className="font-semibold">{submission.reviewer_email || "Admin"}</span> on{" "}
-              {new Date(submission.reviewed_at).toLocaleString()}
+              {formatDeterministicDateTime(submission.reviewed_at)}
             </p>
           )}
 
           {submission.status === "rejected" && (
-            <div className="mt-2 text-xs text-red-400">
+            <div className="mt-2 text-xs text-red-400" suppressHydrationWarning>
               ✕ Rejected by <span className="font-semibold">{submission.reviewer_email || "Admin"}</span> on{" "}
-              {submission.reviewed_at ? new Date(submission.reviewed_at).toLocaleString() : "N/A"}
+              {submission.reviewed_at ? formatDeterministicDateTime(submission.reviewed_at) : "N/A"}
               {submission.reviewer_notes && (
                 <div className="mt-1 rounded-sm border border-red-900/50 bg-red-950/30 p-2 text-xs text-red-300">
                   Notes: {submission.reviewer_notes}
@@ -230,8 +231,10 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
                   { label: "Bike Year", live: liveRider.bike_year, sub: submission.bike_year },
                   { label: "Bike Color", live: liveRider.bike_color || "—", sub: submission.bike_color || "—" },
                   { label: "City", live: liveRider.city || "—", sub: submission.city || "—" },
+                  { label: "Date of Birth", live: liveRider.date_of_birth || "—", sub: submission.date_of_birth || "—" },
                   { label: "Age", live: liveRider.age ?? "—", sub: submission.age ?? "—" },
                   { label: "Blood Group", live: liveRider.blood_group || "—", sub: submission.blood_group || "—" },
+
                   { label: "Riding Since", live: liveRider.riding_since ?? "—", sub: submission.riding_since ?? "—" },
                   { label: "Favorite Route", live: liveRider.favorite_route || "—", sub: submission.favorite_route || "—" },
                   {
@@ -437,6 +440,12 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
                   </p>
                 </div>
                 <div>
+                  <span className="text-graphite-400">Date of Birth:</span>
+                  <p className="font-semibold text-ivory-100">
+                    {submission.date_of_birth || "—"}
+                  </p>
+                </div>
+                <div>
                   <span className="text-graphite-400">Age:</span>
                   <p className="text-ivory-100">
                     {submission.age || "—"}{" "}
@@ -445,6 +454,7 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
                     </span>
                   </p>
                 </div>
+
                 <div>
                   <span className="text-graphite-400">Blood Group:</span>
                   <p className="text-ivory-100">

@@ -6,6 +6,7 @@
 import { createAnonServerClient, hasSupabaseEnv } from "@/lib/db/client";
 import { getAdminDbClient } from "@/lib/auth/server";
 import { validateImageFile } from "@/lib/db/admin";
+import { calculateAgeFromDob } from "@/lib/date-utils";
 import {
   onboardingSubmissionInputSchema,
   slugify,
@@ -13,6 +14,7 @@ import {
   type SubmissionStatus,
 } from "@/lib/db/onboarding-schema";
 import type { AdminRiderRecord } from "@/lib/db/admin-schema";
+
 
 // ── Feature Toggle Check ───────────────────────────────────────────────────────
 
@@ -185,9 +187,11 @@ export async function submitRiderProfile(
     bike_variant: parsed.bike_variant || null,
     bike_year: parsed.bike_year,
     bike_color: parsed.bike_color || null,
-    age: parsed.age ?? null,
+    date_of_birth: parsed.date_of_birth || null,
+    age: (parsed.date_of_birth ? calculateAgeFromDob(parsed.date_of_birth) : parsed.age) ?? null,
     blood_group: parsed.blood_group || null,
     city: parsed.city || null,
+
     show_age: parsed.show_age,
     show_blood_group: parsed.show_blood_group,
     show_city: parsed.show_city,
@@ -317,8 +321,10 @@ export async function getLiveRiderForPrefill(
         bike_variant: pubData.bike_variant ?? null,
         bike_year: pubData.bike_year,
         bike_color: pubData.bike_color ?? null,
+        date_of_birth: pubData.date_of_birth ?? null,
         age: pubData.age ?? null,
         blood_group: pubData.blood_group ?? null,
+
         city: pubData.city ?? null,
         show_age: Boolean(pubData.age),
         show_blood_group: Boolean(pubData.blood_group),
@@ -467,9 +473,11 @@ export async function approveSubmission(
     bike_variant: sub.bike_variant || null,
     bike_year: sub.bike_year,
     bike_color: sub.bike_color || null,
-    age: sub.age ?? null,
+    date_of_birth: sub.date_of_birth || null,
+    age: (sub.date_of_birth ? calculateAgeFromDob(sub.date_of_birth) : sub.age) ?? null,
     blood_group: sub.blood_group || null,
     city: sub.city || null,
+
     show_age: sub.show_age,
     show_blood_group: sub.show_blood_group,
     show_city: sub.show_city,
