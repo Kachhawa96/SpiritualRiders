@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: "/admin/onboarding", label: "Onboarding" },
   { href: "/admin/rides", label: "Rides" },
   { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/messages", label: "Inquiries" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
@@ -24,6 +25,12 @@ const NAV_LINKS = [
 export function AdminNav({ userEmail, logoUrl }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isSvg = Boolean(
+    logoUrl &&
+      (logoUrl.toLowerCase().includes(".svg") ||
+        logoUrl.toLowerCase().includes("image/svg+xml"))
+  );
 
   function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
@@ -47,6 +54,7 @@ export function AdminNav({ userEmail, logoUrl }: AdminNavProps) {
                   fill
                   sizes="32px"
                   className="object-contain"
+                  unoptimized={isSvg}
                 />
               </div>
             ) : null}

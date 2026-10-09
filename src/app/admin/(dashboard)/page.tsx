@@ -37,11 +37,17 @@ export default async function AdminDashboardPage() {
           >
             + Upload Frame
           </Link>
+          <Link
+            href="/admin/messages"
+            className="cursor-pointer rounded-sm border border-charcoal-500 bg-charcoal-700/60 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ivory-100 transition-colors hover:border-gold-500 hover:text-gold-400"
+          >
+            Inquiries {stats.messages.unread > 0 ? `(${stats.messages.unread})` : ""}
+          </Link>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {/* Riders metric */}
         <div className="rounded-sm border border-charcoal-600 bg-obsidian-900/60 p-5">
           <div className="flex items-center justify-between">
@@ -106,6 +112,38 @@ export default async function AdminDashboardPage() {
           <p className="mt-2 text-xs text-graphite-300">
             Photographs and moments on record
           </p>
+        </div>
+
+        {/* Inquiries metric */}
+        <div className="rounded-sm border border-charcoal-600 bg-obsidian-900/60 p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.68rem] font-medium uppercase tracking-[0.22em] text-graphite-300">
+              Inquiries
+            </span>
+            {stats.messages.unread > 0 ? (
+              <span className="rounded-xs border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[0.62rem] font-semibold text-amber-400">
+                {stats.messages.unread} Unread
+              </span>
+            ) : (
+              <span className="rounded-xs bg-charcoal-700 px-1.5 py-0.5 text-[0.62rem] font-semibold text-graphite-400">
+                Desk
+              </span>
+            )}
+          </div>
+          <p className="mt-3 font-display text-3xl font-bold text-ivory-100">
+            {stats.messages.total}
+          </p>
+          <div className="mt-2 flex items-center justify-between text-xs text-graphite-300">
+            <span>
+              <strong className="text-gold-400">{stats.messages.unread}</strong> pending attention
+            </span>
+            <Link
+              href="/admin/messages"
+              className="text-[0.68rem] font-medium uppercase tracking-wider text-gold-400 hover:underline"
+            >
+              View →
+            </Link>
+          </div>
         </div>
 
         {/* Security & Access */}
@@ -247,6 +285,67 @@ export default async function AdminDashboardPage() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Recent Contact Inquiries */}
+      <div className="rounded-sm border border-charcoal-600 bg-obsidian-900/40 p-6">
+        <div className="flex items-center justify-between border-b border-charcoal-700 pb-4">
+          <div>
+            <h2 className="font-display text-xl font-bold tracking-wide text-ivory-100">
+              Recent Inquiries
+            </h2>
+            <p className="mt-0.5 text-xs text-graphite-300">
+              Dispatches and messages submitted via the public contact desk
+            </p>
+          </div>
+          <Link
+            href="/admin/messages"
+            className="text-xs uppercase tracking-wider text-gold-400 hover:underline"
+          >
+            View All ({stats.messages.total}) →
+          </Link>
+        </div>
+
+        <div className="mt-4 divide-y divide-charcoal-700/60">
+          {stats.recentMessages.length === 0 ? (
+            <p className="py-6 text-center text-xs text-graphite-400">
+              No contact inquiries recorded yet.
+            </p>
+          ) : (
+            stats.recentMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className="flex items-center justify-between py-3.5"
+              >
+                <div className="min-w-0 pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium text-ivory-100">
+                      {msg.name}
+                    </p>
+                    {msg.status === "unread" && (
+                      <span className="rounded-xs border border-amber-500/40 bg-amber-950/40 px-1.5 py-0.2 text-[0.58rem] font-semibold uppercase tracking-wider text-amber-400">
+                        Unread
+                      </span>
+                    )}
+                    <span className="rounded-xs bg-charcoal-700 px-1.5 py-0.2 text-[0.58rem] font-semibold uppercase tracking-wider text-graphite-300">
+                      {msg.topic}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-graphite-300">
+                    <span className="text-gold-400">{msg.email}</span> • {msg.message}
+                  </p>
+                </div>
+
+                <Link
+                  href="/admin/messages"
+                  className="shrink-0 rounded-sm border border-charcoal-500 bg-charcoal-700/40 px-2.5 py-1 text-xs text-ivory-100 transition-colors hover:border-gold-500 hover:text-gold-400"
+                >
+                  View Desk
+                </Link>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

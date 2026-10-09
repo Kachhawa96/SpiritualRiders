@@ -38,9 +38,10 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       return;
     }
 
-    const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/svg+xml"];
-    if (!allowed.includes(file.type)) {
-      setErrorMessage(`Invalid logo format (${file.type}). Allowed: PNG, SVG, WebP, JPG, AVIF.`);
+    const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+    if (!allowed.includes(file.type) && !isSvg) {
+      setErrorMessage(`Invalid logo format (${file.type || "unknown"}). Allowed: SVG, PNG, WebP, JPG, AVIF.`);
       e.target.value = "";
       setLogoFilePreview(null);
       return;
@@ -307,7 +308,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               <input
                 type="file"
                 name="logo_image_file"
-                accept="image/png,image/svg+xml,image/webp,image/jpeg,image/avif"
+                accept="image/png,image/svg+xml,image/webp,image/jpeg,image/avif,.svg"
                 onChange={handleLogoFileChange}
                 className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
               />

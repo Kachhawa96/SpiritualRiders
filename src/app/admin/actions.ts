@@ -15,6 +15,8 @@ import {
   updateAdminRide,
   updateAdminRider,
   updateCommunitySettings,
+  updateContactMessageStatus,
+  deleteContactMessage,
   uploadAdminImage,
 } from "@/lib/db/admin";
 import type {
@@ -471,7 +473,7 @@ export async function saveSettingsAction(
 
     const logoImageFile = formData.get("logo_image_file") as File | null;
     if (logoImageFile && logoImageFile.size > 0) {
-      logo_image_url = await uploadAdminImage(logoImageFile, "brand", 5);
+      logo_image_url = await uploadAdminImage(logoImageFile, "brand", 5, true);
     }
 
     await updateCommunitySettings({
@@ -501,6 +503,43 @@ export async function saveSettingsAction(
     return {
       success: false,
       error: getErrorMessage(err, "Failed to update settings."),
+    };
+  }
+}
+
+// ── Contact Inquiries Actions ─────────────────────────────────────────────────
+
+export async function updateContactMessageStatusAction(
+  id: string,
+  status: "unread" | "read" | "archived"
+): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    await updateContactMessageStatus(id, status);
+    revalidatePath("/admin/messages");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(err, "Failed to update inquiry status."),
+    };
+  }
+}
+
+export async function deleteContactMessageAction(
+  id: string
+): Promise<ActionResult> {
+  try {
+    await requireAdmin();
+    await deleteContactMessage(id);
+    revalidatePath("/admin/messages");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(err, "Failed to delete inquiry."),
     };
   }
 }

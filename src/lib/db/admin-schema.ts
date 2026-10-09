@@ -177,3 +177,17 @@ export const adminCommunitySettingsSchema = z.object({
 
 export type AdminCommunitySettings = z.infer<typeof adminCommunitySettingsSchema>;
 
+// ── Contact Messages Schemas ──────────────────────────────────────────────────
+
+export const adminContactMessageSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string(),
+  topic: z.string(),
+  message: z.string(),
+  status: z.enum(["unread", "read", "archived"]),
+  created_at: z.string(),
+});
+
+export type AdminContactMessageRecord = z.infer<typeof adminContactMessageSchema>;
+

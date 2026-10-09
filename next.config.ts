@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   // Remote patterns will be added in Phase 6 when Supabase Storage is configured.
   // Cloudinary patterns can also be added here if needed.
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: "https",

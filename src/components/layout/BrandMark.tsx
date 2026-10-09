@@ -10,6 +10,12 @@ interface BrandMarkProps {
 }
 
 export function BrandMark({ compact = false, className, logoUrl }: BrandMarkProps) {
+  const isSvg = Boolean(
+    logoUrl &&
+      (logoUrl.toLowerCase().includes(".svg") ||
+        logoUrl.toLowerCase().includes("image/svg+xml"))
+  );
+
   return (
     <Link
       href="/"
@@ -25,6 +31,7 @@ export function BrandMark({ compact = false, className, logoUrl }: BrandMarkProp
             sizes="40px"
             className="object-contain"
             priority
+            unoptimized={isSvg}
           />
         </div>
       ) : (
