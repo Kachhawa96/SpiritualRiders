@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CommunityIntro } from "@/components/sections/home/CommunityIntro";
-import { FeaturedBikes } from "@/components/sections/home/FeaturedBikes";
+// import { FeaturedBikes } from "@/components/sections/home/FeaturedBikes";
 import { FeaturedRiders } from "@/components/sections/home/FeaturedRiders";
 import { FinalCta } from "@/components/sections/home/FinalCta";
 import { GalleryPreview } from "@/components/sections/home/GalleryPreview";
@@ -38,7 +38,11 @@ export default async function HomePage({
       <Stats />
       <FeaturedRiders />
       <Values />
-      <FeaturedBikes />
+      {/* 
+        'The machines' (Steel, held with care) section is disabled per user preference.
+        To re-enable in the future, simply uncomment the line below.
+      */}
+      {/* <FeaturedBikes /> */}
       <Timeline />
       <RideHighlight />
       <GalleryPreview />

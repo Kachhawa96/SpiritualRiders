@@ -83,8 +83,8 @@ export async function Hero({ heroImageUrl: propHeroImageUrl }: HeroProps = {}) {
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button href="#intro">Enter the chapter</Button>
-          <Button href="#machines" variant="outline">
-            The machines
+          <Button href="/riders" variant="outline">
+            The brotherhood
           </Button>
         </div>
         <a
