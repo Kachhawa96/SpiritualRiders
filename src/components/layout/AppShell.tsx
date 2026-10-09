@@ -36,6 +36,18 @@ export function AppShell({ children, footer, contactInfo }: AppShellProps) {
     setOpen(false);
   }, []);
 
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
+      <MotionConfig reducedMotion="user" transition={{ ease: EASE_OUT_EXPO }}>
+        <div id="main-content" className="flex flex-1 flex-col">
+          {children}
+        </div>
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: EASE_OUT_EXPO }}>
       <Header
