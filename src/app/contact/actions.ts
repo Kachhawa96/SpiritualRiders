@@ -6,7 +6,7 @@ import { createAnonServerClient, hasSupabaseEnv } from "@/lib/db/client";
 const contactMessageSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters.").max(100, "Name too long."),
   email: z.string().trim().email("Please enter a valid email address.").max(150),
-  topic: z.enum(["general", "rides", "chapter", "press", "other"]).default("general"),
+  topic: z.enum(["general", "rides", "sponsorship", "others", "chapter", "press", "other"]).default("general"),
   message: z.string().trim().min(10, "Message must be at least 10 characters.").max(3000, "Message is too long."),
 });
 

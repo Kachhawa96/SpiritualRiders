@@ -5,10 +5,10 @@ import { submitContactMessageAction } from "@/app/contact/actions";
 import { Button } from "@/components/ui/Button";
 
 const TOPICS = [
-  { id: "general", label: "General Brotherhood" },
+  { id: "general", label: "General" },
   { id: "rides", label: "Ride Invitations" },
-  { id: "chapter", label: "Chapter & Membership" },
-  { id: "press", label: "Press & Media" },
+  { id: "sponsorship", label: "Sponsorship" },
+  { id: "others", label: "Others" },
 ] as const;
 
 export function ContactForm() {
@@ -54,10 +54,10 @@ export function ContactForm() {
           </svg>
         </div>
         <h3 className="mt-5 font-display text-2xl font-bold text-ivory-100">
-          Dispatch Received
+          Message Sent
         </h3>
         <p className="mx-auto mt-3 max-w-md text-sm text-graphite-300">
-          Your message has reached Spiritual Riders leadership. We will answer directly to your email as soon as we dismount from the road.
+          Thank you for reaching out. We have received your message and will get back to your email as soon as possible.
         </p>
         <div className="mt-8">
           <Button
@@ -68,7 +68,7 @@ export function ContactForm() {
               setErrorMessage(null);
             }}
           >
-            Send another dispatch
+            Send another message
           </Button>
         </div>
       </div>
@@ -81,10 +81,10 @@ export function ContactForm() {
       className="rounded-sm border border-border-subtle bg-obsidian-900/40 p-6 sm:p-8"
     >
       <h2 className="font-display text-xl font-bold tracking-wide text-ivory-100">
-        Transmit a Message
+        Send a Message
       </h2>
       <p className="mt-1 text-xs text-graphite-300">
-        Leave your coordinates and words. The line will answer.
+        Fill out the details below and we will get back to you shortly.
       </p>
 
       {errorMessage && (
@@ -183,7 +183,7 @@ export function ContactForm() {
             disabled={isPending}
             className="w-full sm:w-auto"
           >
-            {isPending ? "Transmitting..." : "Send Dispatch"}
+            {isPending ? "Sending..." : "Send Message"}
           </Button>
         </div>
       </div>

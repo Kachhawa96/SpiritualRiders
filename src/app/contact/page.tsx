@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ContactForm } from "@/components/contact/ContactForm";
@@ -8,19 +7,19 @@ import { loadCommunitySettings } from "@/lib/community";
 import { SITE_CONFIG } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Contact — Connect with the Brotherhood",
+  title: "Contact — Spiritual Riders",
   description:
-    "Official communication dispatch for Spiritual Riders. Connect with chapter leadership, send ride invitations, or inquire about the brotherhood.",
+    "Get in touch with Spiritual Riders. Inquiries, ride invitations, sponsorships, and questions.",
 };
 
 export default async function ContactPage() {
   const settings = await loadCommunitySettings();
 
   const socials = [
-    { label: "Instagram", href: settings.instagram_url, handle: "@spiritualriders" },
-    { label: "Facebook", href: settings.facebook_url, handle: "Spiritual Riders Official" },
-    { label: "YouTube", href: settings.youtube_url, handle: "Spiritual Riders Media" },
-  ].filter((item): item is { label: string; href: string; handle: string } => Boolean(item.href));
+    { label: "Instagram", href: settings.instagram_url },
+    { label: "Facebook", href: settings.facebook_url },
+    { label: "YouTube", href: settings.youtube_url },
+  ].filter((item): item is { label: string; href: string } => Boolean(item.href));
 
   return (
     <div className="section-padding">
@@ -28,26 +27,26 @@ export default async function ContactPage() {
         {/* Header */}
         <Reveal>
           <SectionHeading
-            eyebrow="Communications & Dispatch"
-            title="The road is open."
-            subtitle="Whether you ride with an allied chapter, carry words for leadership, or seek counsel on the line, transmit your dispatch below."
+            eyebrow="Contact Us"
+            title="Get in touch."
+            subtitle="Have questions, want to ride with us, or discuss a sponsorship? Drop us a message or reach out directly."
           />
         </Reveal>
 
         {/* Content Grid */}
         <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-16">
-          {/* Left Column: Direct Channels & Chapter Presence */}
-          <div className="space-y-8 lg:col-span-5">
-            {/* Direct Dispatch Card */}
+          {/* Left Column: Direct Info */}
+          <div className="space-y-6 lg:col-span-5">
+            {/* Email Card */}
             <div className="rounded-sm border border-border-subtle bg-obsidian-900/40 p-6 sm:p-7">
               <span className="text-[0.68rem] uppercase tracking-[0.24em] text-gold-500">
-                Official Dispatch
+                Email
               </span>
               <h3 className="mt-2 font-display text-xl font-bold text-ivory-100">
-                Direct Line
+                Email Us
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-graphite-300">
-                For administrative communications, official chapter invitations, and urgent brotherhood matters.
+                Drop us an email for general questions, ride inquiries, or sponsorships.
               </p>
               <div className="mt-5">
                 <a
@@ -73,31 +72,31 @@ export default async function ContactPage() {
               </div>
             </div>
 
-            {/* Territory / Origin Card */}
+            {/* Location Card */}
             <div className="rounded-sm border border-border-subtle bg-obsidian-900/40 p-6 sm:p-7">
               <span className="text-[0.68rem] uppercase tracking-[0.24em] text-gold-500">
-                Territory & Base
+                Location
               </span>
               <h3 className="mt-2 font-display text-xl font-bold text-ivory-100">
-                Corridors of Ride
+                Our Location
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-graphite-300">
-                Originating from Jodhpur across the Thar desert highways, riding state corridors and nationwide mountain passes across India.
+                Based in Jodhpur, Rajasthan, with rides and expeditions across India.
               </p>
               <div className="mt-4 flex items-center gap-2 text-xs text-ivory-100">
                 <span className="size-2 rounded-full bg-gold-500" aria-hidden="true" />
-                <span>Rajasthan, India · Nationwide Expeditions</span>
+                <span>Jodhpur, Rajasthan, India</span>
               </div>
             </div>
 
-            {/* Social Channels (if configured in admin) */}
+            {/* Social Media Channels */}
             {socials.length > 0 ? (
               <div className="rounded-sm border border-border-subtle bg-obsidian-900/40 p-6 sm:p-7">
                 <span className="text-[0.68rem] uppercase tracking-[0.24em] text-gold-500">
-                  Brotherhood Media
+                  Social Media
                 </span>
                 <h3 className="mt-2 font-display text-xl font-bold text-ivory-100">
-                  Live Channels
+                  Follow Us
                 </h3>
                 <ul className="mt-4 space-y-3">
                   {socials.map((social) => (
@@ -120,33 +119,9 @@ export default async function ContactPage() {
                 </ul>
               </div>
             ) : null}
-
-            {/* Recruitment Callout (when onboarding portal is active) */}
-            {settings.onboarding_enabled ? (
-              <div className="rounded-sm border border-gold-500/30 bg-gold-500/5 p-6 sm:p-7">
-                <span className="text-[0.68rem] uppercase tracking-[0.24em] text-gold-400">
-                  Rider Roster Open
-                </span>
-                <h3 className="mt-2 font-display text-xl font-bold text-ivory-100">
-                  Seeking to Join the Crew?
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-graphite-300">
-                  Prospective riders can submit their machine specifications, riding experience, and bio directly through the dedicated onboarding portal.
-                </p>
-                <div className="mt-5">
-                  <Link
-                    href="/onboard"
-                    className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-gold-400 transition-colors hover:text-gold-300"
-                  >
-                    <span>Submit Rider Profile</span>
-                    <span>→</span>
-                  </Link>
-                </div>
-              </div>
-            ) : null}
           </div>
 
-          {/* Right Column: Interactive Dispatch Form */}
+          {/* Right Column: Contact Form */}
           <div className="lg:col-span-7">
             <ContactForm />
           </div>
