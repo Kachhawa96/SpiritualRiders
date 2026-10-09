@@ -7,6 +7,7 @@
 
 import { SITE_CONFIG } from "@/config/site";
 import { getDirectoryRiders } from "@/lib/riders";
+import { getRides, loadCommunitySettings } from "@/lib/community";
 
 export type FrameTone = "highway" | "machine" | "crew" | "dawn" | "salt" | "rain";
 
@@ -136,14 +137,43 @@ export const VALUES = [
   },
 ] as const;
 
-export function homeStats(): { label: string; value: number }[] {
+export interface HomeStat {
+  label: string;
+  value: number;
+}
+
+export async function getHomeStats(): Promise<HomeStat[]> {
+  const [riders, rides, settings] = await Promise.all([
+    getDirectoryRiders().catch(() => []),
+    getRides().catch(() => []),
+    loadCommunitySettings().catch(() => null),
+  ]);
+
+  const ridersCount = riders.length;
+  const machinesCount = riders.filter(
+    (r) => Boolean(r.bike_brand?.trim() || r.bike_model?.trim())
+  ).length;
+  const ridesCount = rides.length;
+  const currentYear = new Date().getFullYear();
+  const foundedYear = settings?.founded_year ?? SITE_CONFIG.foundedYear;
+  const yearsCount = Math.max(1, currentYear - foundedYear);
+
   return [
-    { label: "Riders", value: 48 },
-    { label: "Machines", value: 52 },
-    { label: "Rides", value: 86 },
+    { label: "Riders", value: ridersCount },
+    { label: "Machines", value: machinesCount },
+    { label: "Rides", value: ridesCount },
+    { label: "Years", value: yearsCount },
+  ];
+}
+
+export function homeStats(): HomeStat[] {
+  return [
+    { label: "Riders", value: 0 },
+    { label: "Machines", value: 0 },
+    { label: "Rides", value: 0 },
     {
       label: "Years",
-      value: new Date().getFullYear() - SITE_CONFIG.foundedYear,
+      value: Math.max(1, new Date().getFullYear() - SITE_CONFIG.foundedYear),
     },
   ];
 }
