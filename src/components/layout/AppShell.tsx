@@ -11,9 +11,14 @@ import { MobileNav } from "@/components/layout/MobileNav";
 interface AppShellProps {
   children: ReactNode;
   footer: ReactNode;
+  contactInfo?: {
+    email?: string;
+    tagline?: string;
+  };
+  logoUrl?: string | null;
 }
 
-export function AppShell({ children, footer }: AppShellProps) {
+export function AppShell({ children, footer, contactInfo, logoUrl }: AppShellProps) {
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
@@ -32,6 +37,18 @@ export function AppShell({ children, footer }: AppShellProps) {
     setOpen(false);
   }, []);
 
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
+      <MotionConfig reducedMotion="user" transition={{ ease: EASE_OUT_EXPO }}>
+        <div id="main-content" className="flex flex-1 flex-col">
+          {children}
+        </div>
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: EASE_OUT_EXPO }}>
       <Header
@@ -39,9 +56,19 @@ export function AppShell({ children, footer }: AppShellProps) {
         menuId={menuId}
         onMenuOpen={openMenu}
         inert={open}
+        logoUrl={logoUrl}
       />
       <AnimatePresence>
-        {open ? <MobileNav key="mobile-nav" id={menuId} onClose={closeMenu} /> : null}
+        {open ? (
+          <MobileNav
+            key="mobile-nav"
+            id={menuId}
+            onClose={closeMenu}
+            email={contactInfo?.email}
+            tagline={contactInfo?.tagline}
+            logoUrl={logoUrl}
+          />
+        ) : null}
       </AnimatePresence>
       <main
         id="main-content"

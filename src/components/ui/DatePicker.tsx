@@ -70,9 +70,8 @@ export function DatePicker({
   const initial = parseIso(controlledValue || defaultValue);
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState<string>(
-    controlledValue !== undefined ? controlledValue : defaultValue || ""
-  );
+  const [internalDate, setInternalDate] = useState<string>(defaultValue || "");
+  const selectedDate = controlledValue !== undefined ? controlledValue : internalDate;
   const [isOpen, setIsOpen] = useState(false);
 
   // Month and Year currently being viewed in the calendar popup
@@ -83,19 +82,18 @@ export function DatePicker({
     initial?.month ?? today.getMonth()
   );
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Sync when controlledValue changes
-  useEffect(() => {
-    if (controlledValue !== undefined) {
-      setSelectedDate(controlledValue);
-      const parsed = parseIso(controlledValue);
-      if (parsed) {
-        setViewYear(parsed.year);
-        setViewMonth(parsed.month);
-      }
+  // Adjust view during render if controlledValue changes
+  const [prevControlled, setPrevControlled] = useState(controlledValue);
+  if (controlledValue !== prevControlled) {
+    setPrevControlled(controlledValue);
+    const parsed = parseIso(controlledValue);
+    if (parsed) {
+      setViewYear(parsed.year);
+      setViewMonth(parsed.month);
     }
-  }, [controlledValue]);
+  }
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Close calendar popover on outside click or Esc
   useEffect(() => {
@@ -125,7 +123,7 @@ export function DatePicker({
 
   const handleSelectDay = (day: number) => {
     const formatted = formatIso(viewYear, viewMonth, day);
-    setSelectedDate(formatted);
+    setInternalDate(formatted);
     onChange?.(formatted);
     setIsOpen(false);
   };
@@ -155,7 +153,7 @@ export function DatePicker({
   const handleSetToday = () => {
     const now = new Date();
     const formatted = formatIso(now.getFullYear(), now.getMonth(), now.getDate());
-    setSelectedDate(formatted);
+    setInternalDate(formatted);
     setViewYear(now.getFullYear());
     setViewMonth(now.getMonth());
     onChange?.(formatted);
@@ -163,7 +161,7 @@ export function DatePicker({
   };
 
   const handleClear = () => {
-    setSelectedDate("");
+    setInternalDate("");
     onChange?.("");
     setIsOpen(false);
   };

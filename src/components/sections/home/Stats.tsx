@@ -1,10 +1,14 @@
-import { homeStats } from "@/data/home";
+import { getHomeStats, type HomeStat } from "@/data/home";
 import { Reveal } from "@/components/motion/Reveal";
 import { StatCount } from "@/components/sections/home/StatCount";
 import { Container } from "@/components/ui/Container";
 
-export function Stats() {
-  const stats = homeStats();
+interface StatsProps {
+  stats?: HomeStat[];
+}
+
+export async function Stats({ stats: propStats }: StatsProps = {}) {
+  const stats = propStats ?? (await getHomeStats());
 
   return (
     <section id="stats" className="scroll-mt-24 border-t border-border-subtle" aria-label="The brotherhood in numbers">

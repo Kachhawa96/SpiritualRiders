@@ -83,15 +83,15 @@ export async function Hero({ heroImageUrl: propHeroImageUrl }: HeroProps = {}) {
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button href="#intro">Enter the chapter</Button>
-          <Button href="#machines" variant="outline">
-            The machines
+          <Button href="/riders" variant="outline">
+            The brotherhood
           </Button>
         </div>
         <a
           href="#intro"
-          className="mt-16 inline-flex items-center gap-4 text-[0.65rem] uppercase tracking-[0.38em] text-graphite-300"
+          className="group mt-16 inline-flex items-center gap-4 text-[0.65rem] uppercase tracking-[0.38em] text-graphite-300 transition-colors duration-200 hover:text-gold-400"
         >
-          <span className="h-px w-12 bg-gold-500/80" aria-hidden="true" />
+          <span className="h-px w-12 bg-gold-500/80 transition-all duration-300 group-hover:w-16 group-hover:bg-gold-400 motion-reduce:transition-none" aria-hidden="true" />
           Scroll
         </a>
       </Container>

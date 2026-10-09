@@ -3,13 +3,16 @@
  * Handles CRUD operations, image uploads, and dashboard metrics.
  */
 
+import { z } from "zod";
 import { getAdminDbClient } from "@/lib/auth/server";
 import {
   adminCommunitySettingsSchema,
+  adminContactMessageSchema,
   adminGallerySchema,
   adminRideSchema,
   adminRiderSchema,
   type AdminCommunitySettings,
+  type AdminContactMessageRecord,
   type AdminGalleryRecord,
   type AdminRideRecord,
   type AdminRiderRecord,
@@ -27,12 +30,14 @@ const ALLOWED_IMAGE_TYPES = [
 
 export function validateImageFile(
   file: File,
-  maxMb = 5
+  maxMb = 5,
+  allowSvg = false
 ): { valid: boolean; error?: string } {
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+  const isSvg = allowSvg && (file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg"));
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !isSvg) {
     return {
       valid: false,
-      error: `Invalid file format (${file.type}). Allowed: JPG, PNG, WEBP, AVIF.`,
+      error: `Invalid file format (${file.type || "unknown"}). Allowed: JPG, PNG, WEBP, AVIF${allowSvg ? ", SVG" : ""}.`,
     };
   }
 
@@ -50,9 +55,10 @@ export function validateImageFile(
 export async function uploadAdminImage(
   file: File,
   folder = "uploads",
-  maxMb = 5
+  maxMb = 5,
+  allowSvg = false
 ): Promise<string> {
-  const validation = validateImageFile(file, maxMb);
+  const validation = validateImageFile(file, maxMb, allowSvg);
   if (!validation.valid) {
     throw new Error(validation.error);
   }
@@ -62,7 +68,8 @@ export async function uploadAdminImage(
     throw new Error("Supabase client could not be initialized.");
   }
 
-  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const isSvg = allowSvg && (file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg"));
+  const extension = file.name.split(".").pop()?.toLowerCase() || (isSvg ? "svg" : "jpg");
   const sanitizedName = file.name
     .replace(/\.[^/.]+$/, "")
     .replace(/[^a-zA-Z0-9_-]/g, "_")
@@ -75,7 +82,7 @@ export async function uploadAdminImage(
   const { error: uploadError } = await supabase.storage
     .from("rider-media")
     .upload(path, buffer, {
-      contentType: file.type,
+      contentType: isSvg ? "image/svg+xml" : file.type || "application/octet-stream",
       upsert: true,
     });
 
@@ -566,6 +573,7 @@ export async function getCommunitySettings(): Promise<AdminCommunitySettings> {
     facebook_url: SOCIAL_LINKS.facebook ?? "",
     youtube_url: SOCIAL_LINKS.youtube ?? "",
     hero_image_url: null,
+    logo_image_url: null,
     onboarding_enabled: false,
   };
 
@@ -607,6 +615,7 @@ export async function updateCommunitySettings(
       facebook_url: parsed.facebook_url || null,
       youtube_url: parsed.youtube_url || null,
       hero_image_url: parsed.hero_image_url || null,
+      logo_image_url: parsed.logo_image_url || null,
       onboarding_enabled: Boolean(parsed.onboarding_enabled),
       updated_at: new Date().toISOString(),
     })
@@ -620,6 +629,62 @@ export async function updateCommunitySettings(
   return parsed;
 }
 
+// ── Contact Messages ──────────────────────────────────────────────────────────
+
+export async function getAdminContactMessages(
+  statusFilter?: "all" | "unread" | "read" | "archived"
+): Promise<AdminContactMessageRecord[]> {
+  const supabase = await getAdminDbClient();
+  if (!supabase) return [];
+
+  let query = supabase
+    .from("contact_messages")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (statusFilter && statusFilter !== "all") {
+    query = query.eq("status", statusFilter);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    console.warn("[Admin Messages] Error querying contact_messages:", error?.message);
+    return [];
+  }
+
+  return z.array(adminContactMessageSchema).parse(data);
+}
+
+export async function updateContactMessageStatus(
+  id: string,
+  status: "unread" | "read" | "archived"
+): Promise<void> {
+  const supabase = await getAdminDbClient();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase
+    .from("contact_messages")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Failed to update inquiry status: ${error.message}`);
+  }
+}
+
+export async function deleteContactMessage(id: string): Promise<void> {
+  const supabase = await getAdminDbClient();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase
+    .from("contact_messages")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Failed to delete inquiry: ${error.message}`);
+  }
+}
 
 // ── Dashboard Metrics ─────────────────────────────────────────────────────────
 
@@ -637,16 +702,22 @@ export interface AdminDashboardStats {
   gallery: {
     total: number;
   };
+  messages: {
+    total: number;
+    unread: number;
+  };
   recentRiders: AdminRiderRecord[];
   recentRides: AdminRideRecord[];
   recentFrames: AdminGalleryRecord[];
+  recentMessages: AdminContactMessageRecord[];
 }
 
 export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-  const [riders, rides, gallery] = await Promise.all([
+  const [riders, rides, gallery, messages] = await Promise.all([
     getAdminRiders().catch(() => []),
     getAdminRides().catch(() => []),
     getAdminGallery().catch(() => []),
+    getAdminContactMessages().catch(() => []),
   ]);
 
   return {
@@ -663,8 +734,13 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
     gallery: {
       total: gallery.length,
     },
+    messages: {
+      total: messages.length,
+      unread: messages.filter((m) => m.status === "unread").length,
+    },
     recentRiders: riders.slice(0, 5),
     recentRides: rides.slice(0, 5),
     recentFrames: gallery.slice(0, 6),
+    recentMessages: messages.slice(0, 5),
   };
 }

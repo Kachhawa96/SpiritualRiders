@@ -102,8 +102,8 @@ function FilterChip({
       onClick={onClick}
       className={
         pressed
-          ? "h-10 cursor-pointer border border-gold-500 bg-gold-500 px-3 text-[0.68rem] uppercase tracking-[0.16em] text-obsidian-950"
-          : "h-10 cursor-pointer border border-border bg-transparent px-3 text-[0.68rem] uppercase tracking-[0.16em] text-ivory-100"
+          ? "h-10 cursor-pointer border border-gold-500 bg-gold-500 px-3 text-[0.68rem] uppercase tracking-[0.16em] text-obsidian-950 transition-colors duration-200 active:scale-[0.98] motion-reduce:transform-none"
+          : "h-10 cursor-pointer border border-border bg-transparent px-3 text-[0.68rem] uppercase tracking-[0.16em] text-ivory-100 transition-colors duration-200 hover:border-gold-500/60 hover:text-gold-400 active:scale-[0.98] motion-reduce:transform-none"
       }
     >
       {children}

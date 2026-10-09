@@ -2,8 +2,17 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SITE_CONFIG } from "@/config/site";
+import { loadCommunitySettings, type PublicCommunitySettings } from "@/lib/community";
 
-export function CommunityIntro() {
+interface CommunityIntroProps {
+  settings?: PublicCommunitySettings;
+}
+
+export async function CommunityIntro({ settings: propSettings }: CommunityIntroProps = {}) {
+  const settings = propSettings ?? (await loadCommunitySettings());
+  const name = settings.name || SITE_CONFIG.name;
+  const foundedYear = settings.founded_year || SITE_CONFIG.foundedYear;
+
   return (
     <section id="intro" className="section-padding scroll-mt-24 border-t border-border-subtle">
       <Container className="grid items-end gap-12 lg:grid-cols-12 lg:gap-16">
@@ -21,7 +30,7 @@ export function CommunityIntro() {
           </Reveal>
           <Reveal delay={0.14}>
             <p className="mt-6 max-w-xl text-base md:text-lg">
-              {SITE_CONFIG.name} began as a dawn departure in {SITE_CONFIG.foundedYear} and
+              {name} began as a dawn departure in {foundedYear} and
               became a house. Motorcycles are kept, roads are shared, and no rider is left
               at the side of one. This is the crew, told the way the road tells it.
             </p>

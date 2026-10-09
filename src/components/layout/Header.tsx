@@ -11,9 +11,10 @@ interface HeaderProps {
   menuId: string;
   onMenuOpen: () => void;
   inert?: boolean;
+  logoUrl?: string | null;
 }
 
-export function Header({ menuOpen, menuId, onMenuOpen, inert = false }: HeaderProps) {
+export function Header({ menuOpen, menuId, onMenuOpen, inert = false, logoUrl }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export function Header({ menuOpen, menuId, onMenuOpen, inert = false }: HeaderPr
       )}
     >
       <div className="container-site flex h-20 items-center justify-between gap-6">
-        <BrandMark />
+        <BrandMark logoUrl={logoUrl} />
 
         <nav className="hidden items-center gap-5 lg:flex xl:gap-8" aria-label="Primary">
           {NAV_ITEMS.map((item) => (
@@ -52,7 +53,7 @@ export function Header({ menuOpen, menuId, onMenuOpen, inert = false }: HeaderPr
               {item.label}
               <span
                 aria-hidden="true"
-                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-gold-500 transition-transform duration-300 group-hover:scale-x-100 group-data-[active=true]:scale-x-100"
+                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-gold-500 transition-transform duration-300 group-hover:scale-x-100 group-data-[active=true]:scale-x-100 motion-reduce:transition-none motion-reduce:transform-none"
               />
             </PrimaryLink>
           ))}

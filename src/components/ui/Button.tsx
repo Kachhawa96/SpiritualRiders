@@ -27,15 +27,15 @@ interface ButtonProps {
 }
 
 const base =
-  "group inline-flex cursor-pointer items-center justify-center gap-3 whitespace-nowrap rounded-sm border font-medium uppercase tracking-[0.22em] transition-[background-color,border-color,color,box-shadow] duration-300 disabled:pointer-events-none disabled:opacity-40";
+  "group inline-flex cursor-pointer items-center justify-center gap-3 whitespace-nowrap rounded-sm border font-medium uppercase tracking-[0.22em] transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-40";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "border-gold-500 bg-gold-500 text-obsidian-950 hover:border-gold-400 hover:bg-gold-400",
+    "border-gold-500 bg-gold-500 text-obsidian-950 hover:border-gold-400 hover:bg-gold-400 hover:shadow-glow-gold",
   outline:
-    "border-charcoal-500 bg-transparent text-ivory-100 hover:border-gold-500 hover:text-gold-400",
+    "border-charcoal-500 bg-transparent text-ivory-100 hover:border-gold-500 hover:text-gold-400 hover:bg-gold-500/5",
   ghost:
-    "border-transparent bg-transparent text-graphite-200 hover:text-ivory-100",
+    "border-transparent bg-transparent text-graphite-200 hover:text-ivory-100 hover:bg-white/5",
   glow:
     "border-gold-500/40 bg-obsidian-900 text-gold-400 shadow-glow-gold hover:border-gold-500 hover:text-gold-300",
 };
@@ -53,7 +53,7 @@ function ArrowIcon() {
       height="14"
       viewBox="0 0 14 14"
       aria-hidden="true"
-      className="transition-transform duration-300 group-hover:translate-x-1"
+      className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none"
     >
       <path
         d="M2 7h10M8 3l4 4-4 4"

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/lib/auth/actions";
 import { useState } from "react";
 
 interface AdminNavProps {
   userEmail: string;
+  logoUrl?: string | null;
 }
 
 const NAV_LINKS = [
@@ -15,13 +17,20 @@ const NAV_LINKS = [
   { href: "/admin/onboarding", label: "Onboarding" },
   { href: "/admin/rides", label: "Rides" },
   { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/messages", label: "Inquiries" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
 
-export function AdminNav({ userEmail }: AdminNavProps) {
+export function AdminNav({ userEmail, logoUrl }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isSvg = Boolean(
+    logoUrl &&
+      (logoUrl.toLowerCase().includes(".svg") ||
+        logoUrl.toLowerCase().includes("image/svg+xml"))
+  );
 
   function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
@@ -37,6 +46,18 @@ export function AdminNav({ userEmail }: AdminNavProps) {
             href="/admin"
             className="flex items-center gap-3 transition-opacity hover:opacity-90"
           >
+            {logoUrl ? (
+              <div className="relative size-8 shrink-0 overflow-hidden">
+                <Image
+                  src={logoUrl}
+                  alt="Spiritual Riders"
+                  fill
+                  sizes="32px"
+                  className="object-contain"
+                  unoptimized={isSvg}
+                />
+              </div>
+            ) : null}
             <span className="font-display text-lg font-semibold tracking-[0.2em] text-ivory-100">
               SPIRITUAL RIDERS
             </span>

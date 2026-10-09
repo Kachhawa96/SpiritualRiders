@@ -7,7 +7,7 @@ import { formatDate, formatNumber } from "@/lib/utils";
 
 export function RideCard({ ride }: { ride: RideSummary }) {
   return (
-    <article className="flex h-full flex-col border border-border-subtle bg-obsidian-900">
+    <article className="card-interactive group flex h-full flex-col border border-border-subtle bg-obsidian-900 rounded-sm">
       <Link
         href={ROUTES.ride(ride.slug)}
         prefetch={isLiveRoute(ROUTES.ride(ride.slug))}

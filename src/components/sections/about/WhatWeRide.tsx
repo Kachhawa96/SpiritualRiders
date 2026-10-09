@@ -22,7 +22,7 @@ export function WhatWeRide() {
         <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
           {ABOUT_MACHINES.map((machine, index) => (
             <Reveal key={machine.model} delay={index * 0.08} className="h-full">
-              <article className="flex h-full flex-col">
+              <article className="card-interactive group flex h-full flex-col border border-border-subtle bg-obsidian-900/40 p-4 sm:p-5 rounded-sm">
                 <ImageReveal className="aspect-[4/5] w-full border border-border-subtle">
                   <ChapterFrame
                     tone={TONES[index] ?? "machine"}

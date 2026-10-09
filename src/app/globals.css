@@ -411,13 +411,16 @@ video {
     box-shadow var(--duration-normal) var(--ease-out-expo);
 }
 
-.card-interactive:hover {
-  transform: translateY(-4px);
-  border-color: var(--color-gold-600);
-  box-shadow: var(--shadow-glow-gold), var(--shadow-card-hover);
+/* Hover restricted to pointing devices (mouse/trackpad) to eliminate sticky hover on touch mobile */
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-gold-500);
+    box-shadow: 0 4px 24px oklch(67% 0.14 75 / 0.12), var(--shadow-card-hover);
+  }
 }
 
-/* Wipe runs on the view timeline where supported, otherwise once on load. */
+/* Wipe runs on the view timeline where supported, otherwise rests fully visible. */
 @keyframes image-wipe {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
@@ -431,15 +434,43 @@ video {
   .image-reveal {
     animation: image-wipe var(--duration-cinematic) var(--ease-out-expo) both;
     animation-timeline: view();
-    animation-range: entry 0% cover 45%;
+    animation-range: entry 0% cover 35%;
   }
 
   .hero-drift {
-    animation: hero-drift 22s var(--ease-out-expo) both;
+    animation: hero-drift 24s var(--ease-out-expo) both;
   }
 }
 
 @keyframes hero-drift {
-  from { transform: scale(1.06); }
+  from { transform: scale(1.03); }
   to { transform: scale(1); }
 }
+
+/* Strict reduced motion enforcement across all elements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card-interactive,
+  .card-interactive:hover {
+    transform: none !important;
+  }
+
+  .image-reveal {
+    animation: none !important;
+    clip-path: inset(0 0 0 0) !important;
+  }
+
+  [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+

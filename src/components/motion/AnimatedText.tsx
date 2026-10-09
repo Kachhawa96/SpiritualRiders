@@ -5,7 +5,7 @@
  * A mask mode exists for below-fold lines; the hero should use the default settle mode.
  */
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { DURATION, EASE_OUT_EXPO } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,13 @@ export function AnimatedText({
   delay = 0,
   mode = "settle",
 }: AnimatedTextProps) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    const Tag = as;
+    return <Tag className={cn("text-balance", className)}>{text}</Tag>;
+  }
+
   const Tag = tags[as];
   const words = text.split(/\s+/).filter(Boolean);
 
@@ -75,7 +82,7 @@ function Word({
       <span className={cn("inline-block", masked && "overflow-hidden align-bottom")}>
         <motion.span
           className="inline-block"
-          initial={masked ? { y: "110%" } : { y: "0.35em" }}
+          initial={masked ? { y: "110%" } : { y: "0.2em" }}
           animate={{ y: "0em" }}
           transition={{
             duration: DURATION.slower,

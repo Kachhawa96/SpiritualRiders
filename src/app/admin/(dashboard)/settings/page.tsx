@@ -13,6 +13,7 @@ export default async function AdminSettingsPage() {
       email: "contact@spiritualriders.in",
       founded_year: 2020,
       hero_image_url: null,
+      logo_image_url: null,
       onboarding_enabled: false,
     };
   }

@@ -241,10 +241,10 @@ function NeighborLink({
     <Link
       href={ROUTES.rider(rider.slug)}
       prefetch={isLiveRoute(ROUTES.rider(rider.slug))}
-      className={`bg-obsidian-950 px-6 py-8 ${align === "end" ? "sm:text-right" : ""}`}
+      className={`group bg-obsidian-950 px-6 py-8 transition-colors duration-200 hover:bg-obsidian-900 ${align === "end" ? "sm:text-right" : ""}`}
     >
       <span className="text-[0.62rem] uppercase tracking-[0.22em] text-gold-500">{label}</span>
-      <span className="mt-2 block font-display text-2xl text-ivory-100">{rider.display_name}</span>
+      <span className="mt-2 block font-display text-2xl text-ivory-100 transition-colors duration-200 group-hover:text-gold-400">{rider.display_name}</span>
     </Link>
   );
 }

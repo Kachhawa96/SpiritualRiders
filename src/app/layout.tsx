@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { Footer } from "@/components/layout/Footer";
+import { loadCommunitySettings } from "@/lib/community";
 import "./globals.css";
 
 // ── Display / editorial typeface ──────────────────────────────────────────────
@@ -69,11 +70,13 @@ export const viewport: Viewport = {
 };
 
 // ── Layout ────────────────────────────────────────────────────────────────────
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await loadCommunitySettings();
+
   return (
     <html
       lang="en"
@@ -95,7 +98,13 @@ export default function RootLayout({
           </style>
         </noscript>
 
-        <AppShell footer={<Footer />}>{children}</AppShell>
+        <AppShell
+          footer={<Footer settings={settings} />}
+          contactInfo={{ email: settings.email, tagline: settings.tagline }}
+          logoUrl={settings.logo_image_url}
+        >
+          {children}
+        </AppShell>
       </body>
     </html>
   );

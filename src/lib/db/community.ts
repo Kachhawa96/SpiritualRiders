@@ -84,3 +84,64 @@ export async function loadCommunityHeroImage(): Promise<string | null> {
     return null;
   }
 }
+
+export interface PublicCommunitySettings {
+  name: string;
+  tagline: string;
+  description: string;
+  email: string;
+  founded_year: number;
+  hero_image_url: string | null;
+  logo_image_url: string | null;
+  onboarding_enabled: boolean;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  youtube_url: string | null;
+}
+
+export async function loadCommunitySettings(): Promise<PublicCommunitySettings> {
+  const fallback: PublicCommunitySettings = {
+    name: "Spiritual Riders",
+    tagline: "Riders. Brotherhood. Spirit.",
+    description:
+      "A premium motorcycle brotherhood built on passion, respect, and the open road.",
+    email: "contact@spiritualriders.in",
+    founded_year: 2020,
+    hero_image_url: null,
+    logo_image_url: null,
+    onboarding_enabled: false,
+    instagram_url: null,
+    facebook_url: null,
+    youtube_url: null,
+  };
+
+  if (!hasSupabaseEnv()) return fallback;
+  const supabase = createAnonServerClient();
+  if (!supabase) return fallback;
+
+  try {
+    const { data, error } = await supabase
+      .from("community_settings")
+      .select("*")
+      .eq("id", "default")
+      .maybeSingle();
+
+    if (error || !data) return fallback;
+
+    return {
+      name: (data.name as string) || fallback.name,
+      tagline: (data.tagline as string) || fallback.tagline,
+      description: (data.description as string) || fallback.description,
+      email: (data.email as string) || fallback.email,
+      founded_year: Number(data.founded_year) || fallback.founded_year,
+      hero_image_url: (data.hero_image_url as string) || null,
+      logo_image_url: (data.logo_image_url as string) || null,
+      onboarding_enabled: Boolean(data.onboarding_enabled),
+      instagram_url: (data.instagram_url as string) || null,
+      facebook_url: (data.facebook_url as string) || null,
+      youtube_url: (data.youtube_url as string) || null,
+    };
+  } catch {
+    return fallback;
+  }
+}

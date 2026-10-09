@@ -14,7 +14,7 @@ export function RiderCard({ rider }: RiderCardProps) {
   const imageUrl = rider.profile_image_url || rider.cover_image_url;
 
   return (
-    <article className="group flex h-full flex-col border border-border-subtle bg-obsidian-900 transition-colors hover:border-gold-500/40">
+    <article className="card-interactive group flex h-full flex-col border border-border-subtle bg-obsidian-900 rounded-sm">
       <Link
         href={ROUTES.rider(rider.slug)}
         prefetch={isLiveRoute(ROUTES.rider(rider.slug))}
@@ -27,7 +27,7 @@ export function RiderCard({ rider }: RiderCardProps) {
                 src={imageUrl}
                 alt={rider.display_name}
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none"
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-obsidian-900 via-transparent to-transparent opacity-60" />
