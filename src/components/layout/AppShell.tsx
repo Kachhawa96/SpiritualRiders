@@ -11,9 +11,13 @@ import { MobileNav } from "@/components/layout/MobileNav";
 interface AppShellProps {
   children: ReactNode;
   footer: ReactNode;
+  contactInfo?: {
+    email?: string;
+    tagline?: string;
+  };
 }
 
-export function AppShell({ children, footer }: AppShellProps) {
+export function AppShell({ children, footer, contactInfo }: AppShellProps) {
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
@@ -41,7 +45,15 @@ export function AppShell({ children, footer }: AppShellProps) {
         inert={open}
       />
       <AnimatePresence>
-        {open ? <MobileNav key="mobile-nav" id={menuId} onClose={closeMenu} /> : null}
+        {open ? (
+          <MobileNav
+            key="mobile-nav"
+            id={menuId}
+            onClose={closeMenu}
+            email={contactInfo?.email}
+            tagline={contactInfo?.tagline}
+          />
+        ) : null}
       </AnimatePresence>
       <main
         id="main-content"

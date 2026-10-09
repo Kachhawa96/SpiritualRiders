@@ -4,10 +4,14 @@
 
 import {
   loadCommunityHeroImage,
+  loadCommunitySettings,
   loadGallery,
   loadParticipants,
   loadRides,
+  type PublicCommunitySettings,
 } from "@/lib/db/community";
+
+export { loadCommunitySettings, type PublicCommunitySettings };
 import { RIDE_STATUS_LABEL, RIDE_TYPE_LABEL } from "@/lib/ride-labels";
 import { positionLabel } from "@/lib/riders";
 import type { PublicGalleryRow, PublicRideRow } from "@/lib/db/community-schema";

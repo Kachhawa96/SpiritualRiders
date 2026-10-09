@@ -14,9 +14,11 @@ import { PrimaryLink } from "@/components/layout/PrimaryLink";
 interface MobileNavProps {
   id: string;
   onClose: () => void;
+  email?: string;
+  tagline?: string;
 }
 
-export function MobileNav({ id, onClose }: MobileNavProps) {
+export function MobileNav({ id, onClose, email, tagline }: MobileNavProps) {
   const titleId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -135,13 +137,13 @@ export function MobileNav({ id, onClose }: MobileNavProps) {
 
           <div className="pt-8">
             <p className="max-w-none text-[0.65rem] uppercase tracking-[0.32em] text-graphite-400">
-              {SITE_CONFIG.tagline}
+              {tagline || SITE_CONFIG.tagline}
             </p>
             <a
-              href={`mailto:${SITE_CONFIG.email}`}
+              href={`mailto:${email || SITE_CONFIG.email}`}
               className="mt-3 inline-block text-sm text-gold-400"
             >
-              {SITE_CONFIG.email}
+              {email || SITE_CONFIG.email}
             </a>
           </div>
         </motion.div>

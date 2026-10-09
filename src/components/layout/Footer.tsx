@@ -1,19 +1,22 @@
-import { NAV_ITEMS, SITE_CONFIG, SOCIAL_LINKS } from "@/config/site";
+import { NAV_ITEMS, SITE_CONFIG } from "@/config/site";
 import { Button } from "@/components/ui/Button";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { PrimaryLink } from "@/components/layout/PrimaryLink";
+import { loadCommunitySettings, type PublicCommunitySettings } from "@/lib/community";
 
-const SOCIALS = [
-  { label: "Instagram", href: SOCIAL_LINKS.instagram },
-  { label: "Facebook", href: SOCIAL_LINKS.facebook },
-  { label: "YouTube", href: SOCIAL_LINKS.youtube },
-] as const;
+interface FooterProps {
+  settings?: PublicCommunitySettings;
+}
 
-export function Footer() {
+export async function Footer({ settings: initialSettings }: FooterProps = {}) {
+  const settings = initialSettings ?? (await loadCommunitySettings());
   const year = new Date().getFullYear();
-  const socials = SOCIALS.flatMap((item) =>
-    item.href ? [{ label: item.label, href: item.href }] : []
-  );
+
+  const socials = [
+    { label: "Instagram", href: settings.instagram_url },
+    { label: "Facebook", href: settings.facebook_url },
+    { label: "YouTube", href: settings.youtube_url },
+  ].filter((item): item is { label: string; href: string } => Boolean(item.href));
 
   return (
     <footer className="border-t border-border-subtle">
@@ -22,10 +25,10 @@ export function Footer() {
         <div className="md:col-span-5">
           <BrandMark />
           <p className="mt-6 max-w-sm text-sm leading-relaxed">
-            {SITE_CONFIG.description}
+            {settings.description || SITE_CONFIG.description}
           </p>
           <div className="mt-8">
-            <Button href={`mailto:${SITE_CONFIG.email}`} variant="outline" size="sm">
+            <Button href={`mailto:${settings.email || SITE_CONFIG.email}`} variant="outline" size="sm">
               Write to the crew
             </Button>
           </div>
@@ -54,13 +57,13 @@ export function Footer() {
             The road
           </p>
           <a
-            href={`mailto:${SITE_CONFIG.email}`}
-            className="mt-6 inline-block text-sm text-gold-400"
+            href={`mailto:${settings.email || SITE_CONFIG.email}`}
+            className="mt-6 inline-block text-sm text-gold-400 transition-colors duration-200 hover:underline"
           >
-            {SITE_CONFIG.email}
+            {settings.email || SITE_CONFIG.email}
           </a>
           <p className="mt-6 max-w-xs text-sm">
-            Founded {SITE_CONFIG.foundedYear}. The long way home, still being written.
+            Founded {settings.founded_year || SITE_CONFIG.foundedYear}. The long way home, still being written.
           </p>
           {socials.length > 0 ? (
             <ul className="mt-6 space-y-3">
@@ -84,9 +87,9 @@ export function Footer() {
       <div className="border-t border-border-subtle">
         <div className="container-site flex flex-col gap-2 py-6 text-xs text-graphite-400 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-none">
-            © {year} {SITE_CONFIG.name}. All rights reserved.
+            © {year} {settings.name || SITE_CONFIG.name}. All rights reserved.
           </p>
-          <p className="max-w-none tracking-[0.22em] uppercase">{SITE_CONFIG.tagline}</p>
+          <p className="max-w-none tracking-[0.22em] uppercase">{settings.tagline || SITE_CONFIG.tagline}</p>
         </div>
       </div>
     </footer>

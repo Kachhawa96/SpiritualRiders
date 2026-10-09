@@ -486,6 +486,8 @@ export async function saveSettingsAction(
     revalidatePath("/onboard");
     revalidatePath("/");
     revalidatePath("/about");
+    revalidatePath("/contact");
+    revalidatePath("/", "layout");
 
     return { success: true };
   } catch (err: unknown) {
