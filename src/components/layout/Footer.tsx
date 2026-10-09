@@ -16,7 +16,7 @@ export async function Footer({ settings: initialSettings }: FooterProps = {}) {
     { label: "Instagram", href: settings.instagram_url },
     { label: "Facebook", href: settings.facebook_url },
     { label: "YouTube", href: settings.youtube_url },
-  ].filter((item): item is { label: string; href: string } => Boolean(item.href));
+  ].filter((item): item is { label: string; href: string } => Boolean(item.href?.trim()));
 
   return (
     <footer className="border-t border-border-subtle">
