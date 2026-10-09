@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { OnboardingSubmissionRecord } from "@/lib/db/onboarding-schema";
+import { formatDeterministicDate } from "@/lib/date-utils";
 
 interface SubmissionTableProps {
   initialSubmissions: OnboardingSubmissionRecord[];
@@ -105,8 +106,8 @@ export function SubmissionTable({ initialSubmissions }: SubmissionTableProps) {
                     <div className="text-ivory-100">{sub.bike_brand} {sub.bike_model}</div>
                     <div className="text-[0.68rem] text-graphite-400">{sub.bike_year}</div>
                   </td>
-                  <td className="px-4 py-3 text-graphite-400">
-                    {new Date(sub.created_at).toLocaleDateString()}
+                  <td className="px-4 py-3 text-graphite-400" suppressHydrationWarning>
+                    {formatDeterministicDate(sub.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     {sub.status === "pending" && (

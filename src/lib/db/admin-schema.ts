@@ -70,9 +70,13 @@ export const adminRiderSchema = z.object({
   community_position: adminPositionSchema,
   bio: z.string().min(1, "Bio is required"),
   short_bio: z.string().min(1, "Short bio is required"),
+  date_of_birth: z.string().min(10).nullable().optional(),
   age: z.number().int().min(16).max(100).nullable().optional(),
   blood_group: adminBloodSchema.nullable().optional(),
   city: z.string().nullable().optional(),
+
+
+
   show_age: z.boolean().default(false),
   show_blood_group: z.boolean().default(false),
   show_city: z.boolean().default(false),

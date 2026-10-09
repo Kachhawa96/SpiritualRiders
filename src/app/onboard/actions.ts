@@ -10,6 +10,8 @@ import {
   submitRiderProfile,
   uploadOnboardingImage,
 } from "@/lib/db/onboarding";
+import { calculateAgeFromDob } from "@/lib/date-utils";
+
 import type {
   adminBloodSchema,
   adminPositionSchema,
@@ -17,6 +19,7 @@ import type {
 } from "@/lib/db/admin-schema";
 import type { z } from "zod";
 import { revalidatePath } from "next/cache";
+
 
 export interface OnboardingActionResult {
   success: boolean;
@@ -91,12 +94,16 @@ export async function submitOnboardingAction(
     const bike_year = Number(formData.get("bike_year")) || new Date().getFullYear();
     const bike_color = (formData.get("bike_color") as string)?.trim() || null;
 
+    const date_of_birth = (formData.get("date_of_birth") as string)?.trim() || null;
     const ageRaw = formData.get("age") as string;
-    const age = ageRaw ? Number(ageRaw) : null;
+    const age = date_of_birth
+      ? calculateAgeFromDob(date_of_birth)
+      : (ageRaw ? Number(ageRaw) : null);
     const blood_group = (formData.get("blood_group") as string)
       ? (formData.get("blood_group") as z.infer<typeof adminBloodSchema>)
       : null;
     const city = (formData.get("city") as string)?.trim() || null;
+
 
     const show_age = formData.get("show_age") === "on";
     const show_blood_group = formData.get("show_blood_group") === "on";
@@ -160,8 +167,10 @@ export async function submitOnboardingAction(
         bike_variant,
         bike_year,
         bike_color,
+        date_of_birth,
         age,
         blood_group,
+
         city,
         show_age,
         show_blood_group,
