@@ -10,7 +10,7 @@ interface StatCountProps {
 
 export function StatCount({ value }: StatCountProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.8 });
+  const inView = useInView(ref, { once: true, amount: 0.5 });
   const prefersReduced = useReducedMotion();
   const [display, setDisplay] = useState(value);
 

@@ -32,14 +32,14 @@ export async function FeaturedRiders() {
         <div className="mt-14 grid gap-8 md:grid-cols-3 md:gap-6">
           {featured.map((rider, index) => (
             <Reveal key={rider.slug} delay={index * 0.08} className="h-full">
-              <article className="flex h-full flex-col">
+              <article className="card-interactive group flex h-full flex-col border border-border-subtle bg-obsidian-900/60 p-4 sm:p-5 rounded-sm">
                 <ImageReveal className="relative aspect-[3/4] w-full overflow-hidden border border-border-subtle bg-obsidian-950">
                   {rider.profile_image_url ? (
                     <Image
                       src={rider.profile_image_url}
                       alt={rider.displayName}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none"
                       sizes="(min-width: 768px) 33vw, 100vw"
                     />
                   ) : (

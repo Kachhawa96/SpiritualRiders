@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef } from "react";
 import { NAV_ITEMS, SITE_CONFIG } from "@/config/site";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
@@ -19,6 +19,7 @@ interface MobileNavProps {
 export function MobileNav({ id, onClose }: MobileNavProps) {
   const titleId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   useFocusTrap(true, containerRef);
   useBodyScrollLock(true);
@@ -36,10 +37,10 @@ export function MobileNav({ id, onClose }: MobileNavProps) {
   return (
     <motion.div
       className="fixed inset-0 z-50 lg:hidden"
-      initial={{ opacity: 0 }}
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: DURATION.normal, ease: EASE_OUT_EXPO }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: DURATION.normal, ease: EASE_OUT_EXPO }}
     >
       <div
         ref={containerRef}
@@ -60,10 +61,10 @@ export function MobileNav({ id, onClose }: MobileNavProps) {
         <motion.div
           data-motion-reveal
           className="relative z-10 flex h-full w-full flex-col bg-obsidian-950 px-6 py-5 sm:max-w-md sm:border-l sm:border-border-subtle"
-          initial={{ x: "100%" }}
+          initial={shouldReduceMotion ? false : { x: "100%" }}
           animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ duration: DURATION.slow, ease: EASE_OUT_EXPO }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: DURATION.slow, ease: EASE_OUT_EXPO }}
         >
           <h2 id={titleId} className="sr-only">
             Menu
@@ -74,7 +75,7 @@ export function MobileNav({ id, onClose }: MobileNavProps) {
               type="button"
               onClick={onClose}
               aria-label="Close menu"
-              className="order-2 grid size-11 cursor-pointer place-items-center border border-border text-foreground"
+              className="order-2 grid size-11 cursor-pointer place-items-center border border-border text-foreground transition-colors duration-150 active:scale-[0.98] motion-reduce:transform-none"
             >
               <span aria-hidden="true" className="text-2xl leading-none">
                 ×
@@ -89,13 +90,17 @@ export function MobileNav({ id, onClose }: MobileNavProps) {
                 <motion.li
                   key={item.href}
                   data-motion-reveal
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: DURATION.normal,
-                    delay: 0.08 + index * 0.045,
-                    ease: EASE_OUT_EXPO,
-                  }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : {
+                          duration: DURATION.normal,
+                          delay: 0.08 + index * 0.045,
+                          ease: EASE_OUT_EXPO,
+                        }
+                  }
                 >
                   <PrimaryLink
                     item={item}

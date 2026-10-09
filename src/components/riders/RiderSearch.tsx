@@ -15,7 +15,7 @@ export function RiderSearch({ value, onChange }: RiderSearchProps) {
         onChange={(event) => onChange(event.target.value)}
         placeholder="Name or machine"
         autoComplete="off"
-        className="mt-3 h-12 w-full border border-border bg-obsidian-900 px-4 text-sm text-ivory-100 outline-none placeholder:text-graphite-400 focus-visible:border-gold-500"
+        className="mt-3 h-12 w-full border border-border bg-obsidian-900 px-4 text-sm text-ivory-100 outline-none placeholder:text-graphite-400 transition-[border-color,box-shadow] duration-200 focus-visible:border-gold-500 focus-visible:shadow-[0_0_15px_oklch(67%_0.14_75/0.12)]"
       />
     </label>
   );

@@ -52,7 +52,7 @@ export function Header({ menuOpen, menuId, onMenuOpen, inert = false }: HeaderPr
               {item.label}
               <span
                 aria-hidden="true"
-                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-gold-500 transition-transform duration-300 group-hover:scale-x-100 group-data-[active=true]:scale-x-100"
+                className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-gold-500 transition-transform duration-300 group-hover:scale-x-100 group-data-[active=true]:scale-x-100 motion-reduce:transition-none motion-reduce:transform-none"
               />
             </PrimaryLink>
           ))}

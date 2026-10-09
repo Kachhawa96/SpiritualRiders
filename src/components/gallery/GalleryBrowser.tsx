@@ -83,7 +83,7 @@ function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void
   useEscapeKey(onClose);
 
   return (
-    <div className="fixed inset-0 z-50 bg-obsidian-950/80">
+    <div className="fixed inset-0 z-50 bg-obsidian-950/85 backdrop-blur-md transition-opacity duration-300">
       <div
         ref={ref}
         role="dialog"
@@ -98,7 +98,7 @@ function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void
           className="absolute inset-0 cursor-pointer"
           onClick={onClose}
         />
-        <div className="relative z-10 grid w-full max-w-4xl overflow-hidden border border-border-subtle bg-obsidian-950 md:grid-cols-2">
+        <div className="relative z-10 grid w-full max-w-4xl overflow-hidden border border-border-subtle bg-obsidian-950 shadow-2xl transition-all duration-300 md:grid-cols-2">
           <div className="relative min-h-72">
             <ChapterFrame tone={frame.tone} label={frame.ride_title ?? "The road"} title={frame.title} />
           </div>
@@ -106,7 +106,7 @@ function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void
             <button
               type="button"
               onClick={onClose}
-              className="mb-6 h-11 cursor-pointer self-end border border-border px-4 text-[0.68rem] uppercase tracking-[0.18em]"
+              className="mb-6 h-11 cursor-pointer self-end border border-border px-4 text-[0.68rem] uppercase tracking-[0.18em] text-ivory-100 transition-colors duration-200 hover:border-gold-500 hover:text-gold-400 active:scale-[0.98] motion-reduce:transform-none"
             >
               Close
             </button>

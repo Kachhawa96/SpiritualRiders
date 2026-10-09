@@ -54,7 +54,7 @@ export function RideBrowser({ rides }: RideBrowserProps) {
             onChange={(event) => update("q", event.target.value)}
             placeholder="Name or road"
             autoComplete="off"
-            className="mt-3 h-12 w-full border border-border bg-obsidian-900 px-4 text-sm text-ivory-100 outline-none placeholder:text-graphite-400"
+            className="mt-3 h-12 w-full border border-border bg-obsidian-900 px-4 text-sm text-ivory-100 outline-none placeholder:text-graphite-400 transition-all duration-200 focus-visible:border-gold-500 focus-visible:shadow-[0_0_15px_oklch(67%_0.14_75/0.12)]"
           />
         </label>
         <ChipGroup
@@ -153,8 +153,8 @@ function Chip({
       onClick={onClick}
       className={
         pressed
-          ? "h-10 cursor-pointer border border-gold-500 bg-gold-500 px-3 text-[0.68rem] uppercase tracking-[0.16em] text-obsidian-950"
-          : "h-10 cursor-pointer border border-border bg-transparent px-3 text-[0.68rem] uppercase tracking-[0.16em] text-ivory-100"
+          ? "h-10 cursor-pointer border border-gold-500 bg-gold-500 px-3 text-[0.68rem] uppercase tracking-[0.16em] text-obsidian-950 transition-all duration-200 active:scale-[0.98] motion-reduce:transform-none"
+          : "h-10 cursor-pointer border border-border bg-transparent px-3 text-[0.68rem] uppercase tracking-[0.16em] text-ivory-100 transition-all duration-200 hover:border-gold-500/50 hover:text-gold-300 active:scale-[0.98] motion-reduce:transform-none"
       }
     >
       {children}
