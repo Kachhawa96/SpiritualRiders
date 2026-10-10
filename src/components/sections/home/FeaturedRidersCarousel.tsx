@@ -19,7 +19,6 @@ interface FeaturedRidersCarouselProps {
 
 export function FeaturedRidersCarousel({
   riders,
-  totalFeaturedCount = riders.length,
 }: FeaturedRidersCarouselProps) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -90,68 +89,58 @@ export function FeaturedRidersCarousel({
   );
 
   return (
-    <div className="relative mt-12 space-y-8">
-      {/* Carousel Controls Bar (Arrows + Counter) */}
-      <div className="flex items-center justify-between border-b border-border-subtle/80 pb-4">
-        {/* Visual status cue */}
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-xs tracking-[0.2em] text-gold-400">
-            {String(selectedIndex + 1).padStart(2, "0")} / {String(displayedRiders.length).padStart(2, "0")}
-          </span>
-          <span className="hidden text-xs text-graphite-400 sm:inline">
-            · Swipe or use arrows to explore
-          </span>
-        </div>
+    <div className="relative mt-10">
+      {/* Aesthetic Left Navigation Arrow (at the leftmost card) */}
+      <button
+        type="button"
+        onClick={scrollPrev}
+        disabled={!canScrollPrev}
+        aria-label="Previous rider"
+        className={cn(
+          "group absolute left-2 sm:left-3 lg:-left-4 xl:-left-6 top-[38%] -translate-y-1/2 z-20",
+          "flex size-10 sm:size-12 items-center justify-center rounded-full backdrop-blur-md",
+          "transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.85)]",
+          canScrollPrev
+            ? "cursor-pointer border border-gold-500/50 bg-obsidian-950/90 text-ivory-100 hover:border-gold-400 hover:bg-gold-500/20 hover:text-gold-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] active:scale-95"
+            : "cursor-not-allowed border border-charcoal-700/60 bg-obsidian-950/60 text-graphite-600 opacity-40"
+        )}
+      >
+        <svg
+          className="size-5 sm:size-6 transition-transform duration-200 group-hover:-translate-x-0.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
 
-        {/* Navigation Arrows */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={scrollPrev}
-            disabled={!canScrollPrev}
-            aria-label="Previous rider"
-            className={cn(
-              "group flex size-9 cursor-pointer items-center justify-center rounded-xs border transition-all duration-200",
-              canScrollPrev
-                ? "border-charcoal-500 bg-obsidian-950/80 text-ivory-100 hover:border-gold-500 hover:bg-gold-500/10 hover:text-gold-400 active:scale-95"
-                : "cursor-not-allowed border-charcoal-700/60 bg-obsidian-950/40 text-graphite-600 opacity-40"
-            )}
-          >
-            <svg
-              className="size-4 transition-transform group-hover:-translate-x-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            type="button"
-            onClick={scrollNext}
-            disabled={!canScrollNext}
-            aria-label="Next rider"
-            className={cn(
-              "group flex size-9 cursor-pointer items-center justify-center rounded-xs border transition-all duration-200",
-              canScrollNext
-                ? "border-charcoal-500 bg-obsidian-950/80 text-ivory-100 hover:border-gold-500 hover:bg-gold-500/10 hover:text-gold-400 active:scale-95"
-                : "cursor-not-allowed border-charcoal-700/60 bg-obsidian-950/40 text-graphite-600 opacity-40"
-            )}
-          >
-            <svg
-              className="size-4 transition-transform group-hover:translate-x-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      {/* Aesthetic Right Navigation Arrow (at the rightmost card) */}
+      <button
+        type="button"
+        onClick={scrollNext}
+        disabled={!canScrollNext}
+        aria-label="Next rider"
+        className={cn(
+          "group absolute right-2 sm:right-3 lg:-right-4 xl:-right-6 top-[38%] -translate-y-1/2 z-20",
+          "flex size-10 sm:size-12 items-center justify-center rounded-full backdrop-blur-md",
+          "transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.85)]",
+          canScrollNext
+            ? "cursor-pointer border border-gold-500/50 bg-obsidian-950/90 text-ivory-100 hover:border-gold-400 hover:bg-gold-500/20 hover:text-gold-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] active:scale-95"
+            : "cursor-not-allowed border border-charcoal-700/60 bg-obsidian-950/60 text-graphite-600 opacity-40"
+        )}
+      >
+        <svg
+          className="size-5 sm:size-6 transition-transform duration-200 group-hover:translate-x-0.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
 
       {/* Embla Viewport */}
       <div
@@ -163,7 +152,7 @@ export function FeaturedRidersCarousel({
         aria-label="Featured Riders Carousel"
       >
         <div className="flex -ml-4 sm:-ml-6 touch-pan-y select-none">
-          {displayedRiders.map((rider, index) => (
+          {displayedRiders.map((rider) => (
             <div
               key={rider.slug}
               className="min-w-0 flex-[0_0_47%] sm:flex-[0_0_42%] md:flex-[0_0_33.333%] lg:flex-[0_0_31.5%] pl-4 sm:pl-6"
@@ -189,14 +178,11 @@ export function FeaturedRidersCarousel({
                     )}
                   </div>
 
-                  {/* Meta & Position */}
-                  <div className="mt-5 flex items-center justify-between gap-2">
+                  {/* Position */}
+                  <div className="mt-5">
                     <p className="text-[0.62rem] sm:text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-gold-500">
                       {rider.position}
                     </p>
-                    <span className="font-mono text-[0.62rem] tracking-wider text-graphite-500">
-                      #{String(index + 1).padStart(2, "0")}
-                    </span>
                   </div>
 
                   {/* Rider Display Name */}
@@ -235,7 +221,7 @@ export function FeaturedRidersCarousel({
 
       {/* Progress Dots Track */}
       {scrollSnaps.length > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
+        <div className="flex items-center justify-center gap-2 pt-6">
           {scrollSnaps.map((_, index) => (
             <button
               key={index}
@@ -253,12 +239,16 @@ export function FeaturedRidersCarousel({
         </div>
       )}
 
-      {/* Elegant Bottom Section CTA */}
-      <div className="mt-12 flex flex-col items-center justify-center gap-3 border-t border-border-subtle/60 pt-10 text-center">
-        <Button href={ROUTES.riders} variant="outline">
-          View All Riders {totalFeaturedCount > 6 ? `(${totalFeaturedCount} in Roster)` : ""} →
+      {/* Elegant CTA at the end of the carousel */}
+      <div className="mt-10 flex flex-col items-center justify-center gap-3 pt-4 text-center">
+        <Button
+          href={ROUTES.riders}
+          variant="outline"
+          className="border-gold-500/40 px-6 py-2.5 text-xs uppercase tracking-[0.22em] text-gold-400 transition-colors duration-200 hover:border-gold-400 hover:bg-gold-500/10 hover:text-gold-300"
+        >
+          View All Riders →
         </Button>
-        <p className="text-[0.68rem] tracking-[0.24em] text-graphite-400 uppercase">
+        <p className="text-[0.68rem] uppercase tracking-[0.24em] text-graphite-400">
           Explore the complete brotherhood line, machines, and routes
         </p>
       </div>

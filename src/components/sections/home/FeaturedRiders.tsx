@@ -27,10 +27,7 @@ export async function FeaturedRiders() {
           </Reveal>
         </div>
 
-        <FeaturedRidersCarousel
-          riders={featured}
-          totalFeaturedCount={featured.length}
-        />
+        <FeaturedRidersCarousel riders={featured} />
       </Container>
     </section>
   );
