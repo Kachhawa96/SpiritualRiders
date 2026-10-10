@@ -94,6 +94,74 @@ export async function uploadAdminImage(
   return data.publicUrl;
 }
 
+const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
+
+export function validateVideoFile(
+  file: File,
+  maxMb = 6
+): { valid: boolean; error?: string } {
+  const isVideo =
+    ALLOWED_VIDEO_TYPES.includes(file.type) ||
+    /\.(mp4|webm|mov)$/i.test(file.name);
+
+  if (!isVideo) {
+    return {
+      valid: false,
+      error: `Invalid video format (${file.type || "unknown"}). Allowed: MP4 (H.264), WebM.`,
+    };
+  }
+
+  const maxBytes = maxMb * 1024 * 1024;
+  if (file.size > maxBytes) {
+    return {
+      valid: false,
+      error: `Video size exceeds the ${maxMb}MB limit (actual: ${(file.size / (1024 * 1024)).toFixed(1)}MB).`,
+    };
+  }
+
+  return { valid: true };
+}
+
+export async function uploadAdminVideo(
+  file: File,
+  folder = "hero-video",
+  maxMb = 6
+): Promise<string> {
+  const validation = validateVideoFile(file, maxMb);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  const supabase = await getAdminDbClient();
+  if (!supabase) {
+    throw new Error("Supabase client could not be initialized.");
+  }
+
+  const extension = file.name.split(".").pop()?.toLowerCase() || "mp4";
+  const sanitizedName = file.name
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .slice(0, 32);
+  const path = `${folder}/${Date.now()}-${sanitizedName}.${extension}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+
+  const { error: uploadError } = await supabase.storage
+    .from("rider-media")
+    .upload(path, buffer, {
+      contentType: file.type || "video/mp4",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    throw new Error(`Failed to upload video: ${uploadError.message}`);
+  }
+
+  const { data } = supabase.storage.from("rider-media").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 // ── Riders Management ─────────────────────────────────────────────────────────
 
 export async function getAdminRiders(): Promise<AdminRiderRecord[]> {
@@ -574,6 +642,7 @@ export async function getCommunitySettings(): Promise<AdminCommunitySettings> {
     youtube_url: SOCIAL_LINKS.youtube ?? "",
     hero_image_url: null,
     logo_image_url: null,
+    hero_video_url: null,
     onboarding_enabled: false,
   };
 
@@ -616,6 +685,7 @@ export async function updateCommunitySettings(
       youtube_url: parsed.youtube_url || null,
       hero_image_url: parsed.hero_image_url || null,
       logo_image_url: parsed.logo_image_url || null,
+      hero_video_url: parsed.hero_video_url || null,
       onboarding_enabled: Boolean(parsed.onboarding_enabled),
       updated_at: new Date().toISOString(),
     })

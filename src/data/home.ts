@@ -43,6 +43,7 @@ export interface HomeFrame {
   tone: FrameTone;
   label: string;
   title: string;
+  image_url?: string;
 }
 
 export async function getFeaturedHomeRiders(): Promise<HomeRider[]> {
@@ -112,11 +113,41 @@ export const CHAPTERS: HomeChapter[] = [
 ];
 
 export const GALLERY_FRAMES: HomeFrame[] = [
-  { tone: "dawn", label: "04:40", title: "Before the city" },
-  { tone: "highway", label: "The line", title: "Single file" },
-  { tone: "rain", label: "Monsoon", title: "After the rain" },
-  { tone: "salt", label: "The Rann", title: "White horizon" },
-  { tone: "crew", label: "Camp", title: "The long pause" },
+  {
+    tone: "dawn",
+    label: "04:40",
+    title: "Before the city",
+    image_url:
+      "https://fkchydbhfklfsuvodfja.supabase.co/storage/v1/object/public/rider-media/covers/gallery-before-the-city.jpg",
+  },
+  {
+    tone: "highway",
+    label: "The line",
+    title: "Single file",
+    image_url:
+      "https://fkchydbhfklfsuvodfja.supabase.co/storage/v1/object/public/rider-media/covers/gallery-single-file.jpg",
+  },
+  {
+    tone: "rain",
+    label: "Monsoon",
+    title: "After the rain",
+    image_url:
+      "https://fkchydbhfklfsuvodfja.supabase.co/storage/v1/object/public/rider-media/covers/gallery-after-the-rain.jpg",
+  },
+  {
+    tone: "salt",
+    label: "The Rann",
+    title: "White horizon",
+    image_url:
+      "https://fkchydbhfklfsuvodfja.supabase.co/storage/v1/object/public/rider-media/covers/gallery-white-horizon.jpg",
+  },
+  {
+    tone: "crew",
+    label: "Camp",
+    title: "The long pause",
+    image_url:
+      "https://fkchydbhfklfsuvodfja.supabase.co/storage/v1/object/public/rider-media/covers/gallery-the-long-pause.jpg",
+  },
 ];
 
 export const VALUES = [

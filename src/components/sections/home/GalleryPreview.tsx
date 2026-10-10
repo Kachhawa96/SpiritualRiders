@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { GALLERY_FRAMES } from "@/data/home";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { Reveal } from "@/components/motion/Reveal";
@@ -32,11 +33,32 @@ export function GalleryPreview() {
             <ImageReveal
               key={frame.title}
               className={cn(
-                "min-h-52 border border-border-subtle",
+                "relative min-h-52 overflow-hidden border border-border-subtle bg-obsidian-950 group",
                 index === 0 && "col-span-2 min-h-72 md:row-span-2 md:min-h-[36rem]"
               )}
             >
-              <ChapterFrame tone={frame.tone} label={frame.label} title={frame.title} />
+              {frame.image_url ? (
+                <>
+                  <Image
+                    src={frame.image_url}
+                    alt={frame.title}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    sizes={
+                      index === 0
+                        ? "(min-width: 768px) 50vw, 100vw"
+                        : "(min-width: 768px) 25vw, 50vw"
+                    }
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-950/85 via-obsidian-950/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-graphite-300">
+                    <span className="text-gold-500">{frame.label}</span>
+                    <span className="text-ivory-100 font-medium truncate ml-2">{frame.title}</span>
+                  </div>
+                </>
+              ) : (
+                <ChapterFrame tone={frame.tone} label={frame.label} title={frame.title} />
+              )}
             </ImageReveal>
           ))}
         </div>

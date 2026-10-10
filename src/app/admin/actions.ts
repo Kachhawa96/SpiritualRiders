@@ -18,6 +18,7 @@ import {
   updateContactMessageStatus,
   deleteContactMessage,
   uploadAdminImage,
+  uploadAdminVideo,
 } from "@/lib/db/admin";
 import type {
   adminBloodSchema,
@@ -464,11 +465,17 @@ export async function saveSettingsAction(
     const youtube_url = (formData.get("youtube_url") as string)?.trim() || "";
     let hero_image_url = (formData.get("hero_image_url") as string)?.trim() || null;
     let logo_image_url = (formData.get("logo_image_url") as string)?.trim() || null;
+    let hero_video_url = (formData.get("hero_video_url") as string)?.trim() || null;
     const onboarding_enabled = formData.get("onboarding_enabled") === "on";
 
     const heroImageFile = formData.get("hero_image_file") as File | null;
     if (heroImageFile && heroImageFile.size > 0) {
       hero_image_url = await uploadAdminImage(heroImageFile, "hero", 5);
+    }
+
+    const heroVideoFile = formData.get("hero_video_file") as File | null;
+    if (heroVideoFile && heroVideoFile.size > 0) {
+      hero_video_url = await uploadAdminVideo(heroVideoFile, "hero-video", 6);
     }
 
     const logoImageFile = formData.get("logo_image_file") as File | null;
@@ -487,6 +494,7 @@ export async function saveSettingsAction(
       youtube_url,
       hero_image_url,
       logo_image_url,
+      hero_video_url,
       onboarding_enabled,
     });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,8 @@ import { EASE_OUT_EXPO } from "@/lib/motion";
 
 interface HeroClientProps {
   heroImageUrl: string | null;
+  heroVideoUrl?: string | null;
+  logoImageUrl?: string | null;
 }
 
 function subscribeDesktopQuery(callback: () => void) {
@@ -26,7 +28,11 @@ function getDesktopServerSnapshot() {
   return false;
 }
 
-export function HeroClient({ heroImageUrl }: HeroClientProps) {
+export function HeroClient({
+  heroImageUrl,
+  heroVideoUrl,
+  logoImageUrl,
+}: HeroClientProps) {
   const shouldReduceMotion = useReducedMotion();
   const isDesktop = useSyncExternalStore(
     subscribeDesktopQuery,
@@ -34,7 +40,50 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
     getDesktopServerSnapshot
   );
 
-  // Spring-smoothed mouse parallax motion values
+  // Video playback & graceful fallback state
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Mobile & slow connection optimization
+  useEffect(() => {
+    if (!heroVideoUrl || shouldReduceMotion) {
+      setCanPlayVideo(false);
+      return;
+    }
+
+    // Check Network Information API (Data Saver & Slow Connection)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const nav = typeof navigator !== "undefined" ? (navigator as any) : null;
+    const connection =
+      nav?.connection || nav?.mozConnection || nav?.webkitConnection;
+
+    if (connection) {
+      // If user has Data Saver enabled, protect bandwidth and stick to image
+      if (connection.saveData === true) {
+        setCanPlayVideo(false);
+        return;
+      }
+      // If connection is 2G or slow 2G, stick to static image to protect LCP & performance
+      if (
+        connection.effectiveType === "slow-2g" ||
+        connection.effectiveType === "2g"
+      ) {
+        setCanPlayVideo(false);
+        return;
+      }
+    }
+
+    // Defer video mount slightly so initial DOM paint & LCP image render unhindered
+    const timer = setTimeout(() => {
+      setCanPlayVideo(true);
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [heroVideoUrl, shouldReduceMotion]);
+
+  // Spring-smoothed mouse parallax motion values (Desktop only)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -62,18 +111,19 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
     mouseY.set(0);
   }, [mouseX, mouseY]);
 
-  // Motion variants for text settle animation
+  // Motion variants for elegant non-blocking entrance animation
   const settleVariants = {
-    hidden: (custom?: { y?: number }) =>
+    hidden: (custom?: { y?: number; scale?: number }) =>
       shouldReduceMotion
-        ? { opacity: 1, y: 0 }
-        : { opacity: 0, y: custom?.y ?? 16 },
+        ? { opacity: 1, y: 0, scale: 1 }
+        : { opacity: 0, y: custom?.y ?? 16, scale: custom?.scale ?? 1 },
     visible: (custom?: { delay?: number }) => ({
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
-        duration: 0.75,
-        delay: custom?.delay ?? 0,
+        duration: 0.8,
+        delay: shouldReduceMotion ? 0 : (custom?.delay ?? 0),
         ease: EASE_OUT_EXPO,
       },
     }),
@@ -88,9 +138,9 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
     >
       {/* Background layer */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {heroImageUrl ? (
+        {heroImageUrl || heroVideoUrl ? (
           <div className="absolute inset-0">
-            {/* Cinematic Background Image with Slow Drift & Subtle Mouse Parallax */}
+            {/* Cinematic Background Image & Video with Slow Drift & Subtle Mouse Parallax */}
             <motion.div
               className="absolute -inset-6 sm:-inset-8 will-change-transform"
               style={
@@ -116,32 +166,57 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
                     }
               }
             >
-              <Image
-                src={heroImageUrl}
-                alt="Spiritual Riders brotherhood on the road"
-                fill
-                priority
-                quality={90}
-                sizes="100vw"
-                className="object-cover object-center"
-              />
+              {/* Base Poster Image (Instant LCP & Immediate Video Fallback) */}
+              {heroImageUrl && (
+                <Image
+                  src={heroImageUrl}
+                  alt="Spiritual Riders brotherhood on the road"
+                  fill
+                  priority
+                  quality={90}
+                  sizes="100vw"
+                  className="object-cover object-center"
+                />
+              )}
+
+              {/* Looping Cinematic Video */}
+              {canPlayVideo && heroVideoUrl && !videoFailed && (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onCanPlay={() => setIsVideoLoaded(true)}
+                  onError={() => setVideoFailed(true)}
+                  className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out ${
+                    isVideoLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <source
+                    src={heroVideoUrl}
+                    type={heroVideoUrl.endsWith(".webm") ? "video/webm" : "video/mp4"}
+                  />
+                </video>
+              )}
             </motion.div>
 
-            {/* Dark Vignette & Atmospheric Gradients */}
+            {/* Dark Vignette & Atmospheric Gradients to Guarantee Typography Readability */}
             {/* 1. Base dark tint to preserve contrast across all screens */}
             <div className="absolute inset-0 bg-obsidian-950/60" />
 
             {/* 2. Vertical gradient: deeper at the bottom where text and next sections reside */}
             <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/75 to-obsidian-950/25" />
 
-            {/* 3. Horizontal gradient: deep from the left to protect the heading & body typography */}
+            {/* 3. Horizontal gradient: deep from the left to protect heading & body typography */}
             <div className="absolute inset-0 bg-gradient-to-r from-obsidian-950/90 via-obsidian-950/50 to-transparent" />
 
             {/* 4. Top radial gold glow for brotherhood warmth */}
             <div className="absolute -top-24 right-0 h-[36rem] w-[36rem] rounded-full bg-gold-500/10 blur-3xl" />
           </div>
         ) : (
-          /* Procedural drift & road SVG fallback when no image is configured */
+          /* Procedural drift & road SVG fallback when neither image nor video is configured */
           <motion.div
             className="hero-drift absolute -inset-6 sm:-inset-8 will-change-transform"
             style={
@@ -188,15 +263,41 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
         <div className="absolute inset-y-0 left-[8%] hidden w-px bg-gradient-to-b from-transparent via-gold-500/40 to-transparent md:block" />
       </div>
 
-      {/* Hero Content with Refined Text Settle Animation */}
+      {/* Hero Content with Non-Blocking Logo & Text Entrance Animation */}
       <Container className="relative z-10 mt-auto pt-32 pb-16 md:pb-20">
+        {/* Refined Brand Emblem / Logo Entrance */}
+        <motion.div
+          variants={settleVariants}
+          initial={shouldReduceMotion ? false : "hidden"}
+          animate="visible"
+          custom={{ delay: 0.04, y: 12, scale: 0.95 }}
+          className="mb-6 flex items-center gap-3"
+        >
+          {logoImageUrl ? (
+            <div className="relative size-11 overflow-hidden rounded-sm border border-gold-500/40 bg-obsidian-950/80 p-1.5 backdrop-blur-md shadow-[0_0_20px_oklch(67%_0.14_75/0.18)]">
+              <Image
+                src={logoImageUrl}
+                alt={SITE_CONFIG.name}
+                fill
+                className="object-contain p-1"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="grid size-11 place-items-center border border-gold-500/70 bg-obsidian-950/80 font-display text-xs font-bold tracking-[0.18em] text-gold-400 backdrop-blur-md shadow-[0_0_20px_oklch(67%_0.14_75/0.18)]">
+              SR
+            </div>
+          )}
+          <span className="h-px w-8 bg-gradient-to-r from-gold-500/60 to-transparent" />
+        </motion.div>
+
         {/* Eyebrow */}
         <motion.p
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          custom={{ delay: 0.05, y: 12 }}
+          custom={{ delay: 0.12, y: 12 }}
           className="mb-8 max-w-none text-[0.68rem] uppercase tracking-[0.42em] text-gold-500"
         >
           Est. {SITE_CONFIG.foundedYear} — The Brotherhood
@@ -208,7 +309,7 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          custom={{ delay: 0.12, y: 16 }}
+          custom={{ delay: 0.20, y: 16 }}
           className="max-w-5xl font-medium text-foreground text-balance"
         >
           Ride Beyond Roads.
@@ -220,7 +321,7 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          custom={{ delay: 0.22, y: 14 }}
+          custom={{ delay: 0.28, y: 14 }}
           className="mt-8 max-w-2xl font-display text-2xl leading-snug font-medium text-ivory-100 italic md:text-3xl"
         >
           More than riders. One spirit.
@@ -232,7 +333,7 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          custom={{ delay: 0.32, y: 12 }}
+          custom={{ delay: 0.36, y: 12 }}
           className="mt-5 max-w-xl text-graphite-300"
         >
           A crew bound by machines, miles, and the quiet code of the road.
@@ -244,7 +345,7 @@ export function HeroClient({ heroImageUrl }: HeroClientProps) {
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
-          custom={{ delay: 0.42, y: 12 }}
+          custom={{ delay: 0.44, y: 12 }}
           className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center"
         >
           <Button href="#intro">Enter the chapter</Button>

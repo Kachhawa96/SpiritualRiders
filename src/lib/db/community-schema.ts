@@ -41,6 +41,7 @@ export const publicRideRowSchema = z.object({
   participant_count: z.number().int(),
   is_featured: z.boolean(),
   tone: toneSchema,
+  cover_image_url: z.string().nullable().optional(),
 });
 
 export const publicParticipantRowSchema = z.object({
@@ -60,6 +61,7 @@ export const publicGalleryRowSchema = z.object({
   ride_title: z.string().nullable(),
   rider_slug: z.string().nullable(),
   rider_name: z.string().nullable(),
+  image_url: z.string().nullable().optional(),
 });
 
 export type PublicRideRow = z.infer<typeof publicRideRowSchema>;

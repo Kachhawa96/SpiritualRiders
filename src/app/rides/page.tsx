@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Chapter rides of Spiritual Riders. Dawn patrols, night lines, and the long way to the desert.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RidesPage() {
   const rides = await getRides();
 
