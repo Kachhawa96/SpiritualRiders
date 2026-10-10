@@ -3,12 +3,14 @@
 import { useState, useTransition } from "react";
 import type { AdminCommunitySettings } from "@/lib/db/admin-schema";
 import { saveSettingsAction } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface SettingsFormProps {
   initialSettings: AdminCommunitySettings;
 }
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
+  const { showFeedback } = useAdminFeedback();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -34,9 +36,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const maxMb = 6;
     if (file.size > maxMb * 1024 * 1024) {
-      setErrorMessage(
-        `Selected video is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
-      );
+      const msg = `Selected video is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Video Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setVideoFilePreview(null);
       return;
@@ -45,9 +52,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const allowed = ["video/mp4", "video/webm", "video/quicktime"];
     const isVideo = allowed.includes(file.type) || /\.(mp4|webm|mov)$/i.test(file.name);
     if (!isVideo) {
-      setErrorMessage(
-        `Invalid video format (${file.type || "unknown"}). Allowed: MP4 (H.264), WebM.`
-      );
+      const msg = `Invalid video format (${file.type || "unknown"}). Allowed: MP4 (H.264), WebM.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Video Format",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setVideoFilePreview(null);
       return;
@@ -66,9 +78,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const maxMb = 5;
     if (file.size > maxMb * 1024 * 1024) {
-      setErrorMessage(
-        `Selected logo is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
-      );
+      const msg = `Selected logo is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Logo Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setLogoFilePreview(null);
       return;
@@ -77,7 +94,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
     if (!allowed.includes(file.type) && !isSvg) {
-      setErrorMessage(`Invalid logo format (${file.type || "unknown"}). Allowed: SVG, PNG, WebP, JPG, AVIF.`);
+      const msg = `Invalid logo format (${file.type || "unknown"}). Allowed: SVG, PNG, WebP, JPG, AVIF.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Logo Format",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setLogoFilePreview(null);
       return;
@@ -96,9 +120,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const maxMb = 5;
     if (file.size > maxMb * 1024 * 1024) {
-      setErrorMessage(
-        `Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
-      );
+      const msg = `Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Image Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setFilePreview(null);
       return;
@@ -106,7 +135,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
     if (!allowed.includes(file.type)) {
-      setErrorMessage(`Invalid image format (${file.type}). Allowed: JPG, PNG, WebP, AVIF.`);
+      const msg = `Invalid image format (${file.type}). Allowed: JPG, PNG, WebP, AVIF.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Image Format",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setFilePreview(null);
       return;
@@ -126,9 +162,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const file = fileInput?.files?.[0];
 
     if (file && file.size > 5 * 1024 * 1024) {
-      setErrorMessage(
-        `Selected hero image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
-      );
+      const msg = `Selected hero image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
       return;
     }
 
@@ -136,9 +177,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const logoFile = logoInput?.files?.[0];
 
     if (logoFile && logoFile.size > 5 * 1024 * 1024) {
-      setErrorMessage(
-        `Selected logo is ${(logoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
-      );
+      const msg = `Selected logo is ${(logoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
       return;
     }
 
@@ -146,9 +192,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const videoFile = videoInput?.files?.[0];
 
     if (videoFile && videoFile.size > 6 * 1024 * 1024) {
-      setErrorMessage(
-        `Selected hero video is ${(videoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 6MB.`
-      );
+      const msg = `Selected hero video is ${(videoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 6MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
       return;
     }
 
@@ -165,18 +216,34 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           setVideoFilePreview(null);
           if (logoInput) logoInput.value = "";
           setLogoFilePreview(null);
+          showFeedback({
+            type: "success",
+            title: "Settings Saved",
+            message: "Community settings and brand media have been successfully saved.",
+            scrollToTop: true,
+          });
         } else {
-          setErrorMessage(res.error || "Failed to update settings.");
+          const err = res.error || "Failed to update settings.";
+          setErrorMessage(err);
+          showFeedback({
+            type: "error",
+            title: "Settings Save Failed",
+            message: err,
+            scrollToTop: true,
+          });
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to update settings.";
-        if (/failed to fetch|network|aborted/i.test(msg)) {
-          setErrorMessage(
-            "Upload request could not be completed. The image file may exceed network/server limits or connection was interrupted. Please ensure the file is under 5MB."
-          );
-        } else {
-          setErrorMessage(msg);
-        }
+        const displayErr = /failed to fetch|network|aborted/i.test(msg)
+          ? "Upload request could not be completed. The media file may exceed network/server limits or connection was interrupted. Please ensure files meet size guidelines."
+          : msg;
+        setErrorMessage(displayErr);
+        showFeedback({
+          type: "error",
+          title: "Upload / Save Error",
+          message: displayErr,
+          scrollToTop: true,
+        });
       }
     });
   };

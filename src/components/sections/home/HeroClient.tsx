@@ -202,18 +202,21 @@ export function HeroClient({
               )}
             </motion.div>
 
-            {/* Dark Vignette & Atmospheric Gradients to Guarantee Typography Readability */}
-            {/* 1. Base dark tint to preserve contrast across all screens */}
-            <div className="absolute inset-0 bg-obsidian-950/60" />
+            {/* Balanced Cinematic Overlays — preserves video clarity & detail while keeping text crisp */}
+            {/* 1. Light global base tint (keeps highlights in check without crushing darker scenes) */}
+            <div className="absolute inset-0 bg-obsidian-950/20" />
 
-            {/* 2. Vertical gradient: deeper at the bottom where text and next sections reside */}
-            <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/75 to-obsidian-950/25" />
+            {/* 2. Top header shield (preserves navbar link contrast without tinting the video center) */}
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-obsidian-950/60 via-obsidian-950/20 to-transparent" />
 
-            {/* 3. Horizontal gradient: deep from the left to protect heading & body typography */}
-            <div className="absolute inset-0 bg-gradient-to-r from-obsidian-950/90 via-obsidian-950/50 to-transparent" />
+            {/* 3. Bottom vertical gradient (smooth seam to next section and contrast behind CTAs & description) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/65 via-25% to-transparent to-60%" />
 
-            {/* 4. Top radial gold glow for brotherhood warmth */}
-            <div className="absolute -top-24 right-0 h-[36rem] w-[36rem] rounded-full bg-gold-500/10 blur-3xl" />
+            {/* 4. Left horizontal gradient (protects headline & body typography, fully clear on the right) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-obsidian-950/80 via-obsidian-950/35 via-45% to-transparent" />
+
+            {/* 5. Subtle radial gold glow for brotherhood atmosphere */}
+            <div className="pointer-events-none absolute -top-24 right-0 h-[36rem] w-[36rem] rounded-full bg-gold-500/8 blur-3xl" />
           </div>
         ) : (
           /* Procedural drift & road SVG fallback when neither image nor video is configured */
@@ -310,7 +313,7 @@ export function HeroClient({
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
           custom={{ delay: 0.20, y: 16 }}
-          className="max-w-5xl font-medium text-foreground text-balance"
+          className="max-w-5xl font-medium text-foreground text-balance drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]"
         >
           Ride Beyond Roads.
         </motion.h1>
@@ -322,7 +325,7 @@ export function HeroClient({
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
           custom={{ delay: 0.28, y: 14 }}
-          className="mt-8 max-w-2xl font-display text-2xl leading-snug font-medium text-ivory-100 italic md:text-3xl"
+          className="mt-8 max-w-2xl font-display text-2xl leading-snug font-medium text-ivory-100 italic md:text-3xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
         >
           More than riders. One spirit.
         </motion.p>
@@ -334,7 +337,7 @@ export function HeroClient({
           initial={shouldReduceMotion ? false : "hidden"}
           animate="visible"
           custom={{ delay: 0.36, y: 12 }}
-          className="mt-5 max-w-xl text-graphite-300"
+          className="mt-5 max-w-xl text-graphite-200 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]"
         >
           A crew bound by machines, miles, and the quiet code of the road.
         </motion.p>

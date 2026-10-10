@@ -7,6 +7,7 @@ import type {
   AdminRiderRecord,
 } from "@/lib/db/admin-schema";
 import { deleteGalleryAction, saveGalleryAction } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface GalleryManagerProps {
   initialFrames: AdminGalleryRecord[];
@@ -28,6 +29,7 @@ export function GalleryManager({
   rides,
   riders,
 }: GalleryManagerProps) {
+  const { showFeedback } = useAdminFeedback();
   const [frames, setFrames] = useState(initialFrames);
   const [filterTone, setFilterTone] = useState("all");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -46,8 +48,20 @@ export function GalleryManager({
       const res = await deleteGalleryAction(id);
       if (res.success) {
         setFrames((prev) => prev.filter((f) => f.id !== id));
+        showFeedback({
+          type: "success",
+          title: "Frame Deleted",
+          message: `Gallery frame "${title}" was permanently deleted.`,
+          scrollToTop: false,
+        });
       } else {
-        alert(res.error || "Failed to delete frame.");
+        const err = res.error || "Failed to delete frame.";
+        showFeedback({
+          type: "error",
+          title: "Delete Failed",
+          message: err,
+          scrollToTop: false,
+        });
       }
     });
   };
@@ -58,16 +72,34 @@ export function GalleryManager({
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const frameTitle = String(formData.get("title") || "Gallery Frame");
 
     startTransition(async () => {
       const id = editingFrame?.id ?? null;
       const res = await saveGalleryAction(id, formData);
       if (res.success) {
-        setShowAddForm(false);
-        setEditingFrame(null);
-        window.location.reload();
+        showFeedback({
+          type: "success",
+          title: editingFrame ? "Frame Updated" : "Frame Uploaded",
+          message: editingFrame
+            ? `Gallery frame "${frameTitle}" was updated successfully.`
+            : `New gallery frame "${frameTitle}" was uploaded successfully.`,
+          onConfirm: () => {
+            setShowAddForm(false);
+            setEditingFrame(null);
+            window.location.reload();
+          },
+          scrollToTop: true,
+        });
       } else {
-        setErrorMessage(res.error || "Failed to save gallery frame.");
+        const err = res.error || "Failed to save gallery frame.";
+        setErrorMessage(err);
+        showFeedback({
+          type: "error",
+          title: "Upload Failed",
+          message: err,
+          scrollToTop: true,
+        });
       }
     });
   };

@@ -8,6 +8,7 @@ import {
   updateContactMessageStatusAction,
   deleteContactMessageAction,
 } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface MessagesTableProps {
   initialMessages: AdminContactMessageRecord[];
@@ -46,6 +47,7 @@ const TOPIC_LABELS: Record<string, { label: string; badgeClass: string }> = {
 
 export function MessagesTable({ initialMessages }: MessagesTableProps) {
   const router = useRouter();
+  const { showFeedback } = useAdminFeedback();
   const [messages, setMessages] = useState<AdminContactMessageRecord[]>(initialMessages);
   const [filter, setFilter] = useState<"all" | "unread" | "read" | "archived">("unread");
   const [topicFilter, setTopicFilter] = useState<string>("all");
@@ -118,11 +120,24 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
           type: "success",
           text: "Inquiry permanently deleted.",
         });
+        showFeedback({
+          type: "success",
+          title: "Inquiry Deleted",
+          message: `Inquiry from "${name}" has been permanently removed.`,
+          scrollToTop: false,
+        });
         router.refresh();
       } else {
+        const err = res.error || "Failed to delete inquiry.";
         setFeedback({
           type: "error",
-          text: res.error || "Failed to delete inquiry.",
+          text: err,
+        });
+        showFeedback({
+          type: "error",
+          title: "Delete Failed",
+          message: err,
+          scrollToTop: false,
         });
       }
     });

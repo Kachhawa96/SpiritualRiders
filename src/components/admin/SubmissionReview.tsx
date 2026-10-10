@@ -10,6 +10,7 @@ import {
   rejectSubmissionAction,
 } from "@/app/admin/onboarding/actions";
 import { formatDeterministicDateTime } from "@/lib/date-utils";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface SubmissionReviewProps {
   submission: OnboardingSubmissionRecord;
@@ -18,6 +19,7 @@ interface SubmissionReviewProps {
 
 export function SubmissionReview({ submission, liveRider }: SubmissionReviewProps) {
   const router = useRouter();
+  const { showFeedback } = useAdminFeedback();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -35,9 +37,22 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
       const res = await approveSubmissionAction(submission.id);
       if (res.success) {
         setSuccessMessage("Submission approved successfully! Live roster updated.");
+        showFeedback({
+          type: "success",
+          title: "Submission Approved",
+          message: `Rider profile for "${submission.display_name}" has been approved and published to the live roster.`,
+          scrollToTop: true,
+        });
         router.refresh();
       } else {
-        setErrorMessage(res.error || "Approval failed.");
+        const err = res.error || "Approval failed.";
+        setErrorMessage(err);
+        showFeedback({
+          type: "error",
+          title: "Approval Failed",
+          message: err,
+          scrollToTop: true,
+        });
       }
     });
   };
@@ -49,9 +64,22 @@ export function SubmissionReview({ submission, liveRider }: SubmissionReviewProp
       if (res.success) {
         setShowRejectModal(false);
         setSuccessMessage("Submission rejected.");
+        showFeedback({
+          type: "info",
+          title: "Submission Rejected",
+          message: `Submission for "${submission.display_name}" has been marked as rejected.`,
+          scrollToTop: true,
+        });
         router.refresh();
       } else {
-        setErrorMessage(res.error || "Rejection failed.");
+        const err = res.error || "Rejection failed.";
+        setErrorMessage(err);
+        showFeedback({
+          type: "error",
+          title: "Rejection Failed",
+          message: err,
+          scrollToTop: true,
+        });
       }
     });
   };

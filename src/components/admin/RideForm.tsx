@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AdminRideRecord, AdminRiderRecord } from "@/lib/db/admin-schema";
 import { saveRideAction } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface RideFormProps {
   initialData?: AdminRideRecord | null;
@@ -41,7 +41,7 @@ export function RideForm({
   initialData,
   availableRiders = [],
 }: RideFormProps) {
-  const router = useRouter();
+  const { showFeedback } = useAdminFeedback();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -88,10 +88,23 @@ export function RideForm({
     startTransition(async () => {
       const res = await saveRideAction(initialData?.id ?? null, formData);
       if (res.success) {
-        router.push("/admin/rides");
-        router.refresh();
+        showFeedback({
+          type: "success",
+          title: isEditing ? "Expedition Updated" : "Expedition Created",
+          message: isEditing
+            ? `Expedition "${title || "ride"}" was successfully updated.`
+            : `New expedition "${title || "ride"}" has been successfully published.`,
+          redirectTo: "/admin/rides",
+        });
       } else {
-        setErrorMessage(res.error || "Failed to save ride.");
+        const err = res.error || "Failed to save ride.";
+        setErrorMessage(err);
+        showFeedback({
+          type: "error",
+          title: "Unable to Save Expedition",
+          message: err,
+          scrollToTop: true,
+        });
       }
     });
   };
