@@ -14,7 +14,7 @@ export async function Hero({ heroImageUrl: propHeroImageUrl }: HeroProps = {}) {
     propHeroImageUrl !== undefined ? propHeroImageUrl : await getHeroImageUrl();
 
   return (
-    <section className="relative -mt-20 flex min-h-svh flex-col">
+    <section id="hero" className="relative -mt-20 flex min-h-svh flex-col">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {heroImageUrl ? (
           <div className="absolute inset-0">

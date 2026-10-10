@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, MotionConfig } from "motion/react";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { EASE_OUT_EXPO } from "@/lib/motion";
@@ -28,6 +28,13 @@ export function AppShell({ children, footer, contactInfo, logoUrl }: AppShellPro
     setOpenPath(pathname);
     setOpen(false);
   }
+
+  useEffect(() => {
+    // When navigating to the home landing page without a hash fragment, ensure scroll position is reset to the top
+    if (pathname === "/" && !window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   const openMenu = useCallback(() => {
     setOpen(true);

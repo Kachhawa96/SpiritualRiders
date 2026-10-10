@@ -84,7 +84,7 @@ export function MobileNav({ id, onClose, email, tagline, logoUrl }: MobileNavPro
                 ×
               </span>
             </button>
-            <BrandMark compact logoUrl={logoUrl} className="order-1" />
+            <BrandMark compact logoUrl={logoUrl} className="order-1" onNavigate={onClose} />
           </div>
 
           <nav className="mt-12 flex-1 overflow-y-auto" aria-label="Mobile">
