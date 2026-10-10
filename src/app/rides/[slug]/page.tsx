@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
+import { RideStatusBadge } from "@/components/rides/RideStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { isLiveRoute, ROUTES, SITE_CONFIG } from "@/config/site";
-import { getRide, getRides, RIDE_STATUS_LABEL, RIDE_TYPE_LABEL } from "@/lib/community";
+import { getRide, getRides, RIDE_TYPE_LABEL } from "@/lib/community";
 import { formatDate, formatNumber } from "@/lib/utils";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -37,12 +39,30 @@ export default async function RidePage({ params }: PageProps) {
 
   return (
     <>
-      <section className="relative -mt-20 flex min-h-[70svh] flex-col">
-        <div className="pointer-events-none absolute inset-0 bg-obsidian-950" aria-hidden="true" />
+      <section className="relative -mt-20 flex min-h-[70svh] flex-col overflow-hidden">
+        {ride.cover_image_url ? (
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <Image
+              src={ride.cover_image_url}
+              alt={ride.title}
+              fill
+              priority
+              className="object-cover opacity-25 filter contrast-110"
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/80 to-obsidian-950/40" />
+          </div>
+        ) : (
+          <div className="pointer-events-none absolute inset-0 bg-obsidian-950" aria-hidden="true" />
+        )}
         <Container className="relative z-10 mt-auto pt-32 pb-14">
-          <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">
-            {RIDE_TYPE_LABEL[ride.ride_type]} · {RIDE_STATUS_LABEL[ride.status]}
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <RideStatusBadge status={ride.calculated_status} />
+            <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">
+              {RIDE_TYPE_LABEL[ride.ride_type]}
+              {ride.route_summary ? ` · ${ride.route_summary}` : ""}
+            </p>
+          </div>
           <h1 className="mt-5 max-w-4xl font-medium">{ride.title}</h1>
           {ride.tagline ? (
             <p className="mt-6 max-w-xl font-display text-2xl text-ivory-100 italic">{ride.tagline}</p>
@@ -70,8 +90,25 @@ export default async function RidePage({ params }: PageProps) {
               <Fact label="The line" value={`${ride.participant_count} riders`} />
             </dl>
           </div>
-          <ImageReveal className="min-h-80 border border-border-subtle lg:col-span-5">
-            <ChapterFrame tone={ride.tone} label={ride.route_summary ?? "The road"} title={ride.title} />
+          <ImageReveal className="relative min-h-80 overflow-hidden border border-border-subtle lg:col-span-5 bg-obsidian-950 aspect-[4/3] w-full">
+            {ride.cover_image_url ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={ride.cover_image_url}
+                  alt={ride.title}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-950/70 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-between text-xs tracking-[0.2em] uppercase text-graphite-300">
+                  <span className="text-gold-500">{ride.route_summary ?? "The road"}</span>
+                  <span>{ride.title}</span>
+                </div>
+              </div>
+            ) : (
+              <ChapterFrame tone={ride.tone} label={ride.route_summary ?? "The road"} title={ride.title} />
+            )}
           </ImageReveal>
         </Container>
       </section>
@@ -111,9 +148,22 @@ export default async function RidePage({ params }: PageProps) {
             <h2 className="font-medium">Frames</h2>
             <ul className="mt-8 grid gap-4 md:grid-cols-3">
               {ride.frames.map((frame) => (
-                <li key={frame.id} className="border border-border-subtle">
-                  <div className="relative aspect-[4/3]">
-                    <ChapterFrame tone={frame.tone} label={frame.rider_name ?? "The road"} title={frame.title} />
+                <li key={frame.id} className="border border-border-subtle bg-obsidian-900 group">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-obsidian-950">
+                    {frame.image_url ? (
+                      <>
+                        <Image
+                          src={frame.image_url}
+                          alt={frame.title}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          sizes="(min-width: 768px) 33vw, 100vw"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-950/70 via-transparent to-transparent" />
+                      </>
+                    ) : (
+                      <ChapterFrame tone={frame.tone} label={frame.rider_name ?? "The road"} title={frame.title} />
+                    )}
                   </div>
                   <p className="px-4 py-4 text-sm">{frame.caption}</p>
                 </li>

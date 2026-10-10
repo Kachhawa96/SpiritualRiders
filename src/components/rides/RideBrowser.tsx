@@ -3,12 +3,23 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { RideCard } from "@/components/rides/RideCard";
 import { Button } from "@/components/ui/Button";
-import { RIDE_STATUS_LABEL, RIDE_TYPE_LABEL } from "@/lib/ride-labels";
+import {
+  CALCULATED_STATUS_LABEL,
+  CalculatedRideStatus,
+  getCalculatedRideStatus,
+  RIDE_TYPE_LABEL,
+} from "@/lib/ride-labels";
 import type { RideSummary } from "@/lib/community";
 
 interface RideBrowserProps {
   rides: RideSummary[];
 }
+
+const STATUS_OPTIONS: { id: CalculatedRideStatus; label: string }[] = [
+  { id: "upcoming", label: CALCULATED_STATUS_LABEL.upcoming },
+  { id: "ongoing", label: CALCULATED_STATUS_LABEL.ongoing },
+  { id: "completed", label: CALCULATED_STATUS_LABEL.completed },
+];
 
 export function RideBrowser({ rides }: RideBrowserProps) {
   const params = useSearchParams();
@@ -20,7 +31,9 @@ export function RideBrowser({ rides }: RideBrowserProps) {
 
   const results = rides.filter((ride) => {
     if (type && ride.ride_type !== type) return false;
-    if (status && ride.status !== status) return false;
+    const computedStatus =
+      ride.calculated_status ?? getCalculatedRideStatus(ride.start_date, ride.end_date);
+    if (status && computedStatus !== status) return false;
     if (!q.trim()) return true;
     const needle = q.trim().toLowerCase();
     return [ride.title, ride.route_summary ?? "", ride.short_description]
@@ -30,7 +43,6 @@ export function RideBrowser({ rides }: RideBrowserProps) {
   });
 
   const types = [...new Set(rides.map((ride) => ride.ride_type))];
-  const statuses = [...new Set(rides.map((ride) => ride.status))];
   const narrowed = Boolean(q || type || status);
 
   function update(key: string, value: string) {
@@ -64,9 +76,9 @@ export function RideBrowser({ rides }: RideBrowserProps) {
           onChange={(value) => update("type", value)}
         />
         <ChipGroup
-          legend="When"
+          legend="Status"
           value={status}
-          options={statuses.map((item) => ({ id: item, label: RIDE_STATUS_LABEL[item] }))}
+          options={STATUS_OPTIONS}
           onChange={(value) => update("status", value)}
         />
         {narrowed ? (

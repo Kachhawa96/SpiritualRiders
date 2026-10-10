@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/server";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminFeedbackProvider } from "@/components/admin/AdminFeedbackContext";
 import { getCommunitySettings } from "@/lib/db/admin";
 import type { ReactNode } from "react";
 
@@ -18,11 +19,13 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <AdminNav userEmail={user.email ?? "Admin"} logoUrl={logoUrl} />
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">{children}</div>
-      </main>
-    </div>
+    <AdminFeedbackProvider>
+      <div className="flex min-h-screen flex-col">
+        <AdminNav userEmail={user.email ?? "Admin"} logoUrl={logoUrl} />
+        <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">{children}</div>
+        </main>
+      </div>
+    </AdminFeedbackProvider>
   );
 }

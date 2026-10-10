@@ -8,12 +8,14 @@ import {
   toggleRiderActiveAction,
   toggleRiderFeaturedAction,
 } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface RiderTableProps {
   initialRiders: AdminRiderRecord[];
 }
 
 export function RiderTable({ initialRiders }: RiderTableProps) {
+  const { showFeedback } = useAdminFeedback();
   const [riders, setRiders] = useState(initialRiders);
   const [search, setSearch] = useState("");
   const [positionFilter, setPositionFilter] = useState("all");
@@ -69,8 +71,20 @@ export function RiderTable({ initialRiders }: RiderTableProps) {
       const res = await deleteRiderAction(id);
       if (res.success) {
         setRiders((prev) => prev.filter((r) => r.id !== id));
+        showFeedback({
+          type: "success",
+          title: "Rider Deleted",
+          message: `Rider "${name}" has been permanently removed.`,
+          scrollToTop: false,
+        });
       } else {
-        alert(res.error || "Failed to delete rider.");
+        const err = res.error || "Failed to delete rider.";
+        showFeedback({
+          type: "error",
+          title: "Delete Failed",
+          message: err,
+          scrollToTop: false,
+        });
       }
     });
   };

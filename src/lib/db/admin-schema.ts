@@ -172,6 +172,7 @@ export const adminCommunitySettingsSchema = z.object({
   youtube_url: z.string().nullable().optional(),
   hero_image_url: z.string().nullable().optional(),
   logo_image_url: z.string().nullable().optional(),
+  hero_video_url: z.string().nullable().optional(),
   onboarding_enabled: z.boolean().default(false),
 });
 

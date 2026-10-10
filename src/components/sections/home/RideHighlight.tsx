@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ImageReveal } from "@/components/motion/ImageReveal";
 import { Reveal } from "@/components/motion/Reveal";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
@@ -15,8 +16,25 @@ export async function RideHighlight() {
     <section id="ride" className="section-padding scroll-mt-24 border-t border-border-subtle">
       <Container>
         <article className="grid overflow-hidden border border-border-subtle lg:grid-cols-2">
-          <ImageReveal className="min-h-[22rem] lg:min-h-[36rem]">
-            <ChapterFrame tone={ride.tone} label={ride.route_summary ?? "The road"} title={ride.title} />
+          <ImageReveal className="relative min-h-[22rem] lg:min-h-[36rem] overflow-hidden bg-obsidian-950">
+            {ride.cover_image_url ? (
+              <>
+                <Image
+                  src={ride.cover_image_url}
+                  alt={ride.title}
+                  fill
+                  className="object-cover transition-transform duration-700 ease-out hover:scale-105"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-950/80 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6 z-10 flex items-center justify-between text-xs tracking-[0.2em] uppercase text-graphite-300">
+                  <span className="text-gold-500">{ride.route_summary ?? "The road"}</span>
+                  <span>{ride.title}</span>
+                </div>
+              </>
+            ) : (
+              <ChapterFrame tone={ride.tone} label={ride.route_summary ?? "The road"} title={ride.title} />
+            )}
           </ImageReveal>
           <div className="flex flex-col justify-center bg-obsidian-900 px-7 py-12 md:px-12 md:py-16">
             <Reveal>

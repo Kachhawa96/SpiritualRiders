@@ -5,7 +5,7 @@ import { AboutValues } from "@/components/sections/about/AboutValues";
 import { Culture } from "@/components/sections/about/Culture";
 import { Origin } from "@/components/sections/about/Origin";
 import { Philosophy } from "@/components/sections/about/Philosophy";
-import { WhatWeRide } from "@/components/sections/about/WhatWeRide";
+// import { WhatWeRide } from "@/components/sections/about/WhatWeRide";
 import { Timeline } from "@/components/sections/home/Timeline";
 import { SITE_CONFIG } from "@/config/site";
 
@@ -21,7 +21,11 @@ export default function AboutPage() {
       <Origin />
       <Philosophy />
       <AboutValues />
-      <WhatWeRide />
+      {/* 
+        'What we ride' section is disabled per user preference.
+        To re-enable in the future, simply uncomment the line below.
+      */}
+      {/* <WhatWeRide /> */}
       <Culture />
       <Timeline />
       <AboutCta />

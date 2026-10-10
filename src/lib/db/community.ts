@@ -93,6 +93,7 @@ export interface PublicCommunitySettings {
   founded_year: number;
   hero_image_url: string | null;
   logo_image_url: string | null;
+  hero_video_url: string | null;
   onboarding_enabled: boolean;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -109,6 +110,7 @@ export async function loadCommunitySettings(): Promise<PublicCommunitySettings> 
     founded_year: 2020,
     hero_image_url: null,
     logo_image_url: null,
+    hero_video_url: null,
     onboarding_enabled: false,
     instagram_url: null,
     facebook_url: null,
@@ -136,6 +138,7 @@ export async function loadCommunitySettings(): Promise<PublicCommunitySettings> 
       founded_year: Number(data.founded_year) || fallback.founded_year,
       hero_image_url: (data.hero_image_url as string) || null,
       logo_image_url: (data.logo_image_url as string) || null,
+      hero_video_url: (data.hero_video_url as string) || null,
       onboarding_enabled: Boolean(data.onboarding_enabled),
       instagram_url: (data.instagram_url as string) || null,
       facebook_url: (data.facebook_url as string) || null,

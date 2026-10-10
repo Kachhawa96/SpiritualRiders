@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { isLiveRoute } from "@/config/site";
 import { isActivePath } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -28,13 +28,27 @@ export function PrimaryLink({
   const pathname = usePathname();
   const active = isActivePath(pathname, item.href);
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      onNavigate?.();
+      if (item.href === "/" && pathname === "/") {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      }
+    },
+    [item.href, pathname, onNavigate]
+  );
+
   return (
     <Link
       href={item.href}
       prefetch={isLiveRoute(item.href)}
       aria-current={active ? "page" : undefined}
       data-active={active ? "true" : undefined}
-      onClick={onNavigate}
+      onClick={handleClick}
       className={cn(className, active ? activeClassName : idleClassName)}
     >
       {children ?? item.label}

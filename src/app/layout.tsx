@@ -23,44 +23,72 @@ const inter = Inter({
 });
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://spiritualriders.in"
-  ),
-  title: {
-    default: "Spiritual Riders — Riders. Brotherhood. Spirit.",
-    template: "%s | Spiritual Riders",
-  },
-  description:
-    "Spiritual Riders is a premium motorcycle brotherhood built on passion, respect, and the open road. Explore our riders, machines, rides, and community story.",
-  keywords: [
-    "Spiritual Riders",
-    "motorcycle brotherhood",
-    "biker community",
-    "riders club",
-    "motorcycle community India",
-  ],
-  authors: [{ name: "Spiritual Riders" }],
-  creator: "Spiritual Riders",
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    siteName: "Spiritual Riders",
-    title: "Spiritual Riders — Riders. Brotherhood. Spirit.",
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await loadCommunitySettings();
+  const logoUrl = settings.logo_image_url;
+
+  return {
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://spiritualriders.in"
+    ),
+    title: {
+      default: `${settings.name || "Spiritual Riders"} — ${settings.tagline || "Riders. Brotherhood. Spirit."}`,
+      template: `%s | ${settings.name || "Spiritual Riders"}`,
+    },
     description:
-      "A premium motorcycle brotherhood built on passion, respect, and the open road.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Spiritual Riders — Riders. Brotherhood. Spirit.",
-    description:
-      "A premium motorcycle brotherhood built on passion, respect, and the open road.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+      settings.description ||
+      "Spiritual Riders is a premium motorcycle brotherhood built on passion, respect, and the open road. Explore our riders, machines, rides, and community story.",
+    keywords: [
+      "Spiritual Riders",
+      "motorcycle brotherhood",
+      "biker community",
+      "riders club",
+      "motorcycle community India",
+    ],
+    authors: [{ name: settings.name || "Spiritual Riders" }],
+    creator: settings.name || "Spiritual Riders",
+    icons: {
+      icon: logoUrl
+        ? [
+            { url: logoUrl },
+            { url: "/icon.png", sizes: "32x32", type: "image/png" },
+            { url: "/icon.svg", type: "image/svg+xml" },
+            { url: "/favicon.ico" },
+          ]
+        : [
+            { url: "/icon.png", sizes: "32x32", type: "image/png" },
+            { url: "/icon.svg", type: "image/svg+xml" },
+            { url: "/favicon.ico" },
+          ],
+      apple: logoUrl
+        ? [{ url: logoUrl }, { url: "/apple-icon.png", sizes: "180x180" }]
+        : [{ url: "/apple-icon.png", sizes: "180x180" }],
+      shortcut: [logoUrl || "/favicon.ico"],
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_IN",
+      siteName: settings.name || "Spiritual Riders",
+      title: `${settings.name || "Spiritual Riders"} — ${settings.tagline || "Riders. Brotherhood. Spirit."}`,
+      description:
+        settings.description ||
+        "A premium motorcycle brotherhood built on passion, respect, and the open road.",
+      images: settings.hero_image_url ? [{ url: settings.hero_image_url }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${settings.name || "Spiritual Riders"} — ${settings.tagline || "Riders. Brotherhood. Spirit."}`,
+      description:
+        settings.description ||
+        "A premium motorcycle brotherhood built on passion, respect, and the open road.",
+      images: settings.hero_image_url ? [settings.hero_image_url] : undefined,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 // ── Viewport ──────────────────────────────────────────────────────────────────
 export const viewport: Viewport = {

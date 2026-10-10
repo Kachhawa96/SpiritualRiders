@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
@@ -56,8 +57,21 @@ export function GalleryBrowser({ frames }: GalleryBrowserProps) {
                 onClick={() => setOpenId(frame.id)}
                 className="block w-full cursor-pointer border border-border-subtle text-left"
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <ChapterFrame tone={frame.tone} label={frame.ride_title ?? "The road"} title={frame.title} />
+                <div className="relative aspect-[4/3] overflow-hidden bg-obsidian-950 group">
+                  {frame.image_url ? (
+                    <>
+                      <Image
+                        src={frame.image_url}
+                        alt={frame.title}
+                        fill
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        sizes="(min-width: 768px) 33vw, 50vw"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-obsidian-950/80 via-transparent to-transparent" />
+                    </>
+                  ) : (
+                    <ChapterFrame tone={frame.tone} label={frame.ride_title ?? "The road"} title={frame.title} />
+                  )}
                 </div>
                 <span className="block px-4 py-4">
                   <span className="block font-display text-2xl text-ivory-100">{frame.title}</span>
@@ -99,8 +113,18 @@ function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void
           onClick={onClose}
         />
         <div className="relative z-10 grid w-full max-w-4xl overflow-hidden border border-border-subtle bg-obsidian-950 shadow-2xl transition-all duration-300 md:grid-cols-2">
-          <div className="relative min-h-72">
-            <ChapterFrame tone={frame.tone} label={frame.ride_title ?? "The road"} title={frame.title} />
+          <div className="relative min-h-72 aspect-[4/3] md:aspect-auto overflow-hidden bg-obsidian-950">
+            {frame.image_url ? (
+              <Image
+                src={frame.image_url}
+                alt={frame.title}
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 50vw, 100vw"
+              />
+            ) : (
+              <ChapterFrame tone={frame.tone} label={frame.ride_title ?? "The road"} title={frame.title} />
+            )}
           </div>
           <div className="flex flex-col p-6 md:p-8">
             <button

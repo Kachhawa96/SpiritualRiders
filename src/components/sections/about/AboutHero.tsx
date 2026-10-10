@@ -36,8 +36,8 @@ export function AboutHero() {
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button href="#origin">The origin</Button>
-          <Button href="#what-we-ride" variant="outline">
-            What we ride
+          <Button href="#philosophy" variant="outline">
+            Our philosophy
           </Button>
         </div>
       </Container>

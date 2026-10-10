@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { AdminRiderRecord } from "@/lib/db/admin-schema";
 import { saveRiderAction } from "@/app/admin/actions";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { calculateAgeFromDob } from "@/lib/date-utils";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface RiderFormProps {
   initialData?: AdminRiderRecord | null;
@@ -38,7 +38,7 @@ const RIDING_STYLES = [
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export function RiderForm({ initialData }: RiderFormProps) {
-  const router = useRouter();
+  const { showFeedback } = useAdminFeedback();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -95,10 +95,23 @@ export function RiderForm({ initialData }: RiderFormProps) {
     startTransition(async () => {
       const res = await saveRiderAction(initialData?.id ?? null, formData);
       if (res.success) {
-        router.push("/admin/riders");
-        router.refresh();
+        showFeedback({
+          type: "success",
+          title: isEditing ? "Rider Updated" : "Rider Created",
+          message: isEditing
+            ? `Profile details for "${displayName || "rider"}" were successfully updated.`
+            : `New rider "${displayName || "rider"}" has been successfully added to the roster.`,
+          redirectTo: "/admin/riders",
+        });
       } else {
-        setErrorMessage(res.error || "Failed to save rider.");
+        const err = res.error || "Failed to save rider.";
+        setErrorMessage(err);
+        showFeedback({
+          type: "error",
+          title: "Unable to Save Rider",
+          message: err,
+          scrollToTop: true,
+        });
       }
     });
   };

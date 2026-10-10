@@ -141,7 +141,7 @@ const RAW_RIDERS: Rider[] = [
     riding_since: 2016,
     riding_style: ["adventure"],
     favorite_route: "Jodhpur dunes",
-    is_featured: false,
+    is_featured: true,
     joined_date: "2022-11-18",
   }),
   rider({
@@ -164,7 +164,7 @@ const RAW_RIDERS: Rider[] = [
     riding_since: 2012,
     riding_style: ["touring", "commuter"],
     favorite_route: "Ahmedabad to the coast",
-    is_featured: false,
+    is_featured: true,
     joined_date: "2021-08-09",
   }),
   rider({
@@ -187,7 +187,7 @@ const RAW_RIDERS: Rider[] = [
     riding_since: 2001,
     riding_style: ["adventure", "touring"],
     favorite_route: "The Aravalli loop",
-    is_featured: false,
+    is_featured: true,
     joined_date: "2021-02-14",
   }),
   rider({

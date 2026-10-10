@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { AdminRideRecord } from "@/lib/db/admin-schema";
 import { deleteRideAction, toggleRideFeaturedAction } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface RideTableProps {
   initialRides: AdminRideRecord[];
 }
 
 export function RideTable({ initialRides }: RideTableProps) {
+  const { showFeedback } = useAdminFeedback();
   const [rides, setRides] = useState(initialRides);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -47,8 +49,20 @@ export function RideTable({ initialRides }: RideTableProps) {
       const res = await deleteRideAction(id);
       if (res.success) {
         setRides((prev) => prev.filter((r) => r.id !== id));
+        showFeedback({
+          type: "success",
+          title: "Expedition Deleted",
+          message: `Expedition "${title}" has been permanently removed.`,
+          scrollToTop: false,
+        });
       } else {
-        alert(res.error || "Failed to delete ride.");
+        const err = res.error || "Failed to delete ride.";
+        showFeedback({
+          type: "error",
+          title: "Delete Failed",
+          message: err,
+          scrollToTop: false,
+        });
       }
     });
   };

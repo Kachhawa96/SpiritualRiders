@@ -12,7 +12,14 @@ import {
 } from "@/lib/db/community";
 
 export { loadCommunitySettings, type PublicCommunitySettings };
-import { RIDE_STATUS_LABEL, RIDE_TYPE_LABEL } from "@/lib/ride-labels";
+import {
+  CalculatedRideStatus,
+  CALCULATED_STATUS_BADGE,
+  CALCULATED_STATUS_LABEL,
+  getCalculatedRideStatus,
+  RIDE_STATUS_LABEL,
+  RIDE_TYPE_LABEL,
+} from "@/lib/ride-labels";
 import { positionLabel } from "@/lib/riders";
 import type { PublicGalleryRow, PublicRideRow } from "@/lib/db/community-schema";
 import type { CommunityPosition } from "@/types/rider";
@@ -25,6 +32,7 @@ export interface RideSummary {
   short_description: string;
   ride_type: PublicRideRow["ride_type"];
   status: PublicRideRow["status"];
+  calculated_status: CalculatedRideStatus;
   start_date: string;
   end_date: string | null;
   distance_km: number | null;
@@ -32,6 +40,7 @@ export interface RideSummary {
   participant_count: number;
   is_featured: boolean;
   tone: PublicRideRow["tone"];
+  cover_image_url?: string | null;
 }
 
 export interface RideParticipant {
@@ -57,6 +66,7 @@ export interface GalleryFrame {
   ride_title: string | null;
   rider_slug: string | null;
   rider_name: string | null;
+  image_url?: string | null;
 }
 
 function dateOnly(value: string | null): string | null {
@@ -65,6 +75,8 @@ function dateOnly(value: string | null): string | null {
 }
 
 function toSummary(row: PublicRideRow): RideSummary {
+  const startDate = dateOnly(row.start_date) ?? row.start_date;
+  const endDate = dateOnly(row.end_date);
   return {
     id: row.id,
     slug: row.slug,
@@ -73,13 +85,15 @@ function toSummary(row: PublicRideRow): RideSummary {
     short_description: row.short_description,
     ride_type: row.ride_type,
     status: row.status,
-    start_date: dateOnly(row.start_date) ?? row.start_date,
-    end_date: dateOnly(row.end_date),
+    calculated_status: getCalculatedRideStatus(startDate, endDate),
+    start_date: startDate,
+    end_date: endDate,
     distance_km: row.distance_km,
     route_summary: row.route_summary,
     participant_count: row.participant_count,
     is_featured: row.is_featured,
     tone: row.tone,
+    cover_image_url: row.cover_image_url ?? null,
   };
 }
 
@@ -94,10 +108,18 @@ function toFrame(row: PublicGalleryRow): GalleryFrame {
     ride_title: row.ride_title,
     rider_slug: row.rider_slug,
     rider_name: row.rider_name,
+    image_url: row.image_url ?? null,
   };
 }
 
-export { RIDE_STATUS_LABEL, RIDE_TYPE_LABEL };
+export {
+  RIDE_STATUS_LABEL,
+  RIDE_TYPE_LABEL,
+  CALCULATED_STATUS_LABEL,
+  CALCULATED_STATUS_BADGE,
+  getCalculatedRideStatus,
+  type CalculatedRideStatus,
+};
 
 export async function getRides(): Promise<RideSummary[]> {
   const rows = await loadRides();
@@ -140,4 +162,9 @@ export async function getGallery(): Promise<GalleryFrame[]> {
 
 export async function getHeroImageUrl(): Promise<string | null> {
   return loadCommunityHeroImage();
+}
+
+export async function getHeroVideoUrl(): Promise<string | null> {
+  const settings = await loadCommunitySettings();
+  return settings.hero_video_url;
 }

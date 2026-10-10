@@ -3,12 +3,14 @@
 import { useState, useTransition } from "react";
 import type { AdminCommunitySettings } from "@/lib/db/admin-schema";
 import { saveSettingsAction } from "@/app/admin/actions";
+import { useAdminFeedback } from "@/components/admin/AdminFeedbackContext";
 
 interface SettingsFormProps {
   initialSettings: AdminCommunitySettings;
 }
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
+  const { showFeedback } = useAdminFeedback();
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -16,10 +18,56 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     initialSettings.hero_image_url ?? ""
   );
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [heroVideoUrl, setHeroVideoUrl] = useState<string>(
+    initialSettings.hero_video_url ?? ""
+  );
+  const [videoFilePreview, setVideoFilePreview] = useState<string | null>(null);
   const [logoImageUrl, setLogoImageUrl] = useState<string>(
     initialSettings.logo_image_url ?? ""
   );
   const [logoFilePreview, setLogoFilePreview] = useState<string | null>(null);
+
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setVideoFilePreview(null);
+      return;
+    }
+
+    const maxMb = 6;
+    if (file.size > maxMb * 1024 * 1024) {
+      const msg = `Selected video is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Video Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
+      e.target.value = "";
+      setVideoFilePreview(null);
+      return;
+    }
+
+    const allowed = ["video/mp4", "video/webm", "video/quicktime"];
+    const isVideo = allowed.includes(file.type) || /\.(mp4|webm|mov)$/i.test(file.name);
+    if (!isVideo) {
+      const msg = `Invalid video format (${file.type || "unknown"}). Allowed: MP4 (H.264), WebM.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Video Format",
+        message: msg,
+        scrollToTop: false,
+      });
+      e.target.value = "";
+      setVideoFilePreview(null);
+      return;
+    }
+
+    setErrorMessage(null);
+    setVideoFilePreview(URL.createObjectURL(file));
+  };
 
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,9 +78,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const maxMb = 5;
     if (file.size > maxMb * 1024 * 1024) {
-      setErrorMessage(
-        `Selected logo is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
-      );
+      const msg = `Selected logo is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Logo Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setLogoFilePreview(null);
       return;
@@ -41,7 +94,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
     if (!allowed.includes(file.type) && !isSvg) {
-      setErrorMessage(`Invalid logo format (${file.type || "unknown"}). Allowed: SVG, PNG, WebP, JPG, AVIF.`);
+      const msg = `Invalid logo format (${file.type || "unknown"}). Allowed: SVG, PNG, WebP, JPG, AVIF.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Logo Format",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setLogoFilePreview(null);
       return;
@@ -60,9 +120,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const maxMb = 5;
     if (file.size > maxMb * 1024 * 1024) {
-      setErrorMessage(
-        `Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`
-      );
+      const msg = `Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is ${maxMb}MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Image Too Large",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setFilePreview(null);
       return;
@@ -70,7 +135,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
     if (!allowed.includes(file.type)) {
-      setErrorMessage(`Invalid image format (${file.type}). Allowed: JPG, PNG, WebP, AVIF.`);
+      const msg = `Invalid image format (${file.type}). Allowed: JPG, PNG, WebP, AVIF.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "Unsupported Image Format",
+        message: msg,
+        scrollToTop: false,
+      });
       e.target.value = "";
       setFilePreview(null);
       return;
@@ -90,9 +162,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const file = fileInput?.files?.[0];
 
     if (file && file.size > 5 * 1024 * 1024) {
-      setErrorMessage(
-        `Selected hero image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
-      );
+      const msg = `Selected hero image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
       return;
     }
 
@@ -100,9 +177,29 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const logoFile = logoInput?.files?.[0];
 
     if (logoFile && logoFile.size > 5 * 1024 * 1024) {
-      setErrorMessage(
-        `Selected logo is ${(logoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`
-      );
+      const msg = `Selected logo is ${(logoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 5MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
+      return;
+    }
+
+    const videoInput = form.elements.namedItem("hero_video_file") as HTMLInputElement | null;
+    const videoFile = videoInput?.files?.[0];
+
+    if (videoFile && videoFile.size > 6 * 1024 * 1024) {
+      const msg = `Selected hero video is ${(videoFile.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed size is 6MB.`;
+      setErrorMessage(msg);
+      showFeedback({
+        type: "error",
+        title: "File Exceeds Limit",
+        message: msg,
+        scrollToTop: true,
+      });
       return;
     }
 
@@ -115,20 +212,38 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           setSuccessMessage("Community settings updated successfully.");
           if (fileInput) fileInput.value = "";
           setFilePreview(null);
+          if (videoInput) videoInput.value = "";
+          setVideoFilePreview(null);
           if (logoInput) logoInput.value = "";
           setLogoFilePreview(null);
+          showFeedback({
+            type: "success",
+            title: "Settings Saved",
+            message: "Community settings and brand media have been successfully saved.",
+            scrollToTop: true,
+          });
         } else {
-          setErrorMessage(res.error || "Failed to update settings.");
+          const err = res.error || "Failed to update settings.";
+          setErrorMessage(err);
+          showFeedback({
+            type: "error",
+            title: "Settings Save Failed",
+            message: err,
+            scrollToTop: true,
+          });
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to update settings.";
-        if (/failed to fetch|network|aborted/i.test(msg)) {
-          setErrorMessage(
-            "Upload request could not be completed. The image file may exceed network/server limits or connection was interrupted. Please ensure the file is under 5MB."
-          );
-        } else {
-          setErrorMessage(msg);
-        }
+        const displayErr = /failed to fetch|network|aborted/i.test(msg)
+          ? "Upload request could not be completed. The media file may exceed network/server limits or connection was interrupted. Please ensure files meet size guidelines."
+          : msg;
+        setErrorMessage(displayErr);
+        showFeedback({
+          type: "error",
+          title: "Upload / Save Error",
+          message: displayErr,
+          scrollToTop: true,
+        });
       }
     });
   };
@@ -441,6 +556,121 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               />
               <p className="mt-2 text-[0.65rem] text-graphite-400">
                 Paste an external image link or keep existing storage URL.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Homepage Hero Video (Cinematic Background) */}
+      <div className="rounded-sm border border-charcoal-600 bg-obsidian-900/40 p-6">
+        <div className="border-b border-charcoal-700 pb-3">
+          <h2 className="font-display text-lg font-bold text-ivory-100">
+            Homepage Hero Video (Cinematic Background)
+          </h2>
+          <p className="mt-1 text-xs text-graphite-300">
+            Configure an optional looping cinematic video for the homepage hero. Muted, autoplaying, and plays inline on mobile. If not provided or if loading fails, the hero automatically displays the background image.
+          </p>
+        </div>
+
+        <div className="mt-5 space-y-5">
+          {/* Recommended Specs Badge */}
+          <div className="flex flex-wrap items-center gap-3 rounded-sm border border-gold-500/30 bg-gold-500/5 px-4 py-3 text-xs text-graphite-300">
+            <span className="font-semibold uppercase tracking-wider text-gold-400">
+              Recommended Specs:
+            </span>
+            <span>MP4 (H.264) or WebM</span>
+            <span>·</span>
+            <span>8–12 Seconds (Ideal: 10s Loop)</span>
+            <span>·</span>
+            <span>1920 × 1080 (16:9)</span>
+            <span>·</span>
+            <span>Max 6MB (Under 5MB Ideal)</span>
+            <span>·</span>
+            <span>No Audio Track</span>
+          </div>
+
+          {/* Hero Video Preview */}
+          {videoFilePreview || heroVideoUrl ? (
+            <div className="space-y-2">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                {videoFilePreview ? "New Selected Video (Preview)" : "Current Background Video Preview"}
+              </label>
+              <div className="relative aspect-[16/9] w-full max-w-xl overflow-hidden rounded-sm border border-charcoal-600 bg-obsidian-950 shadow-inner">
+                <video
+                  src={videoFilePreview || heroVideoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/60 to-obsidian-950/20" />
+                <div className="absolute bottom-3 left-3 text-[0.68rem] uppercase tracking-[0.2em] text-gold-400">
+                  {videoFilePreview ? "● Pending Upload (Click Save Below)" : "✓ Live Hero Video Active"}
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {videoFilePreview ? (
+                  <button
+                    type="button"
+                    onClick={() => setVideoFilePreview(null)}
+                    className="cursor-pointer text-xs text-graphite-400 transition-colors hover:text-ivory-100"
+                  >
+                    ✕ Cancel new selection
+                  </button>
+                ) : null}
+                {heroVideoUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeroVideoUrl("");
+                      setVideoFilePreview(null);
+                    }}
+                    className="cursor-pointer text-xs text-red-400 transition-colors hover:text-red-300"
+                  >
+                    ✕ Remove background video (fall back to hero image)
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-graphite-400 italic">
+              No hero video currently active. The homepage will display the configured hero background image.
+            </p>
+          )}
+
+          {/* File Upload and URL inputs */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                Upload New Video File
+              </label>
+              <input
+                type="file"
+                name="hero_video_file"
+                accept="video/mp4,video/webm"
+                onChange={handleVideoFileChange}
+                className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
+              />
+              <p className="mt-2 text-[0.65rem] text-graphite-400">
+                Direct upload to Supabase storage bucket (<code className="text-gold-400">rider-media/hero-video</code>).
+              </p>
+            </div>
+
+            <div className="rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
+              <label className="block text-xs uppercase tracking-wider text-graphite-300">
+                Or Direct Video URL
+              </label>
+              <input
+                name="hero_video_url"
+                value={heroVideoUrl}
+                onChange={(e) => setHeroVideoUrl(e.target.value)}
+                placeholder="https://..."
+                className="mt-2 w-full rounded-sm border border-charcoal-500 bg-obsidian-900 px-3 py-2 text-xs text-ivory-100 focus:border-gold-500 focus:outline-none"
+              />
+              <p className="mt-2 text-[0.65rem] text-graphite-400">
+                Paste an external video link (MP4/WebM) or keep existing storage URL.
               </p>
             </div>
           </div>
