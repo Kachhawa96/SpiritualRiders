@@ -136,19 +136,60 @@ export async function submitOnboardingAction(
     let bike_image_url = (formData.get("bike_image_url") as string)?.trim() || null;
     let cover_image_url = (formData.get("cover_image_url") as string)?.trim() || null;
 
+    const MAX_SERVER_FILE_SIZE = 5 * 1024 * 1024;
     const profileFile = formData.get("profile_image_file") as File | null;
-    if (profileFile && profileFile.size > 0) {
-      profile_image_url = await uploadOnboardingImage(profileFile, "profiles");
-    }
-
     const bikeFile = formData.get("bike_image_file") as File | null;
-    if (bikeFile && bikeFile.size > 0) {
-      bike_image_url = await uploadOnboardingImage(bikeFile, "bikes");
+    const coverFile = formData.get("cover_image_file") as File | null;
+
+    // Validate 5MB server limit on every image
+    if (profileFile && profileFile.size > MAX_SERVER_FILE_SIZE) {
+      return {
+        success: false,
+        error: `Portrait photo exceeds the 5MB maximum limit (${(profileFile.size / (1024 * 1024)).toFixed(1)}MB). Please choose a smaller photo.`,
+      };
+    }
+    if (bikeFile && bikeFile.size > MAX_SERVER_FILE_SIZE) {
+      return {
+        success: false,
+        error: `Motorcycle photo exceeds the 5MB maximum limit (${(bikeFile.size / (1024 * 1024)).toFixed(1)}MB). Please choose a smaller photo.`,
+      };
+    }
+    if (coverFile && coverFile.size > MAX_SERVER_FILE_SIZE) {
+      return {
+        success: false,
+        error: `Cover photo exceeds the 5MB maximum limit (${(coverFile.size / (1024 * 1024)).toFixed(1)}MB). Please choose a smaller photo.`,
+      };
     }
 
-    const coverFile = formData.get("cover_image_file") as File | null;
+    // Upload images concurrently to avoid serverless function execution timeout
+    const uploadTasks: Promise<void>[] = [];
+
+    if (profileFile && profileFile.size > 0) {
+      uploadTasks.push(
+        uploadOnboardingImage(profileFile, "profiles").then((url) => {
+          profile_image_url = url;
+        })
+      );
+    }
+
+    if (bikeFile && bikeFile.size > 0) {
+      uploadTasks.push(
+        uploadOnboardingImage(bikeFile, "bikes").then((url) => {
+          bike_image_url = url;
+        })
+      );
+    }
+
     if (coverFile && coverFile.size > 0) {
-      cover_image_url = await uploadOnboardingImage(coverFile, "covers");
+      uploadTasks.push(
+        uploadOnboardingImage(coverFile, "covers").then((url) => {
+          cover_image_url = url;
+        })
+      );
+    }
+
+    if (uploadTasks.length > 0) {
+      await Promise.all(uploadTasks);
     }
 
     // 6. Submit to pending table
@@ -201,9 +242,16 @@ export async function submitOnboardingAction(
       slug: result.slug,
     };
   } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "";
+    let friendly = "Failed to submit profile. Please verify your details.";
+    if (/storage|upload|bucket|media/i.test(msg)) {
+      friendly = `Image upload error: ${msg}`;
+    } else if (msg) {
+      friendly = msg;
+    }
     return {
       success: false,
-      error: getErrorMessage(err, "Failed to submit profile. Please verify your details."),
+      error: friendly,
     };
   }
 }

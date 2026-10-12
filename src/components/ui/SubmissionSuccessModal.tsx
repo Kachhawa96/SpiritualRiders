@@ -157,14 +157,25 @@ export function SubmissionSuccessModal({
             2. Submit Another Profile
           </button>
 
-          {/* Option 3: Close / Dismiss */}
+          {/* Option 3: Done & Return to Onboarding */}
           <button
             type="button"
             onClick={onClose}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-transparent py-2 text-xs uppercase tracking-[0.15em] text-graphite-400 transition-colors hover:text-ivory-100"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-charcoal-700 bg-obsidian-900/60 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-graphite-300 transition-colors hover:border-gold-500/50 hover:bg-obsidian-900 hover:text-ivory-100"
           >
-            3. Close & Dismiss
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            3. Done & Return to Onboarding
           </button>
+
+          {/* Explore Roster Link */}
+          <a
+            href="/riders"
+            className="flex w-full items-center justify-center gap-1.5 pt-2 text-[0.68rem] uppercase tracking-[0.15em] text-gold-400/80 transition-colors hover:text-gold-300 hover:underline"
+          >
+            Explore Brotherhood Roster →
+          </a>
         </div>
       </div>
     </div>

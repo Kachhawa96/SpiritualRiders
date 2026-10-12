@@ -112,8 +112,14 @@ Each phase ends with a commit: `phase-X-name` (e.g., `phase-0-foundation`).
 | `npm run lint` | ESLint check |
 | `npm run typecheck` | TypeScript check (tsc --noEmit) |
 | `npm run lint:fix` | Auto-fix ESLint issues |
+| `npm run format` | Prettier code formatter |
 
 **Before every commit**: `npm run lint && npm run typecheck && npm run build`
+
+### Media & Image Upload Guidelines
+- User uploads must never exceed 5 MB per image.
+- Image uploads on forms must use client-side optimization (`src/lib/image-compression.ts`) to keep request payloads under 4.2 MB (safely beneath edge gateway limits).
+- iPhone HEIC/HEIF files must be converted to standard JPEG before storage upload for cross-platform compatibility.
 
 ---
 

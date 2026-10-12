@@ -129,10 +129,20 @@ export async function uploadOnboardingImage(
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
 
+  const contentType =
+    file.type ||
+    (extension === "png"
+      ? "image/png"
+      : extension === "webp"
+      ? "image/webp"
+      : extension === "heic"
+      ? "image/heic"
+      : "image/jpeg");
+
   const { error: uploadError } = await supabase.storage
     .from("rider-media")
     .upload(path, buffer, {
-      contentType: file.type,
+      contentType,
       upsert: true,
     });
 

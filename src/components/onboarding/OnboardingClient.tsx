@@ -12,6 +12,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { ErrorModal } from "@/components/ui/ErrorModal";
 import { SubmissionSuccessModal } from "@/components/ui/SubmissionSuccessModal";
 import type { AdminRiderRecord } from "@/lib/db/admin-schema";
+import { compressImage, formatFileSize, isHeicImage } from "@/lib/image-compression";
 
 const POSITIONS = [
   { value: "member", label: "Member (Default)" },
@@ -46,6 +47,7 @@ interface FileState {
   previewUrl: string | null;
   error: string | null;
   sizeFormatted: string | null;
+  isCompressing?: boolean;
 }
 
 export function OnboardingClient() {
@@ -132,43 +134,110 @@ export function OnboardingClient() {
     );
   };
 
-  // File selection validator: checks 5MB limit immediately
-  const handleFileSelection = (
+  // File selection validator and compressor:
+  // Automatically compresses photos on the client side to well under 5MB while preserving visual sharpness.
+  const handleFileSelection = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<FileState>>,
     fileCategoryName: string
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setter({ file: null, previewUrl: null, error: null, sizeFormatted: null });
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) {
+      setter({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false });
       return;
     }
 
-    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      e.target.value = "";
-      setter({
-        file: null,
-        previewUrl: null,
-        error: `Selected ${fileCategoryName} (${sizeMb} MB) exceeds the 5MB maximum limit. Please choose a smaller photo.`,
-        sizeFormatted: null,
-      });
-      // Show pop-up immediately so user never misses it
-      setValidationErrors([
-        `${fileCategoryName} (${file.name}): File size is ${sizeMb} MB. Maximum allowed upload size is 5.0 MB.`,
-      ]);
-      setFirstInvalidFieldId(`card-${fileCategoryName.toLowerCase().replace(/\s+/g, "-")}`);
-      setIsErrorModalOpen(true);
-      return;
-    }
-
+    const isHeic = isHeicImage(rawFile);
+    // For HEIC, native objectUrl may not decode in non-Safari browsers until converted
+    const initialPreview = isHeic ? null : URL.createObjectURL(rawFile);
     setter({
-      file,
-      previewUrl: URL.createObjectURL(file),
+      file: null,
+      previewUrl: initialPreview,
       error: null,
-      sizeFormatted: `${sizeMb} MB`,
+      sizeFormatted: isHeic
+        ? `Converting iPhone photo (${formatFileSize(rawFile.size)})...`
+        : `Optimizing ${formatFileSize(rawFile.size)}...`,
+      isCompressing: true,
     });
+
+    try {
+      // Compress with high quality retention and HD resolution
+      const { file: optimizedFile, originalSize, compressedSize, isCompressed } =
+        await compressImage(rawFile, {
+          maxSizeMB: 1.2,
+          maxWidthOrHeight: 1920,
+          initialQuality: 0.85,
+        });
+
+      // Strict validation: Verify the image is within the 5MB limit after compression
+      if (optimizedFile.size > MAX_FILE_SIZE_BYTES) {
+        e.target.value = "";
+        setter({
+          file: null,
+          previewUrl: null,
+          error: `${fileCategoryName} (${formatFileSize(optimizedFile.size)}) exceeds the 5MB limit after compression. Please choose a smaller photo.`,
+          sizeFormatted: null,
+          isCompressing: false,
+        });
+        setValidationErrors([
+          `${fileCategoryName}: Image is ${formatFileSize(optimizedFile.size)} after optimization. Maximum allowed size is 5.0 MB. Please select a different photo.`,
+        ]);
+        const cardId = fileCategoryName.toLowerCase().includes("portrait")
+          ? "card-portrait-photo"
+          : fileCategoryName.toLowerCase().includes("motorcycle") || fileCategoryName.toLowerCase().includes("bike")
+          ? "card-motorcycle-photo"
+          : "card-cover-photo";
+        setFirstInvalidFieldId(cardId);
+        setIsErrorModalOpen(true);
+        return;
+      }
+
+      // Ready: create object URL from the optimized file
+      const previewUrl = URL.createObjectURL(optimizedFile);
+      const displaySize =
+        isCompressed && originalSize > compressedSize
+          ? `${formatFileSize(compressedSize)} (Optimized from ${formatFileSize(originalSize)})`
+          : formatFileSize(optimizedFile.size);
+
+      setter({
+        file: optimizedFile,
+        previewUrl,
+        error: null,
+        sizeFormatted: displaySize,
+        isCompressing: false,
+      });
+    } catch {
+      // In case of unexpected read error, check raw file size against 5MB
+      if (rawFile.size > MAX_FILE_SIZE_BYTES) {
+        e.target.value = "";
+        setter({
+          file: null,
+          previewUrl: null,
+          error: `${fileCategoryName} (${formatFileSize(rawFile.size)}) exceeds the 5MB maximum limit. Please choose a smaller photo.`,
+          sizeFormatted: null,
+          isCompressing: false,
+        });
+        setValidationErrors([
+          `${fileCategoryName}: File size is ${formatFileSize(rawFile.size)}. Maximum allowed upload size is 5.0 MB.`,
+        ]);
+        const cardId = fileCategoryName.toLowerCase().includes("portrait")
+          ? "card-portrait-photo"
+          : fileCategoryName.toLowerCase().includes("motorcycle") || fileCategoryName.toLowerCase().includes("bike")
+          ? "card-motorcycle-photo"
+          : "card-cover-photo";
+        setFirstInvalidFieldId(cardId);
+        setIsErrorModalOpen(true);
+        return;
+      }
+
+      setter({
+        file: rawFile,
+        previewUrl: initialPreview,
+        error: null,
+        sizeFormatted: formatFileSize(rawFile.size),
+        isCompressing: false,
+      });
+    }
   };
 
   // Search existing riders
@@ -273,17 +342,18 @@ export function OnboardingClient() {
     setJoinedDate(new Date().toISOString().slice(0, 10));
     setLinkedRider(null);
     setSelectedStyles([]);
-    setProfileFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null });
-    setBikeFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null });
-    setCoverFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null });
+    setProfileFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false });
+    setBikeFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false });
+    setCoverFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false });
     setActiveTab("new");
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Action 3: Close the pop-up (Dismiss)
+  // Action 3: Close the pop-up (Dismiss) -> Cleanly redirect to /onboard to prevent duplicate submissions
   const handleCloseSuccessModal = () => {
     setIsSuccessModalOpen(false);
+    window.location.href = "/onboard";
   };
 
   // Client-Side Validation before Server Action
@@ -346,10 +416,39 @@ export function OnboardingClient() {
       setErr("A valid Contact Email is required for administrative verification.", "field-contact_email");
     }
 
-    // Check file sizes
-    if (profileFileState.error) setErr(profileFileState.error, "card-profile-photo");
+    // Check if any photo is currently compressing
+    if (profileFileState.isCompressing || bikeFileState.isCompressing || coverFileState.isCompressing) {
+      setErr("Photos are still being optimized. Please wait a moment and submit again.", "card-portrait-photo");
+    }
+
+    // Check individual file error states
+    if (profileFileState.error) setErr(profileFileState.error, "card-portrait-photo");
     if (bikeFileState.error) setErr(bikeFileState.error, "card-motorcycle-photo");
     if (coverFileState.error) setErr(coverFileState.error, "card-cover-photo");
+
+    // Strictly validate that each image file does not exceed 5MB
+    if (profileFileState.file && profileFileState.file.size > MAX_FILE_SIZE_BYTES) {
+      setErr(`Portrait photo (${formatFileSize(profileFileState.file.size)}) exceeds the 5MB maximum limit.`, "card-portrait-photo");
+    }
+    if (bikeFileState.file && bikeFileState.file.size > MAX_FILE_SIZE_BYTES) {
+      setErr(`Motorcycle photo (${formatFileSize(bikeFileState.file.size)}) exceeds the 5MB maximum limit.`, "card-motorcycle-photo");
+    }
+    if (coverFileState.file && coverFileState.file.size > MAX_FILE_SIZE_BYTES) {
+      setErr(`Cover photo (${formatFileSize(coverFileState.file.size)}) exceeds the 5MB maximum limit.`, "card-cover-photo");
+    }
+
+    // Verify combined upload payload stays safely under 4.2MB to prevent gateway/proxy crashes
+    const totalBytes =
+      (profileFileState.file?.size || 0) +
+      (bikeFileState.file?.size || 0) +
+      (coverFileState.file?.size || 0);
+
+    if (totalBytes > 4.2 * 1024 * 1024) {
+      setErr(
+        `Total combined size of photos (${formatFileSize(totalBytes)}) exceeds upload limits. Please select slightly smaller photos.`,
+        "card-portrait-photo"
+      );
+    }
 
     return { valid: errors.length === 0, errors, firstId };
   };
@@ -357,6 +456,13 @@ export function OnboardingClient() {
   // Submit form
   const handleSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Guard: Prevent duplicate submission if application is already submitted and not in edit mode
+    if (submissionSuccess && !isEditingSubmitted) {
+      setIsSuccessModalOpen(true);
+      return;
+    }
+
     const form = e.currentTarget;
 
     // Run client validation
@@ -393,17 +499,45 @@ export function OnboardingClient() {
       formData.set("joined_date", joinedDate);
     }
 
+    // Inject the optimized compressed files into formData (overriding any raw files from DOM inputs)
+    if (profileFileState.file) {
+      formData.set("profile_image_file", profileFileState.file);
+    } else {
+      formData.delete("profile_image_file");
+    }
+
+    if (bikeFileState.file) {
+      formData.set("bike_image_file", bikeFileState.file);
+    } else {
+      formData.delete("bike_image_file");
+    }
+
+    if (coverFileState.file) {
+      formData.set("cover_image_file", coverFileState.file);
+    } else {
+      formData.delete("cover_image_file");
+    }
+
     startTransition(async () => {
-      const res = await submitOnboardingAction(formData);
-      if (res.success && res.submissionId) {
-        setSubmissionSuccess({
-          submissionId: res.submissionId,
-          slug: res.slug || autoSlug,
-        });
-        setIsSuccessModalOpen(true);
-        setIsEditingSubmitted(false);
-      } else {
-        setValidationErrors([res.error || "Failed to submit profile. Please review fields."]);
+      try {
+        const res = await submitOnboardingAction(formData);
+        if (res.success && res.submissionId) {
+          setSubmissionSuccess({
+            submissionId: res.submissionId,
+            slug: res.slug || autoSlug,
+          });
+          setIsSuccessModalOpen(true);
+          setIsEditingSubmitted(false);
+        } else {
+          setValidationErrors([res.error || "Failed to submit profile. Please review fields."]);
+          setIsErrorModalOpen(true);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "";
+        const displayError = /failed to fetch|network|aborted|payload|413|timeout/i.test(msg)
+          ? "Network error: Connection was interrupted during upload. Please check your internet connection and try submitting again."
+          : (msg || "An unexpected error occurred during submission. Please try again.");
+        setValidationErrors([displayError]);
         setIsErrorModalOpen(true);
       }
     });
@@ -1151,7 +1285,7 @@ export function OnboardingClient() {
                   Max File Size: 5MB
                 </span>
                 <span className="hidden sm:inline rounded-xs border border-charcoal-600 bg-charcoal-800 px-2.5 py-1 text-[0.65rem] uppercase tracking-wider text-graphite-300">
-                  JPG · PNG · WebP · AVIF
+                  JPG · PNG · WebP · HEIC (iPhone)
                 </span>
               </div>
             </div>
@@ -1178,25 +1312,35 @@ export function OnboardingClient() {
                 <input
                   type="file"
                   name="profile_image_file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  accept="image/*,.heic,.heif,image/heic,image/heif"
                   onChange={(e) => handleFileSelection(e, setProfileFileState, "Portrait Photo")}
                   className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
                 />
 
-                {/* Validation Status Indicator */}
+                {/* Validation & Compression Status Indicator */}
                 {profileFileState.error && (
                   <p className="mt-2 rounded-xs border border-red-500/40 bg-red-950/40 p-2 text-[0.68rem] text-red-300">
                     ✕ {profileFileState.error}
                   </p>
                 )}
 
-                {profileFileState.sizeFormatted && (
+                {profileFileState.isCompressing && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xs border border-gold-500/30 bg-gold-500/10 px-2.5 py-1.5 text-[0.65rem] text-gold-300 font-semibold animate-pulse">
+                    <svg className="animate-spin h-3.5 w-3.5 text-gold-400 shrink-0" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>{profileFileState.sizeFormatted || "Optimizing image quality..."}</span>
+                  </div>
+                )}
+
+                {profileFileState.sizeFormatted && !profileFileState.isCompressing && (
                   <div className="mt-2 flex items-center justify-between rounded-xs border border-green-500/30 bg-green-950/30 px-2 py-1 text-[0.65rem] text-green-400 font-semibold">
-                    <span>✓ Ready: {profileFileState.sizeFormatted} / 5MB</span>
+                    <span className="truncate pr-1">✓ Ready: {profileFileState.sizeFormatted}</span>
                     <button
                       type="button"
-                      onClick={() => setProfileFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null })}
-                      className="cursor-pointer text-red-400 hover:underline"
+                      onClick={() => setProfileFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false })}
+                      className="cursor-pointer text-red-400 hover:underline shrink-0"
                     >
                       Remove
                     </button>
@@ -1247,25 +1391,35 @@ export function OnboardingClient() {
                 <input
                   type="file"
                   name="bike_image_file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  accept="image/*,.heic,.heif,image/heic,image/heif"
                   onChange={(e) => handleFileSelection(e, setBikeFileState, "Motorcycle Photo")}
                   className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
                 />
 
-                {/* Validation Status Indicator */}
+                {/* Validation & Compression Status Indicator */}
                 {bikeFileState.error && (
                   <p className="mt-2 rounded-xs border border-red-500/40 bg-red-950/40 p-2 text-[0.68rem] text-red-300">
                     ✕ {bikeFileState.error}
                   </p>
                 )}
 
-                {bikeFileState.sizeFormatted && (
+                {bikeFileState.isCompressing && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xs border border-gold-500/30 bg-gold-500/10 px-2.5 py-1.5 text-[0.65rem] text-gold-300 font-semibold animate-pulse">
+                    <svg className="animate-spin h-3.5 w-3.5 text-gold-400 shrink-0" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>{bikeFileState.sizeFormatted || "Optimizing image quality..."}</span>
+                  </div>
+                )}
+
+                {bikeFileState.sizeFormatted && !bikeFileState.isCompressing && (
                   <div className="mt-2 flex items-center justify-between rounded-xs border border-green-500/30 bg-green-950/30 px-2 py-1 text-[0.65rem] text-green-400 font-semibold">
-                    <span>✓ Ready: {bikeFileState.sizeFormatted} / 5MB</span>
+                    <span className="truncate pr-1">✓ Ready: {bikeFileState.sizeFormatted}</span>
                     <button
                       type="button"
-                      onClick={() => setBikeFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null })}
-                      className="cursor-pointer text-red-400 hover:underline"
+                      onClick={() => setBikeFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false })}
+                      className="cursor-pointer text-red-400 hover:underline shrink-0"
                     >
                       Remove
                     </button>
@@ -1316,25 +1470,35 @@ export function OnboardingClient() {
                 <input
                   type="file"
                   name="cover_image_file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  accept="image/*,.heic,.heif,image/heic,image/heif"
                   onChange={(e) => handleFileSelection(e, setCoverFileState, "Cover Photo")}
                   className="mt-2 block w-full text-xs text-graphite-400 file:mr-2 file:cursor-pointer file:rounded-xs file:border-0 file:bg-charcoal-700 file:px-2.5 file:py-1 file:text-xs file:text-ivory-100 hover:file:bg-gold-500 hover:file:text-obsidian-950"
                 />
 
-                {/* Validation Status Indicator */}
+                {/* Validation & Compression Status Indicator */}
                 {coverFileState.error && (
                   <p className="mt-2 rounded-xs border border-red-500/40 bg-red-950/40 p-2 text-[0.68rem] text-red-300">
                     ✕ {coverFileState.error}
                   </p>
                 )}
 
-                {coverFileState.sizeFormatted && (
+                {coverFileState.isCompressing && (
+                  <div className="mt-2 flex items-center gap-2 rounded-xs border border-gold-500/30 bg-gold-500/10 px-2.5 py-1.5 text-[0.65rem] text-gold-300 font-semibold animate-pulse">
+                    <svg className="animate-spin h-3.5 w-3.5 text-gold-400 shrink-0" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>{coverFileState.sizeFormatted || "Optimizing image quality..."}</span>
+                  </div>
+                )}
+
+                {coverFileState.sizeFormatted && !coverFileState.isCompressing && (
                   <div className="mt-2 flex items-center justify-between rounded-xs border border-green-500/30 bg-green-950/30 px-2 py-1 text-[0.65rem] text-green-400 font-semibold">
-                    <span>✓ Ready: {coverFileState.sizeFormatted} / 5MB</span>
+                    <span className="truncate pr-1">✓ Ready: {coverFileState.sizeFormatted}</span>
                     <button
                       type="button"
-                      onClick={() => setCoverFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null })}
-                      className="cursor-pointer text-red-400 hover:underline"
+                      onClick={() => setCoverFileState({ file: null, previewUrl: null, error: null, sizeFormatted: null, isCompressing: false })}
+                      className="cursor-pointer text-red-400 hover:underline shrink-0"
                     >
                       Remove
                     </button>
@@ -1409,11 +1573,19 @@ export function OnboardingClient() {
             </p>
             <button
               type="submit"
-              disabled={isPending}
-              className="cursor-pointer rounded-sm border border-gold-500 bg-gold-500 px-8 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-obsidian-950 transition-colors hover:border-gold-400 hover:bg-gold-400 disabled:opacity-50"
+              disabled={isPending || (!!submissionSuccess && !isEditingSubmitted)}
+              className={`cursor-pointer rounded-sm border px-8 py-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors disabled:opacity-60 ${
+                submissionSuccess && !isEditingSubmitted
+                  ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-300 cursor-not-allowed"
+                  : "border-gold-500 bg-gold-500 text-obsidian-950 hover:border-gold-400 hover:bg-gold-400"
+              }`}
             >
               {isPending
                 ? "Submitting Profile..."
+                : submissionSuccess && !isEditingSubmitted
+                ? "✓ Application Already Submitted"
+                : isEditingSubmitted
+                ? "Update Submitted Application"
                 : linkedRider
                 ? "Submit Profile Update"
                 : "Submit for Approval"}
