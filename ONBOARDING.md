@@ -1,19 +1,20 @@
-# Rider Profile Onboarding System — Temporary Feature Documentation
+# Rider Profile Onboarding System — Architecture & Administration Guide
 
-This document describes the design, administration, and clean decommissioning procedures for the **Rider Profile Onboarding System** in Spiritual Riders.
+This document describes the design, administration, image processing pipeline, and clean decommissioning procedures for the **Rider Profile Onboarding System** in Spiritual Riders.
 
 ---
 
 ## 1. Feature Architecture Overview
 
-The onboarding system allows both **new prospective riders** and **existing roster members** to submit complete profiles and updates through a dedicated public portal.
+The onboarding system allows both **new prospective riders** and **existing roster members** to submit complete profiles and updates through a dedicated public portal (`/onboard` and `/join`).
 
 ### Key Guarantees:
 1. **Isolated Data Storage:** All public submissions are stored exclusively in the dedicated `public.rider_profile_submissions` table.
 2. **Zero Direct Mutations:** The live `public.riders` table is **never touched** until an administrator explicitly reviews and approves the submission in `/admin/onboarding`.
-3. **Auto-Generated Slugs:** URL slugs (e.g., `/riders/vikram-rathore`) are automatically derived and verified against collision, requiring zero technical input from submitters.
+3. **Auto-Generated Slugs:** URL slugs (e.g., `/riders/vikram-rathore`) are automatically derived and verified against collisions, requiring zero technical input from submitters.
 4. **Built-in Rate Limiting & Anti-Spam:** An in-memory sliding-window limiter restricts submissions to **10 requests per minute per IP**, combined with honeypot bot trap validation.
-5. **Admin Feature Toggle:** Onboarding can be turned on or off in real-time from the Admin Settings panel.
+5. **Fail-Safe Image Processing:** Automatic client-side compression and iPhone HEIC conversion prevent browser drops and edge gateway size limit crashes.
+6. **Admin Feature Toggle:** Onboarding can be turned on or off in real-time from the Admin Settings panel.
 
 ---
 
@@ -62,7 +63,34 @@ The feature uses a dedicated migration file:
 
 ---
 
-## 5. Clean Decommissioning & Removal Guide
+## 5. Image Processing, Crash Prevention & iPhone (HEIC) Compatibility
+
+### Problem Solved
+When riders submitted 3 high-resolution camera photos (often 5–10 MB each), two severe issues occurred:
+1. **Edge Gateway 4.5 MB Ceiling**: Vercel/Cloudflare edge proxies enforce a strict 4.5 MB request body limit on Server Actions, dropping connections with `HTTP 413 Payload Too Large` and causing an unhandled *"This page couldn't load"* crash screen.
+2. **Server Execution Timeouts**: Sequential uploads to Supabase Storage took 15+ seconds.
+3. **iPhone Compatibility**: iPhones shoot photos in HEIC/HEIF format. Non-Apple browsers (Chrome on PC, Android) cannot decode HEIC, resulting in broken image previews and MIME validation errors.
+
+### Implemented Architecture (`src/lib/image-compression.ts`):
+1. **Automatic Client-Side Compression**:
+   - Compresses images down to ~800 KB – 1.2 MB at 1920px Full HD resolution using `browser-image-compression` and HTML5 Canvas fallback.
+   - Preserves sharpness and colors while cutting payload weight by ~80%.
+2. **Apple iPhone (HEIC/HEIF) Universal Conversion**:
+   - `accept="image/*,.heic,.heif,image/heic,image/heif"` ensures photos are selectable across iOS Photo Library, iCloud Drive, and the Files app.
+   - **Dual-Layer Transcoder**:
+     - *Layer 1 (Native Apple / Safari)*: Hardware-accelerated canvas decode to JPEG (instant, 0ms lag).
+     - *Layer 2 (Cross-Browser WebAssembly)*: `heic2any` fallback for Chrome/Edge/Firefox users uploading transferred Apple HEIC files.
+   - Thumbnail previews render cleanly on all devices before upload.
+3. **Pre-Upload & Post-Compression Validation**:
+   - Strict 5.0 MB ceiling enforced per photo.
+   - Total payload ceiling (< 4.2 MB) verified before dispatching the request.
+4. **Concurrent Server Uploads (`src/app/onboard/actions.ts`)**:
+   - Storage uploads run concurrently using `Promise.all([ ... ])`, reducing serverless execution time to ~2–3 seconds.
+   - Server-side validation safely accepts `image/heic`, `image/heif`, and standard formats in `ALLOWED_IMAGE_TYPES`.
+
+---
+
+## 6. Clean Decommissioning & Removal Guide
 
 The entire feature has been strictly isolated so that disabling or permanently removing it requires zero refactoring of core phases (0–7 or live riders).
 

@@ -26,6 +26,8 @@ const ALLOWED_IMAGE_TYPES = [
   "image/png",
   "image/webp",
   "image/avif",
+  "image/heic",
+  "image/heif",
 ];
 
 export function validateImageFile(
@@ -34,10 +36,11 @@ export function validateImageFile(
   allowSvg = false
 ): { valid: boolean; error?: string } {
   const isSvg = allowSvg && (file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg"));
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !isSvg) {
+  const isHeicExtension = /\.(hei(c|f))$/i.test(file.name);
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !isHeicExtension && !isSvg) {
     return {
       valid: false,
-      error: `Invalid file format (${file.type || "unknown"}). Allowed: JPG, PNG, WEBP, AVIF${allowSvg ? ", SVG" : ""}.`,
+      error: `Invalid file format (${file.type || "unknown"}). Allowed: JPG, PNG, WEBP, AVIF, HEIC${allowSvg ? ", SVG" : ""}.`,
     };
   }
 
