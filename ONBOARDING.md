@@ -84,9 +84,11 @@ When riders submitted 3 high-resolution camera photos (often 5–10 MB each), tw
 3. **Pre-Upload & Post-Compression Validation**:
    - Strict 5.0 MB ceiling enforced per photo.
    - Total payload ceiling (< 4.2 MB) verified before dispatching the request.
-4. **Concurrent Server Uploads (`src/app/onboard/actions.ts`)**:
-   - Storage uploads run concurrently using `Promise.all([ ... ])`, reducing serverless execution time to ~2–3 seconds.
-   - Server-side validation safely accepts `image/heic`, `image/heif`, and standard formats in `ALLOWED_IMAGE_TYPES`.
+4. **Direct Client-to-Supabase Storage Upload (`src/lib/onboarding-upload.ts`)**:
+   - Instead of piping heavy multi-photo binary data through the Next.js Server Action (which hits the 1 MB body size ceiling and 10s execution timeout), photos are uploaded directly from the browser to Supabase Storage (`rider-media` bucket under `onboarding/`).
+   - The browser uploads all 3 images in parallel using the native Supabase client.
+   - The Server Action receives only lightweight public image URLs (< 5 KB plain text payload), completing the database insert in ~100ms.
+   - Server-side fallback (`uploadOnboardingImage`) remains operational for programmatic or fallback uploads.
 
 ---
 

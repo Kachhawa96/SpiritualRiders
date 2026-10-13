@@ -70,11 +70,11 @@
 - Created dedicated `SELECT` policies for both `anon` and `authenticated` roles, completely eliminating Supabase's red "UNRESTRICTED" security warnings while keeping underlying tables shielded.
 
 ### 5. Onboarding Pipeline Hardening & Crash Prevention (`/onboard`)
-- **Root Cause Resolution**: Solved the *"This page couldn't load"* crash caused by hosting provider edge proxies dropping Server Action payloads exceeding 4.5 MB.
+- **Root Cause Resolution**: Solved the *"This page couldn't load"* and *"Network error: Connection was interrupted"* crashes caused by Next.js Server Action 1MB body limits and serverless execution timeouts when uploading 3 photos together.
+- **Direct Client-to-Supabase Storage Uploads (`src/lib/onboarding-upload.ts`)**: Bypasses Server Action binary payloads entirely. The browser uploads photos directly to Supabase Storage in parallel and passes lightweight public image URLs (< 5 KB payload) to the Server Action, executing the database write in ~100ms.
 - **Client-Side Compression (`src/lib/image-compression.ts`)**: Automatically optimizes portrait, motorcycle, and cover photos to ~800 KB – 1.2 MB at 1920px Full HD using `browser-image-compression` and HTML5 Canvas fallback.
 - **Strict 5 MB Limit**: Validated on both client and server before and after compression.
-- **Concurrent Storage Uploads**: Converted sequential uploads into parallel `Promise.all` requests on `src/app/onboard/actions.ts`, speeding up server execution by ~65% and preventing timeouts.
-- **Graceful Error Recovery**: Network drops and upload interruptions display a styled modal instead of crashing the browser window.
+- **Graceful Error Recovery & Real-time Feedback**: Real-time status indicators (*"Uploading 3 photos to storage..."* -> *"Submitting profile application..."*) with user-friendly error dialogs.
 
 ### 6. Apple iPhone (HEIC / HEIF) Universal Compatibility
 - **Universal Input Picker**: `accept="image/*,.heic,.heif,image/heic,image/heif"` ensures iPhone photos are never greyed out in Photo Library, iCloud Drive, or the Files app.
@@ -90,9 +90,10 @@
 
 | File | Purpose |
 |------|---------|
+| `src/lib/onboarding-upload.ts` | Direct browser-to-Supabase Storage uploader for onboarding images |
 | `src/lib/image-compression.ts` | Client-side compression, HEIC detection, canvas and `heic2any` conversion, and size formatting |
-| `src/components/onboarding/OnboardingClient.tsx` | Pre-upload compression, 5MB validation, HEIC support, progress indicators, and crash-safe error handling |
-| `src/app/onboard/actions.ts` | Server-side 5MB validation, concurrent `Promise.all` uploads, and sanitized error reporting |
+| `src/components/onboarding/OnboardingClient.tsx` | Direct storage uploads, real-time status feedback, HEIC support, progress indicators, and crash-safe error handling |
+| `src/app/onboard/actions.ts` | Server-side 5MB validation, URL-first submission processing, and fallback storage uploads |
 | `src/lib/db/admin.ts` | Added HEIC/HEIF MIME types and extensions to `validateImageFile` |
 | `src/lib/db/onboarding.ts` | Robust image content-type detection and storage upload handling |
 | `src/components/sections/home/Hero.tsx` | Cinematic video playback, mobile performance guards, and balanced contrast gradient |

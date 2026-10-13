@@ -13,6 +13,7 @@ import { ErrorModal } from "@/components/ui/ErrorModal";
 import { SubmissionSuccessModal } from "@/components/ui/SubmissionSuccessModal";
 import type { AdminRiderRecord } from "@/lib/db/admin-schema";
 import { compressImage, formatFileSize, isHeicImage } from "@/lib/image-compression";
+import { uploadOnboardingImageDirect } from "@/lib/onboarding-upload";
 
 const POSITIONS = [
   { value: "member", label: "Member (Default)" },
@@ -53,6 +54,7 @@ interface FileState {
 export function OnboardingClient() {
   const [activeTab, setActiveTab] = useState<OnboardingTab>("new");
   const [isPending, startTransition] = useTransition();
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   // Form identity states
   const [displayName, setDisplayName] = useState("");
@@ -330,6 +332,7 @@ export function OnboardingClient() {
     setIsSuccessModalOpen(false);
     setSubmissionSuccess(null);
     setIsEditingSubmitted(false);
+    setUploadStatus(null);
 
     if (formRef.current) {
       formRef.current.reset();
@@ -499,28 +502,53 @@ export function OnboardingClient() {
       formData.set("joined_date", joinedDate);
     }
 
-    // Inject the optimized compressed files into formData (overriding any raw files from DOM inputs)
-    if (profileFileState.file) {
-      formData.set("profile_image_file", profileFileState.file);
-    } else {
-      formData.delete("profile_image_file");
-    }
-
-    if (bikeFileState.file) {
-      formData.set("bike_image_file", bikeFileState.file);
-    } else {
-      formData.delete("bike_image_file");
-    }
-
-    if (coverFileState.file) {
-      formData.set("cover_image_file", coverFileState.file);
-    } else {
-      formData.delete("cover_image_file");
-    }
-
     startTransition(async () => {
       try {
+        // Direct Client-to-Supabase Storage Uploads:
+        // Upload images directly from browser to Supabase Storage before calling the Server Action.
+        // This eliminates Server Action bodySizeLimit (1MB) and serverless function timeouts completely.
+        const filesToUpload: Array<{ file: File; folder: "profiles" | "bikes" | "covers"; field: string; label: string }> = [];
+
+        if (profileFileState.file) {
+          filesToUpload.push({ file: profileFileState.file, folder: "profiles", field: "profile_image_url", label: "Portrait" });
+        }
+        if (bikeFileState.file) {
+          filesToUpload.push({ file: bikeFileState.file, folder: "bikes", field: "bike_image_url", label: "Motorcycle" });
+        }
+        if (coverFileState.file) {
+          filesToUpload.push({ file: coverFileState.file, folder: "covers", field: "cover_image_url", label: "Cover" });
+        }
+
+        if (filesToUpload.length > 0) {
+          setUploadStatus(`Uploading ${filesToUpload.length} photo${filesToUpload.length > 1 ? "s" : ""} to storage...`);
+
+          const uploadResults = await Promise.all(
+            filesToUpload.map(async ({ file, folder, field, label }) => {
+              try {
+                const url = await uploadOnboardingImageDirect(file, folder);
+                return { field, url };
+              } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : "Upload error";
+                throw new Error(`${label} photo upload failed: ${msg}`);
+              }
+            })
+          );
+
+          // Inject the public URLs into formData
+          uploadResults.forEach(({ field, url }) => {
+            formData.set(field, url);
+          });
+        }
+
+        // CRITICAL: Always delete raw File objects so only lightweight text (< 5 KB total) is sent to Server Action
+        formData.delete("profile_image_file");
+        formData.delete("bike_image_file");
+        formData.delete("cover_image_file");
+
+        setUploadStatus("Submitting profile application...");
+
         const res = await submitOnboardingAction(formData);
+        setUploadStatus(null);
         if (res.success && res.submissionId) {
           setSubmissionSuccess({
             submissionId: res.submissionId,
@@ -533,6 +561,7 @@ export function OnboardingClient() {
           setIsErrorModalOpen(true);
         }
       } catch (err: unknown) {
+        setUploadStatus(null);
         const msg = err instanceof Error ? err.message : "";
         const displayError = /failed to fetch|network|aborted|payload|413|timeout/i.test(msg)
           ? "Network error: Connection was interrupted during upload. Please check your internet connection and try submitting again."
@@ -1573,14 +1602,16 @@ export function OnboardingClient() {
             </p>
             <button
               type="submit"
-              disabled={isPending || (!!submissionSuccess && !isEditingSubmitted)}
+              disabled={isPending || Boolean(uploadStatus) || (!!submissionSuccess && !isEditingSubmitted)}
               className={`cursor-pointer rounded-sm border px-8 py-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors disabled:opacity-60 ${
                 submissionSuccess && !isEditingSubmitted
                   ? "border-emerald-500/40 bg-emerald-950/40 text-emerald-300 cursor-not-allowed"
                   : "border-gold-500 bg-gold-500 text-obsidian-950 hover:border-gold-400 hover:bg-gold-400"
               }`}
             >
-              {isPending
+              {uploadStatus
+                ? uploadStatus
+                : isPending
                 ? "Submitting Profile..."
                 : submissionSuccess && !isEditingSubmitted
                 ? "✓ Application Already Submitted"
