@@ -550,6 +550,14 @@ export function OnboardingClient() {
         const res = await submitOnboardingAction(formData);
         setUploadStatus(null);
         if (res.success && res.submissionId) {
+          // Tag applicant's device so they can receive personalized approval notification
+          if (typeof window !== "undefined" && window.OneSignal) {
+            window.OneSignal.User?.addTags({
+              submission_id: res.submissionId,
+              pending_slug: res.slug || autoSlug,
+            }).catch(() => {});
+          }
+
           setSubmissionSuccess({
             submissionId: res.submissionId,
             slug: res.slug || autoSlug,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/lib/auth/actions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AdminNavProps {
   userEmail: string;
@@ -17,14 +17,30 @@ const NAV_LINKS = [
   { href: "/admin/onboarding", label: "Onboarding" },
   { href: "/admin/rides", label: "Rides" },
   { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/notifications", label: "Dispatches" },
   { href: "/admin/messages", label: "Inquiries" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
-
 export function AdminNav({ userEmail, logoUrl }: AdminNavProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Automatically tag admin device in OneSignal to receive admin alerts (new submissions)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try {
+        await OneSignal.User?.addTags({
+          role: "admin",
+          admin_email: userEmail,
+        });
+      } catch {
+        // Ignore
+      }
+    });
+  }, [userEmail]);
 
   const isSvg = Boolean(
     logoUrl &&

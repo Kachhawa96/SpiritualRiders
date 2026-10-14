@@ -20,6 +20,10 @@ import {
   uploadAdminImage,
   uploadAdminVideo,
 } from "@/lib/db/admin";
+import {
+  notifyCrewNewRide,
+  scheduleRideReminders,
+} from "@/lib/onesignal-server";
 import type {
   adminBloodSchema,
   adminPositionSchema,
@@ -324,10 +328,34 @@ export async function saveRideAction(
       tone,
     };
 
+    const notify_crew = formData.get("notify_crew") === "on";
+
     if (id) {
       await updateAdminRide(id, rideInput, participantIds);
     } else {
       await createAdminRide(rideInput, participantIds);
+    }
+
+    // Automated Push Notification Triggers:
+    // When creating a new ride, or when admin explicitly checks "Notify Crew" on update
+    if (!id || notify_crew) {
+      notifyCrewNewRide({
+        title,
+        slug,
+        start_date,
+        destination: meeting_point || route_summary,
+        cover_image_url,
+      }).catch((err) => console.warn("[OneSignal] New ride push error:", err));
+
+      scheduleRideReminders({
+        title,
+        slug,
+        start_date,
+        end_date,
+        meeting_point,
+      }).catch((err) =>
+        console.warn("[OneSignal] Ride reminders schedule error:", err)
+      );
     }
 
     revalidatePath("/admin", "layout");

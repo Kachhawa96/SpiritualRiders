@@ -37,6 +37,14 @@
   - Supabase Public Views RLS Security Hardening (`rider_public`, `ride_public`, `gallery_public`, `ride_participant_public`).
   - Rider Profile Onboarding Hardening (client compression, 5 MB limits, edge gateway payload mitigation, concurrent server uploads).
   - Apple iPhone (HEIC/HEIF) Universal Compatibility with dual-layer decoding (iOS Canvas + `heic2any` WebAssembly).
+  - OneSignal Web Push Notifications (Free plan) with custom Obsidian & Gold opt-in prompt, floating Quick-Access Bell, granular alert topic tags (rides, announcements, stories), and service worker bridge.
+  - Automated Push Notification Lifecycle:
+    1. Instant announcement when a new ride is published (topic_rides)
+    2. Scheduled 24h pre-ride meeting & gear reminder
+    3. Scheduled 24h post-ride recap & gallery upload prompt
+    4. Instant admin alert when a new rider profile is submitted
+    5. Direct push to applicant when profile is approved (create/update) + brotherhood welcome broadcast
+  - Admin Dispatch Console (`/admin/notifications`) with quick templates, audience targeting, live smartphone mockup preview, and direct REST API delivery.
 - [ ] Phase 10 — SEO / Accessibility / Performance / Security Hardening
 - [ ] Phase 11 — Testing (Vitest + Playwright)
 - [ ] Phase 12 — Production Release

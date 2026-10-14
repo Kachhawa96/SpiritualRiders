@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { PrimaryLink } from "@/components/layout/PrimaryLink";
 import { loadCommunitySettings, type PublicCommunitySettings } from "@/lib/community";
+import { NotificationFooterToggle } from "@/components/notifications/NotificationFooterToggle";
 
 interface FooterProps {
   settings?: PublicCommunitySettings;
@@ -81,6 +82,7 @@ export async function Footer({ settings: initialSettings }: FooterProps = {}) {
               ))}
             </ul>
           ) : null}
+          <NotificationFooterToggle />
         </div>
       </div>
 
