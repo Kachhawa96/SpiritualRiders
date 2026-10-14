@@ -5,6 +5,7 @@ import { RiderDirectoryFallback } from "@/components/riders/RiderDirectoryFallba
 import { Container } from "@/components/ui/Container";
 import { SITE_CONFIG } from "@/config/site";
 import { getDirectoryRiders } from "@/lib/riders";
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "The Crew",
@@ -13,9 +14,20 @@ export const metadata: Metadata = {
 
 export default async function RidersPage() {
   const riders = await getDirectoryRiders();
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "The Crew", path: "/riders" },
+  ]);
 
   return (
-    <section className="section-padding scroll-mt-24">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <section className="section-padding scroll-mt-24">
       <Container>
         <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">
           The crew
@@ -32,5 +44,6 @@ export default async function RidersPage() {
         </div>
       </Container>
     </section>
+    </>
   );
 }

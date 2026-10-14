@@ -10,6 +10,10 @@ import { Container } from "@/components/ui/Container";
 import { isLiveRoute, ROUTES, SITE_CONFIG } from "@/config/site";
 import { getRide, getRides, RIDE_TYPE_LABEL } from "@/lib/community";
 import { formatDate, formatNumber } from "@/lib/utils";
+import {
+  generateBreadcrumbSchema,
+  generateRideEventSchema,
+} from "@/lib/seo-schema";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -22,12 +26,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const ride = await getRide(slug);
   if (!ride) notFound();
+
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://spiritualriders.in"
+  ).replace(/\/$/, "");
+
   return {
     title: ride.title,
     description: ride.short_description,
+    alternates: {
+      canonical: `${baseUrl}/rides/${slug}`,
+    },
     openGraph: {
       title: `${ride.title} | ${SITE_CONFIG.name}`,
       description: ride.short_description,
+      url: `${baseUrl}/rides/${slug}`,
+      images: ride.cover_image_url ? [{ url: ride.cover_image_url }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${ride.title} | ${SITE_CONFIG.name}`,
+      description: ride.short_description,
+      images: ride.cover_image_url ? [ride.cover_image_url] : undefined,
     },
   };
 }
@@ -37,8 +57,27 @@ export default async function RidePage({ params }: PageProps) {
   const ride = await getRide(slug);
   if (!ride) notFound();
 
+  const eventSchema = generateRideEventSchema(ride);
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Rides", path: "/rides" },
+    { name: ride.title, path: `/rides/${ride.slug}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="relative -mt-20 flex min-h-[70svh] flex-col overflow-hidden">
         {ride.cover_image_url ? (
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">

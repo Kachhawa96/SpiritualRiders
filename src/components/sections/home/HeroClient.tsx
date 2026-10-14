@@ -49,7 +49,6 @@ export function HeroClient({
   // Mobile & slow connection optimization
   useEffect(() => {
     if (!heroVideoUrl || shouldReduceMotion) {
-      setCanPlayVideo(false);
       return;
     }
 
@@ -60,17 +59,12 @@ export function HeroClient({
       nav?.connection || nav?.mozConnection || nav?.webkitConnection;
 
     if (connection) {
-      // If user has Data Saver enabled, protect bandwidth and stick to image
-      if (connection.saveData === true) {
-        setCanPlayVideo(false);
-        return;
-      }
-      // If connection is 2G or slow 2G, stick to static image to protect LCP & performance
+      // If user has Data Saver enabled or connection is 2G, stick to static image
       if (
+        connection.saveData === true ||
         connection.effectiveType === "slow-2g" ||
         connection.effectiveType === "2g"
       ) {
-        setCanPlayVideo(false);
         return;
       }
     }
@@ -80,7 +74,10 @@ export function HeroClient({
       setCanPlayVideo(true);
     }, 60);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setCanPlayVideo(false);
+    };
   }, [heroVideoUrl, shouldReduceMotion]);
 
   // Spring-smoothed mouse parallax motion values (Desktop only)

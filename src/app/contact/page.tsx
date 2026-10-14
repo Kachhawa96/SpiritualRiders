@@ -5,6 +5,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/Reveal";
 import { loadCommunitySettings } from "@/lib/community";
 import { SITE_CONFIG } from "@/config/site";
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "Contact — Spiritual Riders",
@@ -14,6 +15,10 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const settings = await loadCommunitySettings();
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Contact", path: "/contact" },
+  ]);
 
   const socials = [
     { label: "Instagram", href: settings.instagram_url },
@@ -22,7 +27,14 @@ export default async function ContactPage() {
   ].filter((item): item is { label: string; href: string } => Boolean(item.href?.trim()));
 
   return (
-    <div className="section-padding">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <div className="section-padding">
       <Container>
         {/* Header */}
         <Reveal>
@@ -128,5 +140,6 @@ export default async function ContactPage() {
         </div>
       </Container>
     </div>
+    </>
   );
 }

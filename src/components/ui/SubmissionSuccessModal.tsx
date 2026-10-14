@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface SubmissionSuccessModalProps {
   isOpen: boolean;
@@ -170,12 +171,12 @@ export function SubmissionSuccessModal({
           </button>
 
           {/* Explore Roster Link */}
-          <a
+          <Link
             href="/riders"
             className="flex w-full items-center justify-center gap-1.5 pt-2 text-[0.68rem] uppercase tracking-[0.15em] text-gold-400/80 transition-colors hover:text-gold-300 hover:underline"
           >
             Explore Brotherhood Roster →
-          </a>
+          </Link>
         </div>
       </div>
     </div>
