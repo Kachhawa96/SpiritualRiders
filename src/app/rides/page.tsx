@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { RideBrowser } from "@/components/rides/RideBrowser";
 import { Container } from "@/components/ui/Container";
 import { getRides } from "@/lib/community";
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "Rides",
@@ -13,21 +14,33 @@ export const dynamic = "force-dynamic";
 
 export default async function RidesPage() {
   const rides = await getRides();
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Rides", path: "/rides" },
+  ]);
 
   return (
-    <section className="section-padding">
-      <Container>
-        <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">Rides</p>
-        <h1 className="mt-5 max-w-3xl font-medium">The roads the house has taken.</h1>
-        <p className="mt-5 max-w-xl">
-          Search a ride or a road. Narrow by kind, or by whether it is still ahead.
-        </p>
-        <div className="mt-12">
-          <Suspense fallback={<p className="text-graphite-300">Gathering the rides.</p>}>
-            <RideBrowser rides={rides} />
-          </Suspense>
-        </div>
-      </Container>
-    </section>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <section className="section-padding">
+        <Container>
+          <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">Rides</p>
+          <h1 className="mt-5 max-w-3xl font-medium">The roads the house has taken.</h1>
+          <p className="mt-5 max-w-xl">
+            Search a ride or a road. Narrow by kind, or by whether it is still ahead.
+          </p>
+          <div className="mt-12">
+            <Suspense fallback={<p className="text-graphite-300">Gathering the rides.</p>}>
+              <RideBrowser rides={rides} />
+            </Suspense>
+          </div>
+        </Container>
+      </section>
+    </>
   );
 }

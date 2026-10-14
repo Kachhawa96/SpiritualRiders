@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useId, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   submitOnboardingAction,
   searchExistingRidersAction,
@@ -52,6 +53,7 @@ interface FileState {
 }
 
 export function OnboardingClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<OnboardingTab>("new");
   const [isPending, startTransition] = useTransition();
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
@@ -356,7 +358,7 @@ export function OnboardingClient() {
   // Action 3: Close the pop-up (Dismiss) -> Cleanly redirect to /onboard to prevent duplicate submissions
   const handleCloseSuccessModal = () => {
     setIsSuccessModalOpen(false);
-    window.location.href = "/onboard";
+    router.push("/onboard");
   };
 
   // Client-Side Validation before Server Action

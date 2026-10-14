@@ -112,6 +112,12 @@ export default async function RootLayout({
       className={`${cormorant.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preconnect" href="https://fkchydbhfklfsuvodfja.supabase.co" />
+        <link rel="dns-prefetch" href="https://fkchydbhfklfsuvodfja.supabase.co" />
+        <link rel="preconnect" href="https://cdn.onesignal.com" />
+        <link rel="dns-prefetch" href="https://cdn.onesignal.com" />
+      </head>
       <body className="min-h-dvh flex flex-col antialiased">
         {/* Skip to main content — accessibility */}
         <a

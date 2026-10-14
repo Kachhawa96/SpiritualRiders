@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChapterFrame } from "@/components/visuals/ChapterFrame";
@@ -20,7 +20,20 @@ export function GalleryBrowser({ frames }: GalleryBrowserProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   const rides = [...new Map(frames.filter((frame) => frame.ride_slug).map((frame) => [frame.ride_slug, frame.ride_title])).entries()];
   const visible = frames.filter((frame) => !ride || frame.ride_slug === ride);
-  const open = frames.find((frame) => frame.id === openId) ?? null;
+  const currentIndex = openId ? visible.findIndex((frame) => frame.id === openId) : -1;
+  const open = currentIndex >= 0 ? visible[currentIndex] : null;
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setOpenId(visible[currentIndex - 1].id);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex >= 0 && currentIndex < visible.length - 1) {
+      setOpenId(visible[currentIndex + 1].id);
+    }
+  };
 
   return (
     <div>
@@ -85,16 +98,60 @@ export function GalleryBrowser({ frames }: GalleryBrowserProps) {
         <p className="border border-border-subtle px-6 py-16 text-center">No frames for that ride.</p>
       )}
 
-      {open ? <Lightbox frame={open} onClose={() => setOpenId(null)} /> : null}
+      {open ? (
+        <Lightbox
+          frame={open}
+          onClose={() => setOpenId(null)}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          hasPrev={currentIndex > 0}
+          hasNext={currentIndex < visible.length - 1}
+          currentIndex={currentIndex}
+          totalCount={visible.length}
+        />
+      ) : null}
     </div>
   );
 }
 
-function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void }) {
+function Lightbox({
+  frame,
+  onClose,
+  onPrev,
+  onNext,
+  hasPrev,
+  hasNext,
+  currentIndex,
+  totalCount,
+}: {
+  frame: GalleryFrame;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  hasPrev: boolean;
+  hasNext: boolean;
+  currentIndex: number;
+  totalCount: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(true, ref);
   useBodyScrollLock(true);
   useEscapeKey(onClose);
+
+  // Left & right arrow keyboard navigation
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft" && hasPrev) {
+        e.preventDefault();
+        onPrev();
+      } else if (e.key === "ArrowRight" && hasNext) {
+        e.preventDefault();
+        onNext();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasPrev, hasNext, onPrev, onNext]);
 
   return (
     <div className="fixed inset-0 z-50 bg-obsidian-950/85 backdrop-blur-md transition-opacity duration-300">
@@ -127,13 +184,42 @@ function Lightbox({ frame, onClose }: { frame: GalleryFrame; onClose: () => void
             )}
           </div>
           <div className="flex flex-col p-6 md:p-8">
-            <button
-              type="button"
-              onClick={onClose}
-              className="mb-6 h-11 cursor-pointer self-end border border-border px-4 text-[0.68rem] uppercase tracking-[0.18em] text-ivory-100 transition-colors duration-200 hover:border-gold-500 hover:text-gold-400 active:scale-[0.98] motion-reduce:transform-none"
-            >
-              Close
-            </button>
+            <div className="mb-6 flex items-center justify-between border-b border-border-subtle/60 pb-3">
+              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-graphite-300">
+                {currentIndex + 1} / {totalCount}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onPrev}
+                  disabled={!hasPrev}
+                  aria-label="Previous frame"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center border border-border text-ivory-100 transition-colors hover:border-gold-500 hover:text-gold-400 disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={onNext}
+                  disabled={!hasNext}
+                  aria-label="Next frame"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center border border-border text-ivory-100 transition-colors hover:border-gold-500 hover:text-gold-400 disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="h-8 cursor-pointer border border-border px-3 text-[0.68rem] uppercase tracking-[0.18em] text-ivory-100 transition-colors duration-200 hover:border-gold-500 hover:text-gold-400 active:scale-[0.98] motion-reduce:transform-none"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
             <p className="text-[0.68rem] uppercase tracking-[0.28em] text-gold-500">
               {frame.taken_on ? formatDate(`${frame.taken_on}T12:00:00`) : "The road"}
             </p>

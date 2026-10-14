@@ -53,6 +53,7 @@ export function ErrorModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="error-modal-title"
         className="relative w-full max-w-lg overflow-hidden rounded-sm border border-red-500/40 bg-obsidian-950 p-6 shadow-2xl transition-all sm:p-8"
       >
         <div className="flex items-start gap-4">
@@ -65,7 +66,7 @@ export function ErrorModal({
           </div>
 
           <div className="flex-1 space-y-2">
-            <h3 className="font-display text-xl font-bold tracking-tight text-ivory-100">
+            <h3 id="error-modal-title" className="font-display text-xl font-bold tracking-tight text-ivory-100">
               {title}
             </h3>
             <p className="text-xs text-graphite-300">

@@ -10,6 +10,8 @@ import { Stats } from "@/components/sections/home/Stats";
 import { Timeline } from "@/components/sections/home/Timeline";
 import { Values } from "@/components/sections/home/Values";
 import { SITE_CONFIG } from "@/config/site";
+import { loadCommunitySettings } from "@/lib/community";
+import { generateOrganizationSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: {
@@ -23,11 +25,23 @@ export default async function HomePage({
 }: {
   searchParams?: Promise<{ notice?: string }>;
 }) {
-  const resolvedParams = searchParams ? await searchParams : undefined;
+  const [resolvedParams, settings] = await Promise.all([
+    searchParams ? searchParams : Promise.resolve(undefined),
+    loadCommunitySettings(),
+  ]);
   const showClosedNotice = resolvedParams?.notice === "onboarding-closed";
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateOrganizationSchema(settings)).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
+      />
       {showClosedNotice && (
         <div className="relative z-30 border-b border-gold-500/30 bg-obsidian-900/90 px-4 py-3 text-center text-xs text-graphite-300">
           <span className="font-semibold text-gold-400">Notice:</span> Profile onboarding is currently closed. Contact leadership if you need assistance.

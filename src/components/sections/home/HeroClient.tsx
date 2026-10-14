@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
-import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { SITE_CONFIG } from "@/config/site";
 import { EASE_OUT_EXPO } from "@/lib/motion";
+import { HeroSplashLoader } from "./HeroSplashLoader";
 
 interface HeroClientProps {
   heroImageUrl: string | null;
@@ -46,10 +47,70 @@ export function HeroClient({
   const [videoFailed, setVideoFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Logo splash screen & hero entrance state
+  const [showSplash, setShowSplash] = useState(true);
+  const [isHeroRevealed, setIsHeroRevealed] = useState(false);
+  const mountTimeRef = useRef<number>(0);
+  const splashDismissedRef = useRef<boolean>(false);
+
+  const dismissSplash = useCallback(() => {
+    if (splashDismissedRef.current) return;
+    splashDismissedRef.current = true;
+    setShowSplash(false);
+    setIsHeroRevealed(true);
+  }, []);
+
+  // Initialize mount timestamp once
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
+
+  // Hard timeout ceiling: Max 4 seconds (whichever comes first)
+  useEffect(() => {
+    const MAX_SPLASH_TIME = 4000;
+
+    const maxTimer = setTimeout(() => {
+      dismissSplash();
+    }, MAX_SPLASH_TIME);
+
+    // If there is no video to wait for (or video failed / motion reduced / slow connection)
+    if (!heroVideoUrl || shouldReduceMotion || videoFailed) {
+      const fallbackTimer = setTimeout(() => {
+        dismissSplash();
+      }, shouldReduceMotion ? 350 : 1200);
+
+      return () => {
+        clearTimeout(maxTimer);
+        clearTimeout(fallbackTimer);
+      };
+    }
+
+    return () => {
+      clearTimeout(maxTimer);
+    };
+  }, [heroVideoUrl, shouldReduceMotion, videoFailed, dismissSplash]);
+
+  // When the Hero cinematic video is loaded and ready to play
+  useEffect(() => {
+    if (!isVideoLoaded || splashDismissedRef.current) return;
+
+    const elapsed = Date.now() - (mountTimeRef.current || Date.now());
+    const MIN_SPLASH_TIME = shouldReduceMotion ? 350 : 900;
+
+    if (elapsed >= MIN_SPLASH_TIME) {
+      dismissSplash();
+    } else {
+      const waitTime = MIN_SPLASH_TIME - elapsed;
+      const readyTimer = setTimeout(() => {
+        dismissSplash();
+      }, waitTime);
+      return () => clearTimeout(readyTimer);
+    }
+  }, [isVideoLoaded, shouldReduceMotion, dismissSplash]);
+
   // Mobile & slow connection optimization
   useEffect(() => {
     if (!heroVideoUrl || shouldReduceMotion) {
-      setCanPlayVideo(false);
       return;
     }
 
@@ -60,17 +121,12 @@ export function HeroClient({
       nav?.connection || nav?.mozConnection || nav?.webkitConnection;
 
     if (connection) {
-      // If user has Data Saver enabled, protect bandwidth and stick to image
-      if (connection.saveData === true) {
-        setCanPlayVideo(false);
-        return;
-      }
-      // If connection is 2G or slow 2G, stick to static image to protect LCP & performance
+      // If user has Data Saver enabled or connection is 2G, stick to static image
       if (
+        connection.saveData === true ||
         connection.effectiveType === "slow-2g" ||
         connection.effectiveType === "2g"
       ) {
-        setCanPlayVideo(false);
         return;
       }
     }
@@ -80,8 +136,18 @@ export function HeroClient({
       setCanPlayVideo(true);
     }, 60);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setCanPlayVideo(false);
+    };
   }, [heroVideoUrl, shouldReduceMotion]);
+
+  // Check if video is already ready in memory/cache
+  useEffect(() => {
+    if (canPlayVideo && videoRef.current && videoRef.current.readyState >= 3) {
+      setIsVideoLoaded(true);
+    }
+  }, [canPlayVideo]);
 
   // Spring-smoothed mouse parallax motion values (Desktop only)
   const mouseX = useMotionValue(0);
@@ -187,8 +253,10 @@ export function HeroClient({
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   onCanPlay={() => setIsVideoLoaded(true)}
+                  onCanPlayThrough={() => setIsVideoLoaded(true)}
+                  onLoadedData={() => setIsVideoLoaded(true)}
                   onError={() => setVideoFailed(true)}
                   className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out ${
                     isVideoLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -272,7 +340,7 @@ export function HeroClient({
         <motion.div
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.04, y: 12, scale: 0.95 }}
           className="mb-6 flex items-center gap-3"
         >
@@ -299,7 +367,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.12, y: 12 }}
           className="mb-8 max-w-none text-[0.68rem] uppercase tracking-[0.42em] text-gold-500"
         >
@@ -311,7 +379,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.20, y: 16 }}
           className="max-w-5xl font-medium text-foreground text-balance drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]"
         >
@@ -323,7 +391,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.28, y: 14 }}
           className="mt-8 max-w-2xl font-display text-2xl leading-snug font-medium text-ivory-100 italic md:text-3xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
         >
@@ -335,7 +403,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.36, y: 12 }}
           className="mt-5 max-w-xl text-graphite-200 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]"
         >
@@ -347,7 +415,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.44, y: 12 }}
           className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center"
         >
@@ -362,7 +430,7 @@ export function HeroClient({
           data-motion-reveal
           variants={settleVariants}
           initial={shouldReduceMotion ? false : "hidden"}
-          animate="visible"
+          animate={isHeroRevealed || shouldReduceMotion ? "visible" : "hidden"}
           custom={{ delay: 0.52, y: 8 }}
         >
           <a
@@ -377,6 +445,16 @@ export function HeroClient({
           </a>
         </motion.div>
       </Container>
+
+      {/* Premium Logo Splash Screen Loader */}
+      <AnimatePresence>
+        {showSplash && (
+          <HeroSplashLoader
+            logoImageUrl={logoImageUrl}
+            shouldReduceMotion={shouldReduceMotion}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

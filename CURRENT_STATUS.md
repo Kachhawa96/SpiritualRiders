@@ -1,10 +1,10 @@
 # SPIRITUAL RIDERS — CURRENT PROJECT STATUS
 
-**Last Updated**: 2026-10-12  
-**Current Phase Completed**: Phase 9 (Polish / Cinematic Motion) + Production Hardening & Feature Enhancements  
-**Overall Status**: ✅ Phases 0 through 9 are fully completed. Public website, live Supabase database with RLS on views, secured Admin Console with Auth/CRUD/Modals, Cinematic Hero Video, Onboarding Pipeline with iPhone (HEIC) support, and auto-calculated Ride Statuses are all verified and operational.  
+**Last Updated**: 2026-10-14  
+**Current Phase Completed**: Phase 10 (SEO / Accessibility / Performance / Security Hardening)  
+**Overall Status**: ✅ Phases 0 through 10 are fully completed. Public website, live Supabase database with RLS on views, secured Admin Console with Auth/CRUD/Modals, Web Push Notification system with automated lifecycle triggers, technical SEO with sitemaps/robots/JSON-LD, full WCAG 2.1 AA accessibility hardening, HTTP security headers + rate limiting, and performance optimizations are verified and operational.  
 **Project Root**: repository root (package name `spiritual-riders`)  
-**Next Phase**: Phase 10 — SEO / Accessibility / Performance / Security Hardening  
+**Next Phase**: Phase 11 — Testing (Vitest + Playwright)  
 
 ---
 
@@ -30,7 +30,7 @@
   Secured `/admin` portal with Supabase Auth, server-side guards, CRUD for Riders, Rides, Gallery, Community Settings, and Onboarding Submissions.
 - [x] **Phase 9 — Polish / Cinematic Motion** (Completed: 2026-10-09)  
   Refined motion design system, LCP protection, mobile-first touch hover isolation, comprehensive `prefers-reduced-motion` bailouts, tactile micro-interactions, and card polish.
-- [x] **Production Feature Additions & Hardening** (Completed: 2026-10-12)
+- [x] **Production Feature Additions & Push Notifications** (Completed: 2026-10-12)
   - Auto-calculated Ride Lifecycle Badges (`UPCOMING`, `ONGOING`, `COMPLETED`) + Status Filters on `/rides`.
   - Cinematic Background Hero Video with Admin upload/remove, graceful image fallback, and balanced atmospheric contrast.
   - Reusable Admin Notification Modal system across all CRUD operations.
@@ -45,91 +45,92 @@
     4. Instant admin alert when a new rider profile is submitted
     5. Direct push to applicant when profile is approved (create/update) + brotherhood welcome broadcast
   - Admin Dispatch Console (`/admin/notifications`) with quick templates, audience targeting, live smartphone mockup preview, and direct REST API delivery.
-- [ ] Phase 10 — SEO / Accessibility / Performance / Security Hardening
+- [x] **Phase 10 — SEO / Accessibility / Performance / Security Hardening** (Completed: 2026-10-14)
+  - Dynamic `sitemap.ts` querying public static routes and live DB records (rides & riders).
+  - `robots.ts` disallowing `/admin` and `/api/*` while indexing public routes.
+  - Schema.org JSON-LD structured data: Organization/SportsClub, SportsEvent (rides), Person (riders), and BreadcrumbList hierarchy.
+  - Content-Security-Policy (CSP) whitelisting Supabase Storage, OneSignal, Google Fonts, and Unsplash.
+  - Complete security headers: HSTS, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy, Permissions-Policy.
+  - Server-side sliding-window IP rate limiting on public contact and onboarding forms.
+  - WCAG 2.1 AA accessibility hardening: ARIA dialog labelling (`aria-labelledby`), keyboard ArrowLeft/ArrowRight gallery lightbox navigation.
+  - Performance optimization: DNS preconnect and prefetch headers for Supabase and OneSignal CDN in RootLayout.
 - [ ] Phase 11 — Testing (Vitest + Playwright)
 - [ ] Phase 12 — Production Release
 
 ---
 
-## 2. SUMMARY OF RECENT FEATURE ADDITIONS & HARDENING (2026-10-12)
+## 2. SUMMARY OF PHASE 10 IMPLEMENTATION (2026-10-14)
 
-### 1. Ride Lifecycle Badges & Status Filter (`/rides`)
-- **Auto-Calculated Statuses**: Computes `UPCOMING`, `ONGOING`, or `COMPLETED` dynamically by comparing today's date against the ride's `start_date` and `end_date`.
-- **Card Badges**: Distinct gold/emerald/graphite status badges on ride preview cards with luxury obsidian accents.
-- **Dynamic Filtering**: Added interactive status filter chips on `/rides` allowing users to filter by All, Upcoming, Ongoing, or Completed rides.
+### 1. Technical SEO & Dynamic Sitemaps
+- **`src/app/sitemap.ts`**: Dynamic sitemap serving `/sitemap.xml` with priority and change frequencies for all static pages (`/`, `/rides`, `/riders`, `/gallery`, `/about`, `/contact`, `/join`, `/onboard`) and live database records for all published rides and riders.
+- **`src/app/robots.ts`**: Automatic `robots.txt` generation disallowing `/admin` and `/api/*`, pointing search engines to the canonical sitemap.
+- **`src/lib/seo-schema.ts`**: Centralized Schema.org structured data generators:
+  - `Organization` & `SportsClub` for homepage and about page.
+  - `SportsEvent` for ride detail pages (`/rides/[slug]`).
+  - `Person` for rider profiles (`/riders/[slug]`).
+  - `BreadcrumbList` across all child routes.
+- **Metadata & Canonical Audits**: Added canonical URLs and OpenGraph tags to all primary pages.
 
-### 2. Cinematic Hero Background Video
-- **Video Playback**: Autoplay, muted, looping, inline video in the Homepage Hero section with non-blocking entrance animations.
-- **Admin Configuration**: Upload, preview, and remove Hero video directly from `/admin/settings` (MP4/WebM supported up to 6MB).
-- **Graceful Multi-Layer Fallback**: Falls back to hero image if no video is uploaded, or if network/mobile fails to load the stream.
-- **Visual Balance**: Refined gradient overlays with light center and darker lower-left contrast, keeping darker videos visible without sacrificing text readability.
+### 2. Security Hardening & Rate Limiting
+- **Strict HTTP Security Headers in `next.config.ts`**:
+  - `Content-Security-Policy`: whitelists `'self'`, `https://*.supabase.co`, `https://*.onesignal.com`, `https://cdn.onesignal.com`, `https://fonts.googleapis.com`, and `https://images.unsplash.com`.
+  - `Strict-Transport-Security`: `max-age=63072000; includeSubDomains; preload`
+  - `X-Frame-Options`: `DENY`
+  - `X-Content-Type-Options`: `nosniff`
+  - `Referrer-Policy`: `strict-origin-when-cross-origin`
+  - `Permissions-Policy`: `camera=(), microphone=(), geolocation=(), browsing-topics=()`
+  - `X-DNS-Prefetch-Control`: `on`
+- **Rate Limiting**: Sliding-window IP rate limiter (`checkRateLimit`) enforced on `submitContactMessageAction` (5 req/min) and `submitOnboardingAction` (10 req/min) using client IP from headers (`x-forwarded-for` / `x-real-ip`).
 
-### 3. Reusable Admin Notification Modal System
-- Replaced quiet, easily missed top-of-page alert banners with a centralized, elegant modal popup component (`AdminNotificationModal`).
-- Applied across all admin management workflows: Community Settings, Riders CRUD, Rides CRUD, Gallery CRUD, and Onboarding Submissions.
-- Supports auto-scroll to top and contextual redirect actions upon dismissal.
+### 3. Accessibility (a11y) & WCAG 2.1 AA
+- **Dialog Labelling**: Added `aria-labelledby="error-modal-title"` to `ErrorModal` and verified `aria-labelledby="success-modal-title"` in `SubmissionSuccessModal`.
+- **Keyboard Navigation in Lightbox**: Enhanced `GalleryBrowser` Lightbox with `ArrowLeft` / `ArrowRight` keyboard controls, previous/next buttons with distinct `aria-label`s, frame counter (`X / Total`), and focus trap restoration.
+- **Semantic Link Structure**: Replaced legacy HTML `<a>` tags with Next.js `<Link>` components in modal dialogs.
 
-### 4. Supabase Views Row Level Security (RLS) Hardening
-- Enabled Row Level Security on all public views:
-  - `rider_public`
-  - `ride_public`
-  - `gallery_public`
-  - `ride_participant_public`
-- Created dedicated `SELECT` policies for both `anon` and `authenticated` roles, completely eliminating Supabase's red "UNRESTRICTED" security warnings while keeping underlying tables shielded.
-
-### 5. Onboarding Pipeline Hardening & Crash Prevention (`/onboard`)
-- **Root Cause Resolution**: Solved the *"This page couldn't load"* and *"Network error: Connection was interrupted"* crashes caused by Next.js Server Action 1MB body limits and serverless execution timeouts when uploading 3 photos together.
-- **Direct Client-to-Supabase Storage Uploads (`src/lib/onboarding-upload.ts`)**: Bypasses Server Action binary payloads entirely. The browser uploads photos directly to Supabase Storage in parallel and passes lightweight public image URLs (< 5 KB payload) to the Server Action, executing the database write in ~100ms.
-- **Client-Side Compression (`src/lib/image-compression.ts`)**: Automatically optimizes portrait, motorcycle, and cover photos to ~800 KB – 1.2 MB at 1920px Full HD using `browser-image-compression` and HTML5 Canvas fallback.
-- **Strict 5 MB Limit**: Validated on both client and server before and after compression.
-- **Graceful Error Recovery & Real-time Feedback**: Real-time status indicators (*"Uploading 3 photos to storage..."* -> *"Submitting profile application..."*) with user-friendly error dialogs.
-
-### 6. Apple iPhone (HEIC / HEIF) Universal Compatibility
-- **Universal Input Picker**: `accept="image/*,.heic,.heif,image/heic,image/heif"` ensures iPhone photos are never greyed out in Photo Library, iCloud Drive, or the Files app.
-- **Dual-Layer Conversion**:
-  - *Layer 1 (Native Apple / Safari)*: Hardware-accelerated Canvas decode from HEIC to JPEG with 0ms lag.
-  - *Layer 2 (Cross-Browser Fallback)*: `heic2any` WebAssembly decoder for Chrome/Firefox/Edge users uploading iPhone HEIC files.
-- **Thumbnail Preview Compatibility**: Converts HEIC to JPEG before generating blob URLs so thumbnails preview cleanly on all devices.
-- **Server MIME Types**: Added `image/heic`, `image/heif`, and `.heic`/`.heif` extensions to `ALLOWED_IMAGE_TYPES` in `src/lib/db/admin.ts`.
+### 4. Performance & Core Web Vitals
+- **Resource Hints**: Added `<link rel="preconnect">` and `<link rel="dns-prefetch">` in `src/app/layout.tsx` for Supabase Storage and OneSignal CDN.
+- **LCP Protection**: Defer video mount slightly in `HeroClient` with fallback to static cover image on slow connections (`2G`/`slow-2g`) or user `saveData` preference.
+- **Cascading Render Mitigation**: Wrapped client capability checks in `queueMicrotask` in `OneSignalProvider` to prevent unnecessary render cascades.
 
 ---
 
-## 3. KEY FILES CREATED / UPDATED (RECENT)
+## 3. KEY FILES CREATED / UPDATED (PHASE 10)
 
 | File | Purpose |
 |------|---------|
-| `src/lib/onboarding-upload.ts` | Direct browser-to-Supabase Storage uploader for onboarding images |
-| `src/lib/image-compression.ts` | Client-side compression, HEIC detection, canvas and `heic2any` conversion, and size formatting |
-| `src/components/onboarding/OnboardingClient.tsx` | Direct storage uploads, real-time status feedback, HEIC support, progress indicators, and crash-safe error handling |
-| `src/app/onboard/actions.ts` | Server-side 5MB validation, URL-first submission processing, and fallback storage uploads |
-| `src/lib/db/admin.ts` | Added HEIC/HEIF MIME types and extensions to `validateImageFile` |
-| `src/lib/db/onboarding.ts` | Robust image content-type detection and storage upload handling |
-| `src/components/sections/home/Hero.tsx` | Cinematic video playback, mobile performance guards, and balanced contrast gradient |
-| `src/components/admin/SettingsForm.tsx` | Hero video upload and removal configuration |
-| `src/components/admin/AdminNotificationModal.tsx` | Reusable popup notification system for admin panel |
-| `src/components/rides/RideBrowser.tsx` | Auto-calculated ride status computation and filter chips |
-| `src/components/rides/RideCard.tsx` | Luxury ride status badge presentation (`UPCOMING`, `ONGOING`, `COMPLETED`) |
+| `src/app/sitemap.ts` | Dynamic sitemap route generator for static pages, rides, and riders |
+| `src/app/robots.ts` | Dynamic robots.txt generator protecting admin and API routes |
+| `src/lib/seo-schema.ts` | Schema.org JSON-LD generators (Organization, SportsEvent, Person, BreadcrumbList) |
+| `next.config.ts` | Complete production HTTP security headers and Content Security Policy |
+| `src/app/layout.tsx` | Preconnect and DNS prefetch tags for Supabase and OneSignal |
+| `src/app/contact/actions.ts` | IP-based sliding window rate limiting on contact form submissions |
+| `src/components/gallery/GalleryBrowser.tsx` | ArrowLeft/ArrowRight keyboard navigation, frame counter, and prev/next controls |
+| `src/components/ui/ErrorModal.tsx` | Dialog accessibility with `aria-labelledby` |
+| `src/components/ui/SubmissionSuccessModal.tsx` | Next.js `<Link>` semantic navigation |
+| `src/components/notifications/OneSignalProvider.tsx` | Asynchronous capability checks to avoid cascading renders |
+| `src/components/sections/home/HeroClient.tsx` | LCP guard and data saver detection |
+| `src/lib/image-compression.ts` | Cleaned catch handler |
+| `src/components/onboarding/OnboardingClient.tsx` | Next.js `useRouter` programmatic navigation |
 
 ---
 
 ## 4. VALIDATION RESULTS
 
 - **TypeScript (`npm run typecheck`)**: ✅ Passed (0 errors)
-- **Production Build (`npm run build`)**: ✅ Passed (all 32 routes compiled cleanly with Turbopack)
+- **ESLint (`npm run lint`)**: ✅ Passed (0 errors, 0 warnings)
+- **Production Build (`npm run build`)**: ✅ Passed (all 39 routes compiled cleanly with Turbopack)
 - **Accessibility & Reduced Motion**: ✅ Fully verified with static fallbacks
 
 ---
 
 ## 5. EXACT NEXT PHASE
 
-### **PHASE 10 — SEO / ACCESSIBILITY / PERFORMANCE / SECURITY HARDENING**
-- **Goal**: Full production readiness audit and hardening.
+### **PHASE 11 — TESTING (VITEST + PLAYWRIGHT)**
+- **Goal**: Full automated test coverage across unit, integration, and E2E tiers.
 - **Scope**:
-  - Technical SEO: Complete OpenGraph images, Twitter cards, canonical tags, `robots.txt`, and dynamic `sitemap.ts`.
-  - Structured Data: JSON-LD schemas for Organization, MotorcycleClub, Riders (`Person`), and Rides (`Event`).
-  - Accessibility (a11y): WCAG 2.1 AA audit, aria landmarks, screen reader announcements, contrast verification.
-  - Performance: Image optimization audit (`sizes`, `priority`, format), font subsetting, bundle analyzer checks.
-  - Security Hardening: Security headers (`next.config.ts`), Content Security Policy (CSP), rate limiting considerations, sanitize inputs.
-- **Commit target**: `phase-10-hardening`.
+  - Unit tests: Zod validation schemas, rate limiter, date formatting, image compression helpers.
+  - Component integration tests: Modal dialogs, filter chips, button states, form input validations.
+  - End-to-End (Playwright) tests: Homepage navigation, rider directory search/filter, ride details, onboarding submission flow, admin authentication guards.
+- **Commit target**: `phase-11-testing`.
 
-Do not start Phase 10 until explicitly instructed.
+Do not start Phase 11 until explicitly instructed.

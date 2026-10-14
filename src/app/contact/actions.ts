@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { z } from "zod";
 import { createAnonServerClient, hasSupabaseEnv } from "@/lib/db/client";
+import { checkRateLimit } from "@/lib/security/rate-limiter";
 
 const contactMessageSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters.").max(100, "Name too long."),
@@ -17,6 +19,19 @@ export type ContactActionResult = {
 
 export async function submitContactMessageAction(formData: FormData): Promise<ContactActionResult> {
   try {
+    const headerList = await headers();
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    const clientIp = (forwardedFor ? forwardedFor.split(",")[0] : realIp || "127.0.0.1").trim();
+
+    const rateLimit = checkRateLimit(clientIp, 5, 60 * 1000);
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        error: `Submission rate limit exceeded. Please wait ${rateLimit.resetSeconds} seconds before trying again.`,
+      };
+    }
+
     const rawData = {
       name: formData.get("name"),
       email: formData.get("email"),

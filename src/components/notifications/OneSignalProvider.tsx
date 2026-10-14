@@ -113,25 +113,23 @@ export function OneSignalProvider({ children }: OneSignalProviderProps) {
     if (typeof window === "undefined") return;
 
     const supported = isPushSupported();
-    setIsSupported(supported);
-
     const onIos = isIosDevice();
     const standalone = isStandaloneMode();
-    // On iOS, push is only supported when added to Home Screen as a standalone PWA
-    if (onIos && !standalone) {
-      setIsIosNeedsPwa(true);
-    }
 
-    if (!supported) {
-      setPermission("unsupported");
-      return;
-    }
+    // Defer initial browser capability state updates to prevent cascading render warnings
+    queueMicrotask(() => {
+      setIsSupported(supported);
+      if (onIos && !standalone) {
+        setIsIosNeedsPwa(true);
+      }
+      if (!supported) {
+        setPermission("unsupported");
+      } else if (typeof Notification !== "undefined") {
+        setPermission(Notification.permission as PermissionState);
+      }
+    });
 
-    if (typeof Notification !== "undefined") {
-      setPermission(Notification.permission as PermissionState);
-    }
-
-    if (!isConfigured) {
+    if (!supported || !isConfigured) {
       return;
     }
 

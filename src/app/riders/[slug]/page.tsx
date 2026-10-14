@@ -9,6 +9,8 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
+
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const riders = await getDirectoryRiders();
   return riders.map((rider) => ({ slug: rider.slug }));
@@ -19,13 +21,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const profile = await getRiderProfile(slug);
   if (!profile) notFound();
 
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://spiritualriders.in"
+  ).replace(/\/$/, "");
+
   const description = publicDescription(profile);
+  const ogImage = profile.cover_image_url || profile.profile_image_url;
+
   return {
     title: profile.display_name,
     description,
+    alternates: {
+      canonical: `${baseUrl}/riders/${slug}`,
+    },
     openGraph: {
       title: `${profile.display_name} | ${SITE_CONFIG.name}`,
       description,
+      url: `${baseUrl}/riders/${slug}`,
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${profile.display_name} | ${SITE_CONFIG.name}`,
+      description,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -35,11 +54,21 @@ export default async function RiderProfilePage({ params }: PageProps) {
   const profile = await getRiderProfile(slug);
   if (!profile) notFound();
 
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Riders", path: "/riders" },
+    { name: profile.display_name, path: `/riders/${profile.slug}` },
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(riderJsonLd(profile)).replace(/</g, "\\u003c") }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c") }}
       />
       <RiderProfileView profile={profile} />
     </>

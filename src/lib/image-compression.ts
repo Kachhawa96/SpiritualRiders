@@ -242,7 +242,7 @@ export async function compressImage(
       compressedSize: originalSize,
       isCompressed: false,
     };
-  } catch (err) {
+  } catch {
     // Graceful fallback to HTML5 Canvas
     try {
       const fallbackFile = await compressWithCanvas(

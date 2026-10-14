@@ -8,6 +8,7 @@ import { Philosophy } from "@/components/sections/about/Philosophy";
 // import { WhatWeRide } from "@/components/sections/about/WhatWeRide";
 import { Timeline } from "@/components/sections/home/Timeline";
 import { SITE_CONFIG } from "@/config/site";
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
 
 export const metadata: Metadata = {
   title: "About",
@@ -15,8 +16,19 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <AboutHero />
       <Origin />
       <Philosophy />

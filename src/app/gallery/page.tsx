@@ -1,6 +1,7 @@
 import { GalleryBrowser } from "@/components/gallery/GalleryBrowser";
 import { Container } from "@/components/ui/Container";
 import { getGallery } from "@/lib/community";
+import { generateBreadcrumbSchema } from "@/lib/seo-schema";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,9 +11,20 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const frames = await getGallery();
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Gallery", path: "/gallery" },
+  ]);
 
   return (
-    <section className="section-padding">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <section className="section-padding">
       <Container>
         <p className="text-[0.68rem] uppercase tracking-[0.38em] text-gold-500">Gallery</p>
         <h1 className="mt-5 max-w-3xl font-medium">Moments from the road.</h1>
@@ -24,5 +36,6 @@ export default async function GalleryPage() {
         </div>
       </Container>
     </section>
+    </>
   );
 }
