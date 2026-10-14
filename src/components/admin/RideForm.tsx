@@ -442,6 +442,25 @@ export function RideForm({
               </div>
             </label>
           </div>
+
+          <div className="flex flex-col justify-center rounded-sm border border-charcoal-600 bg-obsidian-950 p-4">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                name="notify_crew"
+                defaultChecked={!isEditing}
+                className="h-4 w-4 rounded-xs accent-gold-500"
+              />
+              <div>
+                <span className="text-xs font-medium text-ivory-100 flex items-center gap-1.5">
+                  <span>📢</span> Broadcast Push to Crew
+                </span>
+                <p className="text-[0.7rem] text-graphite-400">
+                  Dispatches push announcement to subscribed riders & schedules 24h pre-ride reminder
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 

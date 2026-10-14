@@ -7,6 +7,8 @@ import type { ReactNode } from "react";
 import { EASE_OUT_EXPO } from "@/lib/motion";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { NotificationPrompt } from "@/components/notifications/NotificationPrompt";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface AppShellProps {
   children: ReactNode;
@@ -85,6 +87,8 @@ export function AppShell({ children, footer, contactInfo, logoUrl }: AppShellPro
         {children}
       </main>
       <div inert={open ? true : undefined}>{footer}</div>
+      <NotificationPrompt />
+      <NotificationBell />
     </MotionConfig>
   );
 }

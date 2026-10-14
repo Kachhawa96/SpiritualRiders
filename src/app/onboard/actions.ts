@@ -19,6 +19,7 @@ import type {
 } from "@/lib/db/admin-schema";
 import type { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { notifyAdminNewSubmission } from "@/lib/onesignal-server";
 
 
 export interface OnboardingActionResult {
@@ -235,6 +236,15 @@ export async function submitOnboardingAction(
     );
 
     revalidatePath("/admin/onboarding");
+
+    // Trigger: Alert Admin about incoming rider profile submission
+    notifyAdminNewSubmission({
+      id: result.id,
+      full_name: result.full_name,
+      display_name: result.display_name,
+      motorcycle_name: `${bike_brand} ${bike_model}`.trim(),
+      is_update: Boolean(rider_id),
+    }).catch((err) => console.warn("[OneSignal] Admin notification error:", err));
 
     return {
       success: true,

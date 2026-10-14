@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { Footer } from "@/components/layout/Footer";
+import { OneSignalProvider } from "@/components/notifications/OneSignalProvider";
 import { loadCommunitySettings } from "@/lib/community";
 import "./globals.css";
 
@@ -126,13 +127,15 @@ export default async function RootLayout({
           </style>
         </noscript>
 
-        <AppShell
-          footer={<Footer settings={settings} />}
-          contactInfo={{ email: settings.email, tagline: settings.tagline }}
-          logoUrl={settings.logo_image_url}
-        >
-          {children}
-        </AppShell>
+        <OneSignalProvider>
+          <AppShell
+            footer={<Footer settings={settings} />}
+            contactInfo={{ email: settings.email, tagline: settings.tagline }}
+            logoUrl={settings.logo_image_url}
+          >
+            {children}
+          </AppShell>
+        </OneSignalProvider>
       </body>
     </html>
   );
